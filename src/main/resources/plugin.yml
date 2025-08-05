@@ -1,0 +1,7 @@
+name: AnimalPenPaper
+version: '1.0'
+main: lv.id.bonne.animalpenpaper.AnimalPenPlugin
+api-version: '1.21'
+description: Capture and store animals in single block
+author: BONNe
+website: https://github.com/BONNePlayground/AnimalPenPaperized
