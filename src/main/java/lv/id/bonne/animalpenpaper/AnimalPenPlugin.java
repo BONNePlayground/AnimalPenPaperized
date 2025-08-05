@@ -9,6 +9,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import lv.id.bonne.animalpenpaper.config.ConfigurationManager;
 import lv.id.bonne.animalpenpaper.listeners.AnimalCageListener;
+import lv.id.bonne.animalpenpaper.listeners.AnimalPenListener;
 import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
 
 
@@ -28,6 +29,7 @@ public class AnimalPenPlugin extends JavaPlugin implements Listener
         AnimalPenPlugin.CONFIG_MANAGER.readConfig();
 
         this.getServer().getPluginManager().registerEvents(new AnimalCageListener(), this);
+        this.getServer().getPluginManager().registerEvents(new AnimalPenListener(), this);
 
         this.registerAnimalPenRecipes();
 
@@ -63,6 +65,22 @@ public class AnimalPenPlugin extends JavaPlugin implements Listener
         animalCageRecipe.setIngredient('B', Material.IRON_BARS);
 
         this.getServer().addRecipe(animalCageRecipe);
+
+        ShapedRecipe animalPenRecipe = new ShapedRecipe(
+            new NamespacedKey(this, "animal_pen_oak"),
+            AnimalPenManager.createAnimalPen()
+        );
+
+        animalPenRecipe.shape(
+            "   ",
+            "F F",
+            "SSS"
+        );
+
+        animalPenRecipe.setIngredient('F', Material.OAK_FENCE);
+        animalPenRecipe.setIngredient('S', Material.SMOOTH_STONE_SLAB);
+
+        this.getServer().addRecipe(animalPenRecipe);
     }
 
 

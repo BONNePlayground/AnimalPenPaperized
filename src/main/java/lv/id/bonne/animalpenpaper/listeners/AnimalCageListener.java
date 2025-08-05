@@ -5,12 +5,16 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
@@ -54,7 +58,7 @@ public class AnimalCageListener implements Listener
             return;
         }
 
-        if (animal.isDead() || !animal.isAdult())
+        if (animal.isDead() || !animal.isAdult() || !animal.hasAI())
         {
             player.sendMessage(Component.text("Cannot capture dead or baby animals.").
                 style(StyleUtil.RED_COLOR));
@@ -113,7 +117,7 @@ public class AnimalCageListener implements Listener
     /**
      * This listener checks if player can release entity from animal cage.
      */
-    @EventHandler
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onEntityRelease(PlayerInteractEvent event)
     {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK)
@@ -166,5 +170,94 @@ public class AnimalCageListener implements Listener
         player.swingMainHand();
         player.sendMessage(Component.text("Released " + entity.getType().name()).
             style(StyleUtil.GREEN_COLOR));
+    }
+
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onInteractWithPen(PlayerInteractEvent event)
+    {
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK)
+        {
+            return;
+        }
+
+        Block block = event.getClickedBlock();
+        Player player = event.getPlayer();
+        ItemStack item = player.getInventory().getItem(event.getHand());
+
+        if (!AnimalPenManager.isAnimalCage(item))
+        {
+            return;
+        }
+
+        if (!AnimalPenManager.isAnimalPen(block))
+        {
+            return;
+        }
+
+        event.setCancelled(true);
+
+        AnimalData penData = AnimalPenManager.getAnimalData(block);
+        AnimalData itemData = AnimalPenManager.getAnimalData(item);
+
+        if (itemData == null && penData == null)
+        {
+            // Both are empty
+            return;
+        }
+
+        if (penData == null)
+        {
+            // Animal pen data is null.
+            AnimalPenManager.setAnimalPenData(block, itemData);
+
+            item.setAmount(-1);
+            player.getInventory().setItem(event.getHand(), item);
+            player.swingMainHand();
+            player.sendMessage(Component.text("Inserted into animal pen").
+                style(StyleUtil.GREEN_COLOR));
+
+            return;
+        }
+
+        if (itemData == null)
+        {
+            if (!player.isSneaking() || penData.entityCount < 2)
+            {
+                // Only on sneaking or there is something to split
+                return;
+            }
+
+            // Clone half of data to new item
+            itemData = new AnimalData(penData.entityType, penData.entityCount / 2);
+            itemData.cooldowns = new HashMap<>(penData.cooldowns);
+            itemData.extra = new HashMap<>(penData.extra);
+
+            AnimalPenManager.setItemData(item, itemData);
+
+            penData.entityCount -= itemData.entityCount;
+
+            AnimalPenManager.setAnimalPenData(block, penData);
+
+            return;
+        }
+
+        if (penData.entityType != itemData.entityType)
+        {
+            // Cannot merge different entities
+            return;
+        }
+
+        // Now just combine both data, and clear item.
+        penData.entityCount += itemData.entityCount;
+
+        // Merge cooldowns
+        itemData.cooldowns.forEach((key, value) -> penData.cooldowns.merge(key, value, Math::max));
+
+        // TODO: extra and variant
+
+        // Save everything
+        AnimalPenManager.setItemData(item, null);
+        AnimalPenManager.setAnimalPenData(block, penData);
     }
 }

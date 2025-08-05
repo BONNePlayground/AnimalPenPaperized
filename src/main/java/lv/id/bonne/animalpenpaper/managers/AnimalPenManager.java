@@ -3,7 +3,11 @@ package lv.id.bonne.animalpenpaper.managers;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -14,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.UUID;
 
+import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
 import lv.id.bonne.animalpenpaper.data.AnimalDataType;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
@@ -25,7 +30,8 @@ import net.kyori.adventure.text.Component;
  */
 public class AnimalPenManager
 {
-    private final static int ANIMAL_CAGE_MODEL = 10101010;
+    private final static int ANIMAL_CAGE_MODEL = 1000;
+    private final static int ANIMAL_PEN_MODEL = 1001;
 
     public final static NamespacedKey ANIMAL_DATA_KEY = new NamespacedKey("animal_pen_plugin", "animal_data");
     private final static NamespacedKey UNIQUE_DATA_KEY = new NamespacedKey("animal_pen_plugin", "unique_key");
@@ -124,6 +130,31 @@ public class AnimalPenManager
     }
 
 
+    public static void setItemData(ItemStack item, @Nullable AnimalData animalData)
+    {
+        ItemMeta itemMeta = item.getItemMeta();
+
+        if (animalData == null)
+        {
+            itemMeta.getPersistentDataContainer().remove(AnimalPenManager.ANIMAL_DATA_KEY);
+            itemMeta.lore(List.of(Component.empty(),
+                Component.text("Right-click on animal to catch it").style(StyleUtil.GRAY)));
+        }
+        else
+        {
+            itemMeta.getPersistentDataContainer().set(AnimalPenManager.ANIMAL_DATA_KEY, AnimalDataType.INSTANCE, animalData);
+
+            itemMeta.lore(List.of(Component.empty(),
+                Component.text("Animal: ").style(StyleUtil.GRAY).append(Component.translatable(animalData.entityType.translationKey())),
+                Component.text("Count: ").style(StyleUtil.GRAY).append(Component.text(animalData.entityCount)),
+                Component.empty(),
+                Component.text("Shift Right-click on block to release it").style(StyleUtil.GRAY)));
+        }
+
+        item.setItemMeta(itemMeta);
+    }
+
+
     /**
      * Create an empty animal cage
      */
@@ -147,5 +178,151 @@ public class AnimalPenManager
         bottle.setItemMeta(meta);
 
         return bottle;
+    }
+
+
+// ---------------------------------------------------------------------
+// Section: Animal Pen related methods
+// ---------------------------------------------------------------------
+
+
+    /**
+     * Return if given item is animal pen item.
+     */
+    public static boolean isAnimalPen(@NotNull ItemStack item)
+    {
+        if (item.getType() != Material.SMOOTH_STONE_SLAB)
+        {
+            return false;
+        }
+
+        ItemMeta meta = item.getItemMeta();
+
+        if (meta == null || !meta.hasCustomModelData())
+        {
+            return false;
+        }
+
+        return meta.getCustomModelData() == ANIMAL_PEN_MODEL;
+    }
+
+
+    /**
+     * Return if given block is animal pen.
+     */
+    public static boolean isAnimalPen(@Nullable Block block)
+    {
+        if (block == null || block.getType() != Material.SMOOTH_STONE_SLAB)
+        {
+            return false;
+        }
+
+        NamespacedKey penKey = new NamespacedKey(AnimalPenPlugin.getInstance(),
+            block.getX() + "_" + block.getY() + "_" + block.getZ() + "_animal_pen");
+
+        return block.getWorld().getPersistentDataContainer().has(penKey, PersistentDataType.STRING);
+    }
+
+
+    public static boolean isAnimalPen(@NotNull Entity entity)
+    {
+        return entity.getPersistentDataContainer().has(ANIMAL_DATA_KEY,
+            AnimalDataType.INSTANCE);
+    }
+
+
+    /**
+     * Returns animal data associated with given block.
+     */
+    public static AnimalData getAnimalData(Block block)
+    {
+        NamespacedKey penKey = new NamespacedKey(AnimalPenPlugin.getInstance(),
+            block.getX() + "_" + block.getY() + "_" + block.getZ() + "_animal_pen");
+
+        String entityID = block.getWorld().getPersistentDataContainer().get(penKey, PersistentDataType.STRING);
+
+        if (entityID == null || entityID.isEmpty())
+        {
+            // No data from animal pen.
+            return null;
+        }
+
+        Entity entity = block.getWorld().getEntity(UUID.fromString(entityID));
+
+        if (entity == null)
+        {
+            AnimalPenPlugin.getInstance().getLogger().severe("Animal Pen entity is removed! Cannot access data!");
+            return null;
+        }
+
+        return entity.getPersistentDataContainer().get(ANIMAL_DATA_KEY, AnimalDataType.INSTANCE);
+    }
+
+
+    public static void setAnimalPenData(Block block, AnimalData newData)
+    {
+        NamespacedKey penKey = new NamespacedKey(AnimalPenPlugin.getInstance(),
+            block.getX() + "_" + block.getY() + "_" + block.getZ() + "_animal_pen");
+
+        String entityID = block.getWorld().getPersistentDataContainer().get(penKey, PersistentDataType.STRING);
+
+        Entity entity;
+
+        if (entityID == null || entityID.isEmpty())
+        {
+            entity = block.getWorld().spawnEntity(block.getLocation().add(0.5, 0.5, 0.5),
+                newData.entityType,
+                CreatureSpawnEvent.SpawnReason.CUSTOM,
+                (newEntity) -> {
+                    newEntity.setGravity(false);
+                    newEntity.setNoPhysics(true);
+                    newEntity.setPersistent(true);
+
+                    if (newEntity instanceof LivingEntity livingEntity)
+                    {
+                        livingEntity.setAI(false);
+                        livingEntity.setRemoveWhenFarAway(false);
+                    }
+                });
+
+            // Link entity with block
+            block.getWorld().getPersistentDataContainer().set(penKey,
+                PersistentDataType.STRING,
+                entity.getUniqueId().toString());
+        }
+        else
+        {
+            entity = block.getWorld().getEntity(UUID.fromString(entityID));
+        }
+
+        if (entity == null)
+        {
+            AnimalPenPlugin.getInstance().getLogger().severe("Animal Pen entity is removed! Cannot access data!");
+            return;
+        }
+
+        entity.getPersistentDataContainer().set(ANIMAL_DATA_KEY,
+            AnimalDataType.INSTANCE,
+            newData);
+    }
+
+
+    /**
+     * Create an animal pen
+     */
+    public static ItemStack createAnimalPen() {
+        ItemStack smoothStoneSlab = new ItemStack(Material.SMOOTH_STONE_SLAB);
+        ItemMeta meta = smoothStoneSlab.getItemMeta();
+        if (meta == null) return smoothStoneSlab;
+
+        meta.setCustomModelData(ANIMAL_PEN_MODEL);
+        meta.displayName(Component.text("Animal Pen").style(StyleUtil.WHITE));
+
+        meta.lore(List.of(Component.empty(),
+            Component.text("Insert Animal Cage to interact with animal.").style(StyleUtil.GRAY)));
+
+        smoothStoneSlab.setItemMeta(meta);
+
+        return smoothStoneSlab;
     }
 }
