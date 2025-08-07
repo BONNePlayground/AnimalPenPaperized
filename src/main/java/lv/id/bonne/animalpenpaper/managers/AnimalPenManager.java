@@ -8,8 +8,11 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.AxolotlBucketMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.TropicalFishBucketMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
@@ -567,6 +570,109 @@ public class AnimalPenManager
             AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
                 entity.getType(),
                 Material.BRUSH,
+                data.entityCount));
+
+        // Save data
+        AnimalPenManager.setAnimalPenData(entity, data);
+    }
+
+
+    public static void handleWaterBucket(Entity entity, Player player, ItemStack itemStack)
+    {
+        if (entity.getType() != EntityType.AXOLOTL &&
+            entity.getType() != EntityType.TROPICAL_FISH &&
+            entity.getType() != EntityType.SALMON &&
+            entity.getType() != EntityType.PUFFERFISH &&
+            entity.getType() != EntityType.COD &&
+            entity.getType() != EntityType.TADPOLE)
+        {
+            // Only axolotl and fishes can be interacted with water bucket
+            return;
+        }
+
+        AnimalData data = AnimalPenManager.getAnimalData(entity);
+
+        if (data == null)
+        {
+            return;
+        }
+
+        if (data.hasCooldown(AnimalData.Interaction.WATER_BUCKET))
+        {
+            // under cooldown for feeding
+            return;
+        }
+
+        ItemStack newBucket;
+        Sound sound;
+
+        switch (entity.getType())
+        {
+            case AXOLOTL ->
+            {
+                newBucket = new ItemStack(Material.AXOLOTL_BUCKET);
+                AxolotlBucketMeta itemMeta = (AxolotlBucketMeta) newBucket.getItemMeta();
+                Axolotl axolotl = (Axolotl) entity;
+                itemMeta.setVariant(axolotl.getVariant());
+                newBucket.setItemMeta(itemMeta);
+
+                sound = Sound.ITEM_BUCKET_FILL_FISH;
+            }
+            case COD ->
+            {
+                newBucket =  new ItemStack(Material.COD_BUCKET);
+                sound = Sound.ITEM_BUCKET_FILL_FISH;
+            }
+            case PUFFERFISH ->
+            {
+                newBucket =  new ItemStack(Material.PUFFERFISH_BUCKET);
+                sound = Sound.ITEM_BUCKET_FILL_FISH;
+            }
+            case SALMON ->
+            {
+                newBucket =  new ItemStack(Material.SALMON_BUCKET);
+                sound = Sound.ITEM_BUCKET_FILL_FISH;
+            }
+            case TADPOLE ->
+            {
+                newBucket = new ItemStack(Material.TADPOLE_BUCKET);
+                sound = Sound.ITEM_BUCKET_FILL_TADPOLE;
+            }
+            case TROPICAL_FISH ->
+            {
+                newBucket = new ItemStack(Material.TROPICAL_FISH_BUCKET);
+                TropicalFishBucketMeta itemMeta = (TropicalFishBucketMeta) newBucket.getItemMeta();
+                TropicalFish tropicalFish = (TropicalFish) entity;
+                itemMeta.setBodyColor(tropicalFish.getBodyColor());
+                itemMeta.setPattern(tropicalFish.getPattern());
+                itemMeta.setPatternColor(tropicalFish.getPatternColor());
+                newBucket.setItemMeta(itemMeta);
+
+                sound = Sound.ITEM_BUCKET_FILL_FISH;
+            }
+            default ->
+            {
+                // Should not ever happen.
+                return;
+            }
+        }
+
+        data.entityCount -= 1;
+
+        itemStack.subtract();
+        player.getInventory().addItem(newBucket);
+
+        entity.getWorld().playSound(entity,
+            sound,
+            new Random().nextFloat(0.8f, 1.2f),
+            1);
+
+        player.swingMainHand();
+
+        data.setCooldown(AnimalData.Interaction.WATER_BUCKET,
+            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+                entity.getType(),
+                Material.WATER_BUCKET,
                 data.entityCount));
 
         // Save data

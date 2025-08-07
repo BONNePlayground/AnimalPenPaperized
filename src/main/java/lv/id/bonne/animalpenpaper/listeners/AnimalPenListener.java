@@ -151,6 +151,11 @@ public class AnimalPenListener implements Listener
             AnimalPenManager.handleBrush(entity, player, itemStack);
             return;
         }
+
+        if (itemStack.getType() == Material.WATER_BUCKET)
+        {
+            AnimalPenManager.handleWaterBucket(entity, player, itemStack);
+        }
     }
 
 
