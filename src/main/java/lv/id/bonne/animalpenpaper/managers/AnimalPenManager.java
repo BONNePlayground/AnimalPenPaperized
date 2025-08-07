@@ -326,35 +326,26 @@ public class AnimalPenManager
             AnimalDataType.INSTANCE,
             newData);
 
-        if (blockData.countEntity == null)
-        {
-            entity = block.getWorld().spawnEntity(
-                block.getLocation().add(AnimalPenManager.center(blockData.blockFace)),
-                EntityType.TEXT_DISPLAY,
-                CreatureSpawnEvent.SpawnReason.CUSTOM,
-                (newEntity) -> {
-                    newEntity.setPersistent(true);
-                    newEntity.setRotation(AnimalPenManager.blockFaceToYaw(blockData.blockFace), 0);
-                });
+        updateCountTextEntity(block, blockData, newData.entityCount, penKey);
+    }
 
-            blockData.countEntity = entity.getUniqueId();
 
-            // Link entity with block
-            block.getWorld().getPersistentDataContainer().set(penKey,
-                BlockDataType.INSTANCE,
-                blockData);
-        }
-        else
-        {
-            entity = block.getWorld().getEntity(blockData.countEntity);
-        }
+    public static void setAnimalPenData(Entity entity, AnimalData newData)
+    {
+        entity.getPersistentDataContainer().set(ANIMAL_DATA_KEY,
+            AnimalDataType.INSTANCE,
+            newData);
 
-        if (entity instanceof TextDisplay display)
-        {
-            display.setSeeThrough(false);
-            display.setVisibleByDefault(true);
-            display.text(Component.text(newData.entityCount));
-        }
+        Block block = entity.getLocation().getBlock();
+
+        NamespacedKey penKey = new NamespacedKey(AnimalPenPlugin.getInstance(),
+            block.getX() + "_" + block.getY() + "_" + block.getZ() + "_animal_pen");
+
+        BlockData blockData = block.getWorld().getPersistentDataContainer().getOrDefault(penKey,
+            BlockDataType.INSTANCE,
+            new BlockData());
+
+        updateCountTextEntity(block, blockData, newData.entityCount, penKey);
     }
 
 
@@ -429,6 +420,46 @@ public class AnimalPenManager
     }
 
 
+    private static void updateCountTextEntity(Block block, BlockData blockData, long entityCount, NamespacedKey penKey)
+    {
+        Entity entity;
+
+        if (blockData.countEntity == null)
+        {
+            entity = block.getWorld().spawnEntity(
+                block.getLocation().add(AnimalPenManager.center(blockData.blockFace)),
+                EntityType.TEXT_DISPLAY,
+                CreatureSpawnEvent.SpawnReason.CUSTOM,
+                (newEntity) -> {
+                    newEntity.setPersistent(true);
+                    newEntity.setRotation(AnimalPenManager.blockFaceToYaw(blockData.blockFace), 0);
+
+                    if (newEntity instanceof TextDisplay display)
+                    {
+                        display.setVisibleByDefault(true);
+                        display.setSeeThrough(false);
+                    }
+                });
+
+            blockData.countEntity = entity.getUniqueId();
+
+            // Link entity with block
+            block.getWorld().getPersistentDataContainer().set(penKey,
+                BlockDataType.INSTANCE,
+                blockData);
+        }
+        else
+        {
+            entity = block.getWorld().getEntity(blockData.countEntity);
+        }
+
+        if (entity instanceof TextDisplay display)
+        {
+            display.text(Component.text(entityCount));
+        }
+    }
+
+
 // ---------------------------------------------------------------------
 // Section: Entity Methods
 // ---------------------------------------------------------------------
@@ -493,6 +524,7 @@ public class AnimalPenManager
             new Random().nextFloat(0.8f, 1.2f),
             1);
 
+        player.swingMainHand();
 
         data.setCooldown(AnimalData.Interaction.FOOD,
             AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
@@ -501,7 +533,7 @@ public class AnimalPenManager
                 stackSize));
 
         // Save data
-        entity.getPersistentDataContainer().set(ANIMAL_DATA_KEY, AnimalDataType.INSTANCE, data);
+        AnimalPenManager.setAnimalPenData(entity, data);
     }
 
 
