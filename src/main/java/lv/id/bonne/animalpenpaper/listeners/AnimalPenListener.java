@@ -145,17 +145,51 @@ public class AnimalPenListener implements Listener
             AnimalPenManager.handleFood(entity, player, itemStack);
             return;
         }
-
-        if (itemStack.getType() == Material.BRUSH)
+        else if (itemStack.getType() == Material.BRUSH)
         {
             AnimalPenManager.handleBrush(entity, player, itemStack);
             return;
         }
-
-        if (itemStack.getType() == Material.WATER_BUCKET)
+        else if (itemStack.getType() == Material.WATER_BUCKET)
         {
             AnimalPenManager.handleWaterBucket(entity, player, itemStack);
         }
+
+        // HANDLE BEES
+
+        else if (itemStack.getType() == Material.SHEARS)
+        {
+            AnimalPenManager.handleShears(entity, player, itemStack);
+        }
+        else if (AnimalPenListener.isDye(itemStack.getType()))
+        {
+            AnimalPenManager.handleDyes(entity, player, itemStack);
+        }
+    }
+
+
+    private static boolean isDye(Material material)
+    {
+        return switch (material)
+        {
+            case BLACK_DYE,
+                 BLUE_DYE,
+                 BROWN_DYE,
+                 CYAN_DYE,
+                 GRAY_DYE,
+                 GREEN_DYE,
+                 LIGHT_BLUE_DYE,
+                 LIGHT_GRAY_DYE,
+                 LIME_DYE,
+                 MAGENTA_DYE,
+                 ORANGE_DYE,
+                 PINK_DYE,
+                 PURPLE_DYE,
+                 RED_DYE,
+                 WHITE_DYE,
+                 YELLOW_DYE -> true;
+            default -> false;
+        };
     }
 
 

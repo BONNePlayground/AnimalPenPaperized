@@ -680,9 +680,151 @@ public class AnimalPenManager
     }
 
 
+    public static void handleShears(Entity entity, Player player, ItemStack itemStack)
+    {
+        if (entity.getType() != EntityType.SHEEP)
+        {
+            // Only sheep can be interacted with shears
+            return;
+        }
+
+        AnimalData data = AnimalPenManager.getAnimalData(entity);
+
+        if (data == null)
+        {
+            return;
+        }
+
+        if (data.hasCooldown(AnimalData.Interaction.SHEARS))
+        {
+            // under cooldown for feeding
+            return;
+        }
+
+        itemStack.damage(1, player);
+
+        Sheep sheep = (Sheep) entity;
+        sheep.shear();
+
+        Material woolMaterial = AnimalPenManager.getWoolMaterial(sheep.getColor());
+
+        int woolCount = 1;
+
+        int dropLimits = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getDropLimits(Material.WHITE_WOOL);
+
+        if (dropLimits <= 0)
+        {
+            dropLimits = Integer.MAX_VALUE;
+        }
+
+        Random random = new Random();
+
+        for (int i = 0; i < data.entityCount && woolCount < dropLimits; i++)
+        {
+            woolCount += random.nextInt(3);
+        }
+
+        while (woolCount > 0)
+        {
+            ItemStack woolStack = new ItemStack(woolMaterial);
+
+            if (woolCount > 64)
+            {
+                woolStack.setAmount(64);
+                woolCount -= 64;
+            }
+            else
+            {
+                woolStack.setAmount(woolCount);
+                woolCount = 0;
+            }
+
+            entity.getWorld().dropItem(entity.getLocation().add(0, 1, 0), woolStack);
+        }
+
+        player.swingMainHand();
+
+        data.setCooldown(AnimalData.Interaction.SHEARS,
+            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+                entity.getType(),
+                Material.SHEARS,
+                data.entityCount));
+
+        // Save data
+        AnimalPenManager.setAnimalPenData(entity, data);
+    }
+
+
+    public static void handleDyes(Entity entity, Player player, ItemStack itemStack)
+    {
+        if (entity.getType() != EntityType.SHEEP)
+        {
+            // Only sheep can be interacted with shears
+            return;
+        }
+
+        AnimalData data = AnimalPenManager.getAnimalData(entity);
+
+        if (data == null)
+        {
+            return;
+        }
+
+        if (data.hasCooldown(AnimalData.Interaction.DYES))
+        {
+            // under cooldown for feeding
+            return;
+        }
+
+        itemStack.subtract();
+
+        Sheep sheep = (Sheep) entity;
+        sheep.setColor(AnimalPenManager.getDyeColor(itemStack.getType()));
+
+        player.swingMainHand();
+
+        data.setCooldown(AnimalData.Interaction.DYES,
+            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+                entity.getType(),
+                Material.WHITE_DYE,
+                data.entityCount));
+
+        // Save data
+        AnimalPenManager.setAnimalPenData(entity, data);
+    }
+
+
 // ---------------------------------------------------------------------
 // Section: Private methods
 // ---------------------------------------------------------------------
+
+
+    private static Material getWoolMaterial(DyeColor color)
+    {
+        try
+        {
+            String woolName = color.name() + "_WOOL";
+            return Material.valueOf(woolName);
+        }
+        catch (Exception e)
+        {
+            return Material.WHITE_WOOL;
+        }
+    }
+
+
+    private static DyeColor getDyeColor(Material material)
+    {
+        try
+        {
+            String color = material.name().replace("_DYE", "");
+            return DyeColor.valueOf(color);
+        }
+        catch (Exception e)
+        {
+            return DyeColor.WHITE;
+        }
+    }
 
 
     private static float blockFaceToYaw(BlockFace blockFace) {
