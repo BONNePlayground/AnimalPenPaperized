@@ -3,15 +3,20 @@ package lv.id.bonne.animalpenpaper.managers;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.TextDisplay;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,6 +26,8 @@ import java.util.UUID;
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
 import lv.id.bonne.animalpenpaper.data.AnimalDataType;
+import lv.id.bonne.animalpenpaper.data.BlockData;
+import lv.id.bonne.animalpenpaper.data.BlockDataType;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
 import net.kyori.adventure.text.Component;
 
@@ -220,7 +227,7 @@ public class AnimalPenManager
         NamespacedKey penKey = new NamespacedKey(AnimalPenPlugin.getInstance(),
             block.getX() + "_" + block.getY() + "_" + block.getZ() + "_animal_pen");
 
-        return block.getWorld().getPersistentDataContainer().has(penKey, PersistentDataType.STRING);
+        return block.getWorld().getPersistentDataContainer().has(penKey, BlockDataType.INSTANCE);
     }
 
 
@@ -239,15 +246,15 @@ public class AnimalPenManager
         NamespacedKey penKey = new NamespacedKey(AnimalPenPlugin.getInstance(),
             block.getX() + "_" + block.getY() + "_" + block.getZ() + "_animal_pen");
 
-        String entityID = block.getWorld().getPersistentDataContainer().get(penKey, PersistentDataType.STRING);
+        BlockData blockData = block.getWorld().getPersistentDataContainer().get(penKey, BlockDataType.INSTANCE);
 
-        if (entityID == null || entityID.isEmpty())
+        if (blockData == null || blockData.entity == null)
         {
             // No data from animal pen.
             return null;
         }
 
-        Entity entity = block.getWorld().getEntity(UUID.fromString(entityID));
+        Entity entity = block.getWorld().getEntity(blockData.entity);
 
         if (entity == null)
         {
@@ -264,11 +271,14 @@ public class AnimalPenManager
         NamespacedKey penKey = new NamespacedKey(AnimalPenPlugin.getInstance(),
             block.getX() + "_" + block.getY() + "_" + block.getZ() + "_animal_pen");
 
-        String entityID = block.getWorld().getPersistentDataContainer().get(penKey, PersistentDataType.STRING);
+        BlockData blockData = block.getWorld().getPersistentDataContainer().getOrDefault(penKey,
+            BlockDataType.INSTANCE,
+            new BlockData());
 
         Entity entity;
 
-        if (entityID == null || entityID.isEmpty())
+        // Entity to display
+        if (blockData.entity == null)
         {
             entity = block.getWorld().spawnEntity(block.getLocation().add(0.5, 0.5, 0.5),
                 newData.entityType,
@@ -282,17 +292,24 @@ public class AnimalPenManager
                     {
                         livingEntity.setAI(false);
                         livingEntity.setRemoveWhenFarAway(false);
+                        livingEntity.setRotation(AnimalPenManager.blockFaceToYaw(blockData.blockFace), 0);
+
+                        AttributeInstance attribute = livingEntity.getAttribute(Attribute.GENERIC_SCALE);
+
+                        if (attribute != null) attribute.setBaseValue(0.5d);
                     }
                 });
 
+            blockData.entity = entity.getUniqueId();
+
             // Link entity with block
             block.getWorld().getPersistentDataContainer().set(penKey,
-                PersistentDataType.STRING,
-                entity.getUniqueId().toString());
+                BlockDataType.INSTANCE,
+                blockData);
         }
         else
         {
-            entity = block.getWorld().getEntity(UUID.fromString(entityID));
+            entity = block.getWorld().getEntity(blockData.entity);
         }
 
         if (entity == null)
@@ -304,6 +321,36 @@ public class AnimalPenManager
         entity.getPersistentDataContainer().set(ANIMAL_DATA_KEY,
             AnimalDataType.INSTANCE,
             newData);
+
+        if (blockData.countEntity == null)
+        {
+            entity = block.getWorld().spawnEntity(
+                block.getLocation().add(AnimalPenManager.center(blockData.blockFace)),
+                EntityType.TEXT_DISPLAY,
+                CreatureSpawnEvent.SpawnReason.CUSTOM,
+                (newEntity) -> {
+                    newEntity.setPersistent(true);
+                    newEntity.setRotation(AnimalPenManager.blockFaceToYaw(blockData.blockFace), 0);
+                });
+
+            blockData.countEntity = entity.getUniqueId();
+
+            // Link entity with block
+            block.getWorld().getPersistentDataContainer().set(penKey,
+                BlockDataType.INSTANCE,
+                blockData);
+        }
+        else
+        {
+            entity = block.getWorld().getEntity(blockData.countEntity);
+        }
+
+        if (entity instanceof TextDisplay display)
+        {
+            display.setSeeThrough(false);
+            display.setVisibleByDefault(true);
+            display.text(Component.text(newData.entityCount));
+        }
     }
 
 
@@ -325,4 +372,34 @@ public class AnimalPenManager
 
         return smoothStoneSlab;
     }
+
+
+    private static float blockFaceToYaw(BlockFace blockFace) {
+        return switch (blockFace)
+        {
+            case NORTH -> 180f;
+            case SOUTH -> 0f;
+            case EAST -> 270f;
+            case WEST -> 90f;
+            default -> 180f;
+        };
+    }
+
+
+    private static Vector center(BlockFace blockFace)
+    {
+        return switch (blockFace)
+        {
+            case NORTH -> NORTH_CENTER;
+            case SOUTH -> SOUTH_CENTER;
+            case EAST -> EAST_CENTER;
+            case WEST -> WEST_CENTER;
+            default -> NORTH_CENTER;
+        };
+    }
+
+    private static final Vector NORTH_CENTER = new Vector(0.5, 0.125, 0);
+    private static final Vector SOUTH_CENTER = new Vector(0.5, 0.125, 1);
+    private static final Vector EAST_CENTER = new Vector(1, 0.125, 0.5);
+    private static final Vector WEST_CENTER = new Vector(0, 0.125, 0.5);
 }

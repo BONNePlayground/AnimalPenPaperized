@@ -9,7 +9,9 @@ package lv.id.bonne.animalpenpaper.listeners;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.Slab;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
@@ -19,12 +21,14 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
+import lv.id.bonne.animalpenpaper.data.BlockData;
+import lv.id.bonne.animalpenpaper.data.BlockDataType;
 import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
 
 
@@ -33,7 +37,7 @@ import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
  */
 public class AnimalPenListener implements Listener
 {
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onAnimalPenPlace(BlockPlaceEvent event)
     {
         if (!AnimalPenManager.isAnimalPen(event.getItemInHand()))
@@ -62,7 +66,17 @@ public class AnimalPenListener implements Listener
             block.getX() + "_" + block.getY() + "_" + block.getZ() + "_animal_pen");
 
         // Empty pen
-        block.getWorld().getPersistentDataContainer().set(penKey, PersistentDataType.STRING, "");
+        BlockFace blockFace = event.getBlockAgainst().getFace(event.getBlock());
+
+        if (blockFace == BlockFace.UP || blockFace == BlockFace.DOWN)
+        {
+            blockFace = event.getPlayer().getFacing().getOppositeFace();
+        }
+
+        BlockData data = new BlockData();
+        data.blockFace = blockFace;
+
+        block.getWorld().getPersistentDataContainer().set(penKey, BlockDataType.INSTANCE, data);
     }
 
 
@@ -93,17 +107,27 @@ public class AnimalPenListener implements Listener
             block.getX() + "_" + block.getY() + "_" + block.getZ() + "_animal_pen");
 
         // Remove entity
-        String entityID = block.getWorld().getPersistentDataContainer().get(penKey, PersistentDataType.STRING);
+        BlockData blockData = block.getWorld().getPersistentDataContainer().get(penKey, BlockDataType.INSTANCE);
 
-        if (entityID != null && !entityID.isEmpty())
+        if (blockData != null)
         {
-            Entity entity = block.getWorld().getEntity(UUID.fromString(entityID));
-
-            if (entity != null)
+            if (blockData.entity != null)
             {
-                entity.getPersistentDataContainer().remove(AnimalPenManager.ANIMAL_DATA_KEY);
-                entity.remove();
+                Entity entity = block.getWorld().getEntity(blockData.entity);
+
+                if (entity != null)
+                {
+                    entity.getPersistentDataContainer().remove(AnimalPenManager.ANIMAL_DATA_KEY);
+                    entity.remove();
+                }
             }
+
+            AnimalPenListener.removeEntity(block.getWorld(), blockData.countEntity);
+
+            blockData.cooldowns.forEach(text -> {
+                AnimalPenListener.removeEntity(block.getWorld(), text.text);
+                AnimalPenListener.removeEntity(block.getWorld(), text.icon);
+            });
         }
 
         // Remove saved data key
@@ -112,6 +136,20 @@ public class AnimalPenListener implements Listener
         // Drop proper item
         event.setDropItems(false);
         block.getWorld().dropItem(block.getLocation(), AnimalPenManager.createAnimalPen());
+    }
+
+
+    private static void removeEntity(World world, @Nullable UUID uuid)
+    {
+        if (uuid != null)
+        {
+            Entity entity = world.getEntity(uuid);
+
+            if (entity != null)
+            {
+                entity.remove();
+            }
+        }
     }
 
 

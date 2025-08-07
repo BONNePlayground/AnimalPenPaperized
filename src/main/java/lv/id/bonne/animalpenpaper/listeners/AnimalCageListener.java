@@ -31,7 +31,7 @@ public class AnimalCageListener implements Listener
     /**
      * This listener checks if player can catch clicked entity with animal cage.
      */
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onEntityCatch(PlayerInteractEntityEvent event)
     {
         Player player = event.getPlayer();
