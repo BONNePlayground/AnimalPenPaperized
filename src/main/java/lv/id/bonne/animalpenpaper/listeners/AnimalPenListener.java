@@ -9,7 +9,6 @@ package lv.id.bonne.animalpenpaper.listeners;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.Slab;
@@ -21,9 +20,6 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.UUID;
 
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
@@ -103,53 +99,12 @@ public class AnimalPenListener implements Listener
             block.getWorld().dropItem(block.getLocation(), itemStack);
         }
 
-        NamespacedKey penKey = new NamespacedKey(AnimalPenPlugin.getInstance(),
-            block.getX() + "_" + block.getY() + "_" + block.getZ() + "_animal_pen");
-
-        // Remove entity
-        BlockData blockData = block.getWorld().getPersistentDataContainer().get(penKey, BlockDataType.INSTANCE);
-
-        if (blockData != null)
-        {
-            if (blockData.entity != null)
-            {
-                Entity entity = block.getWorld().getEntity(blockData.entity);
-
-                if (entity != null)
-                {
-                    entity.getPersistentDataContainer().remove(AnimalPenManager.ANIMAL_DATA_KEY);
-                    entity.remove();
-                }
-            }
-
-            AnimalPenListener.removeEntity(block.getWorld(), blockData.countEntity);
-
-            blockData.cooldowns.forEach(text -> {
-                AnimalPenListener.removeEntity(block.getWorld(), text.text);
-                AnimalPenListener.removeEntity(block.getWorld(), text.icon);
-            });
-        }
-
-        // Remove saved data key
-        block.getWorld().getPersistentDataContainer().remove(penKey);
+        // Remove entities
+        AnimalPenManager.clearBlockData(block, false);
 
         // Drop proper item
         event.setDropItems(false);
         block.getWorld().dropItem(block.getLocation(), AnimalPenManager.createAnimalPen());
-    }
-
-
-    private static void removeEntity(World world, @Nullable UUID uuid)
-    {
-        if (uuid != null)
-        {
-            Entity entity = world.getEntity(uuid);
-
-            if (entity != null)
-            {
-                entity.remove();
-            }
-        }
     }
 
 

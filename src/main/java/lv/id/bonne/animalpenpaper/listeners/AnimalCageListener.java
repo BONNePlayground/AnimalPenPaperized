@@ -11,10 +11,10 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
@@ -173,15 +173,12 @@ public class AnimalCageListener implements Listener
     }
 
 
+    /**
+     * This listener cheks is player can interact with animal cage on animal pen
+     */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onInteractWithPen(PlayerInteractEvent event)
+    public void onInteractWithPenWithAnimalCage(PlayerInteractEvent event)
     {
-        if (event.getAction() != Action.RIGHT_CLICK_BLOCK)
-        {
-            return;
-        }
-
-        Block block = event.getClickedBlock();
         Player player = event.getPlayer();
         ItemStack item = player.getInventory().getItem(event.getHand());
 
@@ -189,6 +186,13 @@ public class AnimalCageListener implements Listener
         {
             return;
         }
+
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK)
+        {
+            return;
+        }
+
+        Block block = event.getClickedBlock();
 
         if (!AnimalPenManager.isAnimalPen(block))
         {
@@ -259,5 +263,47 @@ public class AnimalCageListener implements Listener
         // Save everything
         AnimalPenManager.setItemData(item, null);
         AnimalPenManager.setAnimalPenData(block, penData);
+    }
+
+
+    /**
+     * This listener checks if player can interact with animal pen having empty hand
+     */
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onInteractWithPenWithEmptyHand(PlayerInteractEvent event)
+    {
+        if (event.getItem() != null && !event.getItem().getType().isAir())
+        {
+            return;
+        }
+
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK || !event.getPlayer().isSneaking())
+        {
+            return;
+        }
+
+        Block block = event.getClickedBlock();
+
+        if (!AnimalPenManager.isAnimalPen(block))
+        {
+            return;
+        }
+
+        event.setCancelled(true);
+
+        AnimalData penData = AnimalPenManager.getAnimalData(block);
+
+        if (penData == null)
+        {
+            return;
+        }
+
+        ItemStack itemStack = AnimalPenManager.createEmptyAnimalCage();
+        AnimalPenManager.setItemData(itemStack, penData);
+
+        AnimalPenManager.clearBlockData(block, true);
+
+        event.getPlayer().getInventory().setItem(event.getHand() == null ?
+            EquipmentSlot.HAND : event.getHand(), itemStack);
     }
 }

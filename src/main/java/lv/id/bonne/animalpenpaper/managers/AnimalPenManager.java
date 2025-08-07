@@ -3,6 +3,7 @@ package lv.id.bonne.animalpenpaper.managers;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
@@ -350,6 +351,57 @@ public class AnimalPenManager
             display.setSeeThrough(false);
             display.setVisibleByDefault(true);
             display.text(Component.text(newData.entityCount));
+        }
+    }
+
+
+    public static void clearBlockData(Block block, boolean withSave)
+    {
+        NamespacedKey penKey = new NamespacedKey(AnimalPenPlugin.getInstance(),
+            block.getX() + "_" + block.getY() + "_" + block.getZ() + "_animal_pen");
+
+        BlockData blockData = block.getWorld().getPersistentDataContainer().get(penKey, BlockDataType.INSTANCE);
+
+        if (blockData == null)
+        {
+            return;
+        }
+
+        AnimalPenManager.removeEntity(block.getWorld(), blockData.entity);
+        AnimalPenManager.removeEntity(block.getWorld(), blockData.countEntity);
+
+        blockData.cooldowns.forEach(text -> {
+            AnimalPenManager.removeEntity(block.getWorld(), text.text);
+            AnimalPenManager.removeEntity(block.getWorld(), text.icon);
+        });
+
+        blockData.entity = null;
+        blockData.countEntity = null;
+        blockData.cooldowns.clear();
+
+        if (withSave)
+        {
+            block.getWorld().getPersistentDataContainer().set(penKey,
+                BlockDataType.INSTANCE,
+                blockData);
+        }
+        else
+        {
+            block.getWorld().getPersistentDataContainer().remove(penKey);
+        }
+    }
+
+
+    public static void removeEntity(World world, @Nullable UUID uuid)
+    {
+        if (uuid != null)
+        {
+            Entity entity = world.getEntity(uuid);
+
+            if (entity != null)
+            {
+                entity.remove();
+            }
         }
     }
 
