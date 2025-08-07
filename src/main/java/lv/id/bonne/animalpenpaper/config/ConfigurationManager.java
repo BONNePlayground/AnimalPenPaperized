@@ -61,7 +61,7 @@ public class ConfigurationManager
      */
     private File getConfigFile()
     {
-        return new File("config/animal_pen_config.json");
+        return new File(AnimalPenPlugin.getInstance().getDataFolder(),"animal_pen_config.json");
     }
 
 
@@ -150,7 +150,7 @@ public class ConfigurationManager
      */
     public void writeConfig(boolean overwrite) throws IOException
     {
-        File dir = new File("config/");
+        File dir = AnimalPenPlugin.getInstance().getDataFolder();
 
         if (dir.exists() || dir.mkdirs())
         {
