@@ -15,7 +15,6 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -34,12 +33,6 @@ import net.kyori.adventure.text.Component;
  */
 public class AnimalPenManager
 {
-    private final static int ANIMAL_CAGE_MODEL = 1000;
-    private final static int ANIMAL_PEN_MODEL = 1001;
-
-    public final static NamespacedKey ANIMAL_DATA_KEY = new NamespacedKey("animal_pen_plugin", "animal_data");
-    private final static NamespacedKey UNIQUE_DATA_KEY = new NamespacedKey("animal_pen_plugin", "unique_key");
-
     public static boolean isAnimalCage(ItemStack item)
     {
         if (item == null || item.getType() != Material.GLASS_BOTTLE)
@@ -566,8 +559,19 @@ public class AnimalPenManager
         };
     }
 
+    public final static NamespacedKey ANIMAL_DATA_KEY = new NamespacedKey("animal_pen_plugin", "animal_data");
+
     private static final Vector NORTH_CENTER = new Vector(0.5, 0.125, 0);
+
     private static final Vector SOUTH_CENTER = new Vector(0.5, 0.125, 1);
+
     private static final Vector EAST_CENTER = new Vector(1, 0.125, 0.5);
+
     private static final Vector WEST_CENTER = new Vector(0, 0.125, 0.5);
+
+    private final static int ANIMAL_CAGE_MODEL = 1000;
+
+    private final static int ANIMAL_PEN_MODEL = 1001;
+
+    private final static NamespacedKey UNIQUE_DATA_KEY = new NamespacedKey("animal_pen_plugin", "unique_key");
 }
