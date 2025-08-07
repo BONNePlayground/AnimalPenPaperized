@@ -165,6 +165,10 @@ public class AnimalPenListener implements Listener
         {
             AnimalPenManager.handleDyes(entity, player, itemStack);
         }
+        else if (itemStack.getType() == Material.BUCKET)
+        {
+            AnimalPenManager.handleBucket(entity, player, itemStack);
+        }
     }
 
 

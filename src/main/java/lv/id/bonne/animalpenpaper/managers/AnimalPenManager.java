@@ -755,6 +755,97 @@ public class AnimalPenManager
     }
 
 
+    public static void handleBucket(Entity entity, Player player, ItemStack itemStack)
+    {
+        if (entity.getType() != EntityType.CHICKEN &&
+            entity.getType() != EntityType.SNIFFER &&
+            entity.getType() != EntityType.TURTLE)
+        {
+            // Only chicken, snigger and turtle can be interacted with bucket
+            return;
+        }
+
+        AnimalData data = AnimalPenManager.getAnimalData(entity);
+
+        if (data == null)
+        {
+            return;
+        }
+
+        if (data.hasCooldown(AnimalData.Interaction.BUCKET))
+        {
+            // under cooldown for feeding
+            return;
+        }
+
+
+        Material material;
+        Sound sound;
+
+        switch (entity.getType())
+        {
+            case CHICKEN -> {
+                material = Material.EGG;
+                sound = Sound.ENTITY_CHICKEN_EGG;
+            }
+            case SNIFFER -> {
+                material = Material.SNIFFER_EGG;
+                sound = Sound.BLOCK_SNIFFER_EGG_PLOP;
+            }
+            case TURTLE -> {
+                material = Material.TURTLE_EGG;
+                sound = Sound.ENTITY_TURTLE_LAY_EGG;
+            }
+            default -> {
+                return;
+            }
+        }
+
+        int dropLimits = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getDropLimits(material);
+
+        if (dropLimits <= 0)
+        {
+            dropLimits = Integer.MAX_VALUE;
+        }
+
+        int itemCount = (int) Math.min(data.entityCount, dropLimits);
+
+        while (itemCount > 0)
+        {
+            ItemStack dropStack = new ItemStack(material);
+
+            if (itemCount > dropStack.getMaxStackSize())
+            {
+                dropStack.setAmount(dropStack.getMaxStackSize());
+                itemCount -= dropStack.getMaxStackSize();
+            }
+            else
+            {
+                dropStack.setAmount(itemCount);
+                itemCount = 0;
+            }
+
+            entity.getWorld().dropItem(entity.getLocation().add(0, 1, 0), dropStack);
+        }
+
+        player.swingMainHand();
+
+        entity.getWorld().playSound(entity,
+            sound,
+            new Random().nextFloat(0.8f, 1.2f),
+            1);
+
+        data.setCooldown(AnimalData.Interaction.BUCKET,
+            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+                entity.getType(),
+                Material.BUCKET,
+                data.entityCount));
+
+        // Save data
+        AnimalPenManager.setAnimalPenData(entity, data);
+    }
+
+
     public static void handleDyes(Entity entity, Player player, ItemStack itemStack)
     {
         if (entity.getType() != EntityType.SHEEP)
@@ -782,6 +873,11 @@ public class AnimalPenManager
         sheep.setColor(AnimalPenManager.getDyeColor(itemStack.getType()));
 
         player.swingMainHand();
+
+        entity.getWorld().playSound(entity,
+            Sound.ITEM_DYE_USE,
+            new Random().nextFloat(0.8f, 1.2f),
+            1);
 
         data.setCooldown(AnimalData.Interaction.DYES,
             AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
