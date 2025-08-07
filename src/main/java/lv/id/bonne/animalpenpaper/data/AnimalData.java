@@ -21,7 +21,7 @@ public class AnimalData
     /**
      * The map that stores cooldowns.
      */
-    public Map<String, Integer> cooldowns = new HashMap<>();
+    public Map<Interaction, Integer> cooldowns = new HashMap<>();
 
     /**
      * The map that stores extra data.
@@ -46,13 +46,13 @@ public class AnimalData
     }
 
 
-    public void setCooldown(String key, int value)
+    public void setCooldown(Interaction key, int value)
     {
         this.cooldowns.put(key, value);
     }
 
 
-    public int getCooldown(String key)
+    public int getCooldown(Interaction key)
     {
         return this.cooldowns.getOrDefault(key, 0);
     }
@@ -70,8 +70,14 @@ public class AnimalData
     }
 
 
-    public boolean hasCooldown(String key)
+    public boolean hasCooldown(Interaction key)
     {
         return this.cooldowns.containsKey(key) && this.cooldowns.get(key) > 0;
+    }
+
+
+    public enum Interaction
+    {
+        FOOD
     }
 }

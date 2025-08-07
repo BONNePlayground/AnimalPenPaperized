@@ -7,25 +7,32 @@
 package lv.id.bonne.animalpenpaper.listeners;
 
 
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.Slab;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntityInteractEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.Random;
 
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
 import lv.id.bonne.animalpenpaper.data.BlockData;
 import lv.id.bonne.animalpenpaper.data.BlockDataType;
 import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
+import net.kyori.adventure.sound.Sound;
 
 
 /**
@@ -106,6 +113,40 @@ public class AnimalPenListener implements Listener
         event.setDropItems(false);
         block.getWorld().dropItem(block.getLocation(), AnimalPenManager.createAnimalPen());
     }
+
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onEntityInteract(PlayerInteractEntityEvent event)
+    {
+        Entity entity = event.getRightClicked();
+        boolean isAnimalPen = AnimalPenManager.isAnimalPen(entity);
+
+        if (!isAnimalPen)
+        {
+            // Not animal pen
+            return;
+        }
+
+        // I CONTROL IT!!! NO CUSTOM INTERACTIONS HAHAHAHA
+        event.setCancelled(true);
+
+        // Check for food items
+        Player player = event.getPlayer();
+        ItemStack itemStack = player.getInventory().getItem(event.getHand());
+
+        if (itemStack.isEmpty())
+        {
+            // Not an item.
+            return;
+        }
+
+        if (AnimalPenPlugin.CONFIG_MANAGER.getAnimalFoodConfiguration().isFoodItem(entity, itemStack))
+        {
+            AnimalPenManager.handleFood(entity, player, itemStack);
+            return;
+        }
+    }
+
 
 
 // ---------------------------------------------------------------------

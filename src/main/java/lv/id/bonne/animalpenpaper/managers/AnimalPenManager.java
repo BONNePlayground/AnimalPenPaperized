@@ -1,17 +1,12 @@
 package lv.id.bonne.animalpenpaper.managers;
 
 
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.TextDisplay;
+import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -22,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
@@ -255,8 +251,15 @@ public class AnimalPenManager
             return null;
         }
 
-        Entity entity = block.getWorld().getEntity(blockData.entity);
+        return AnimalPenManager.getAnimalData(block.getWorld().getEntity(blockData.entity));
+    }
 
+
+    /**
+     * Returns animal data associated with given entity.
+     */
+    public static AnimalData getAnimalData(Entity entity)
+    {
         if (entity == null)
         {
             AnimalPenPlugin.getInstance().getLogger().severe("Animal Pen entity is removed! Cannot access data!");
@@ -424,6 +427,87 @@ public class AnimalPenManager
 
         return smoothStoneSlab;
     }
+
+
+// ---------------------------------------------------------------------
+// Section: Entity Methods
+// ---------------------------------------------------------------------
+
+
+    public static void handleFood(Entity entity, Player player, ItemStack itemStack)
+    {
+        AnimalData data = AnimalPenManager.getAnimalData(entity);
+
+        if (data == null)
+        {
+            return;
+        }
+
+        if (data.hasCooldown(AnimalData.Interaction.FOOD))
+        {
+            // under cooldown for feeding
+            return;
+        }
+
+        long maxCount = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getMaximalAnimalCount();
+
+        if (maxCount > 0 && data.entityCount >= maxCount)
+        {
+            // Too many entities already in pen
+            return;
+        }
+
+        int stackSize = itemStack.getAmount();
+        stackSize = (int) Math.min(data.entityCount, stackSize);
+
+        if (stackSize < 2)
+        {
+            // Cannot feed 1 animal only for breeding.
+            return;
+        }
+
+        stackSize = (int) Math.min((maxCount - data.entityCount) * 2, stackSize);
+
+        if (player.getGameMode() != GameMode.CREATIVE)
+        {
+            if (stackSize % 2 == 1)
+            {
+                itemStack.subtract(stackSize - 1);
+            }
+            else
+            {
+                itemStack.subtract(stackSize);
+            }
+        }
+
+        data.entityCount += stackSize / 2;
+
+        entity.getWorld().spawnParticle(Particle.HEART,
+            entity.getLocation(),
+            5,
+            0.2, 0.2, 0.2,
+            0.05);
+
+        entity.getWorld().playSound(entity,
+            Sound.ENTITY_GENERIC_EAT,
+            new Random().nextFloat(0.8f, 1.2f),
+            1);
+
+
+        data.setCooldown(AnimalData.Interaction.FOOD,
+            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+                entity.getType(),
+                Material.APPLE,
+                stackSize));
+
+        // Save data
+        entity.getPersistentDataContainer().set(ANIMAL_DATA_KEY, AnimalDataType.INSTANCE, data);
+    }
+
+
+// ---------------------------------------------------------------------
+// Section: Private methods
+// ---------------------------------------------------------------------
 
 
     private static float blockFaceToYaw(BlockFace blockFace) {
