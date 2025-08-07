@@ -145,6 +145,12 @@ public class AnimalPenListener implements Listener
             AnimalPenManager.handleFood(entity, player, itemStack);
             return;
         }
+
+        if (itemStack.getType() == Material.BRUSH)
+        {
+            AnimalPenManager.handleBrush(entity, player, itemStack);
+            return;
+        }
     }
 
 

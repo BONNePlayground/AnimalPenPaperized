@@ -78,6 +78,6 @@ public class AnimalData
 
     public enum Interaction
     {
-        FOOD
+        BRUSH, FOOD
     }
 }

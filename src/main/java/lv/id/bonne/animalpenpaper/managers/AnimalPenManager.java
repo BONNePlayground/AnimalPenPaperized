@@ -530,6 +530,50 @@ public class AnimalPenManager
     }
 
 
+    public static void handleBrush(Entity entity, Player player, ItemStack itemStack)
+    {
+        if (entity.getType() != EntityType.ARMADILLO)
+        {
+            // Only armadillo can be interacted with brush
+            return;
+        }
+
+        AnimalData data = AnimalPenManager.getAnimalData(entity);
+
+        if (data == null)
+        {
+            return;
+        }
+
+        if (data.hasCooldown(AnimalData.Interaction.BRUSH))
+        {
+            // under cooldown for feeding
+            return;
+        }
+
+        itemStack.damage(16, player);
+
+        entity.getWorld().dropItem(entity.getLocation().add(0, 1, 0),
+            new ItemStack(Material.ARMADILLO_SCUTE));
+
+        entity.getWorld().playSound(entity,
+            Sound.ENTITY_ARMADILLO_BRUSH,
+            new Random().nextFloat(0.8f, 1.2f),
+            1);
+
+        player.swingMainHand();
+
+        data.setCooldown(AnimalData.Interaction.BRUSH,
+            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+                entity.getType(),
+                Material.BRUSH,
+                data.entityCount));
+
+        // Save data
+        AnimalPenManager.setAnimalPenData(entity, data);
+    }
+
+
 // ---------------------------------------------------------------------
 // Section: Private methods
 // ---------------------------------------------------------------------
