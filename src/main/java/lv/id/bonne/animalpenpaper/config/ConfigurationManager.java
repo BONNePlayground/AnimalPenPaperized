@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
+import lv.id.bonne.animalpenpaper.config.adapters.FoodItemTypeAdapter;
 import lv.id.bonne.animalpenpaper.config.adapters.NamespacedKeyTypeAdapter;
 import lv.id.bonne.animalpenpaper.config.util.CommentGeneration;
 
@@ -31,6 +32,7 @@ public class ConfigurationManager
         builder.setPrettyPrinting();
         // Register type adapter for ResourceLocation
         builder.registerTypeAdapter(NamespacedKey.class, new NamespacedKeyTypeAdapter());
+        builder.registerTypeAdapter(AnimalFoodConfiguration.FoodItem.class, new FoodItemTypeAdapter());
 
         this.gson = builder.create();
     }
@@ -39,13 +41,13 @@ public class ConfigurationManager
     /**
      * This method generates config if it is missing.
      */
-    public void generateConfig()
+    public void generateConfig(Variants config)
     {
-        this.reset();
+        this.reset(config);
 
         try
         {
-            this.writeConfig(true);
+            this.writeConfig(config, true);
         }
         catch (IOException e)
         {
@@ -59,9 +61,9 @@ public class ConfigurationManager
      *
      * @return The config file location
      */
-    private File getConfigFile()
+    private File getConfigFile(Variants config)
     {
-        return new File(AnimalPenPlugin.getInstance().getDataFolder(),"animal_pen_config.json");
+        return new File(AnimalPenPlugin.getInstance().getDataFolder(), config.getFile());
     }
 
 
@@ -70,23 +72,23 @@ public class ConfigurationManager
      */
     public void readConfig()
     {
-        try (FileReader reader = new FileReader(this.getConfigFile()))
+        try (FileReader reader = new FileReader(this.getConfigFile(Variants.GENERAL)))
         {
             this.configuration = this.gson.fromJson(reader, Configuration.class);
 
-            if (this.isInvalid())
+            if (this.isInvalid(Variants.GENERAL))
             {
                 this.configuration.setDefaults(false);
-                this.writeConfig(false);
+                this.writeConfig(Variants.GENERAL, false);
             }
         }
         catch (JsonSyntaxException var2)
         {
-            this.reset();
+            this.reset(Variants.GENERAL);
 
             try
             {
-                this.writeConfig(false);
+                this.writeConfig(Variants.GENERAL, false);
             }
             catch (IOException ignore)
             {
@@ -96,8 +98,38 @@ public class ConfigurationManager
         }
         catch (IOException var2)
         {
-            this.generateConfig();
+            this.generateConfig(Variants.GENERAL);
             AnimalPenPlugin.getInstance().getLogger().warning("Failed to open config. Generated default one.");
+        }
+
+        try (FileReader reader = new FileReader(this.getConfigFile(Variants.ANIMAL_FOOD)))
+        {
+            this.animalFoodConfiguration = this.gson.fromJson(reader, AnimalFoodConfiguration.class);
+
+            if (this.isInvalid(Variants.ANIMAL_FOOD))
+            {
+                this.animalFoodConfiguration.setDefaults(false);
+                this.writeConfig(Variants.ANIMAL_FOOD, false);
+            }
+        }
+        catch (JsonSyntaxException var2)
+        {
+            this.reset(Variants.ANIMAL_FOOD);
+
+            try
+            {
+                this.writeConfig(Variants.ANIMAL_FOOD, false);
+            }
+            catch (IOException ignore)
+            {
+            }
+
+            AnimalPenPlugin.getInstance().getLogger().warning("Failed to read animal food config. Generated default one.");
+        }
+        catch (IOException var2)
+        {
+            this.generateConfig(Variants.ANIMAL_FOOD);
+            AnimalPenPlugin.getInstance().getLogger().warning("Failed to open animal food config. Generated default one.");
         }
     }
 
@@ -107,11 +139,11 @@ public class ConfigurationManager
      */
     public void reloadConfig()
     {
-        try (FileReader reader = new FileReader(this.getConfigFile()))
+        try (FileReader reader = new FileReader(this.getConfigFile(Variants.GENERAL)))
         {
             this.configuration = this.gson.fromJson(reader, Configuration.class);
 
-            if (this.isInvalid())
+            if (this.isInvalid(Variants.GENERAL))
             {
                 AnimalPenPlugin.getInstance().getLogger().warning("Failed to validate config.");
             }
@@ -120,15 +152,30 @@ public class ConfigurationManager
         {
             AnimalPenPlugin.getInstance().getLogger().warning("Failed to read config. " + var2.getMessage());
         }
+
+        try (FileReader reader = new FileReader(this.getConfigFile(Variants.ANIMAL_FOOD)))
+        {
+            this.animalFoodConfiguration = this.gson.fromJson(reader, AnimalFoodConfiguration.class);
+
+            if (this.isInvalid(Variants.ANIMAL_FOOD))
+            {
+                AnimalPenPlugin.getInstance().getLogger().warning("Failed to validate animal food config.");
+            }
+        }
+        catch (IOException var2)
+        {
+            AnimalPenPlugin.getInstance().getLogger().warning("Failed to read animal food config. " + var2.getMessage());
+        }
     }
 
 
     /**
      * This method resets configs to default values.
      */
-    protected void reset()
+    protected void reset(Variants config)
     {
-        this.configuration = Configuration.getDefaultConfig();
+        if (config == Variants.GENERAL) this.configuration = Configuration.getDefaultConfig();
+        if (config == Variants.ANIMAL_FOOD) this.animalFoodConfiguration = AnimalFoodConfiguration.getDefaultConfig();
     }
 
 
@@ -137,9 +184,18 @@ public class ConfigurationManager
      *
      * @return {@code true} if configs were invalid.
      */
-    private boolean isInvalid()
+    private boolean isInvalid(Variants config)
     {
-        return this.configuration == null || this.configuration.isInvalid();
+        if (config == Variants.GENERAL)
+        {
+            return this.configuration == null || this.configuration.isInvalid();
+        }
+        else if (config == Variants.ANIMAL_FOOD)
+        {
+            return this.animalFoodConfiguration == null || this.animalFoodConfiguration.isInvalid();
+        }
+
+        return true;
     }
 
 
@@ -148,13 +204,13 @@ public class ConfigurationManager
      *
      * @throws IOException Exception if writing failed.
      */
-    public void writeConfig(boolean overwrite) throws IOException
+    public void writeConfig(Variants config, boolean overwrite) throws IOException
     {
         File dir = AnimalPenPlugin.getInstance().getDataFolder();
 
         if (dir.exists() || dir.mkdirs())
         {
-            if (this.getConfigFile().exists() && !overwrite)
+            if (this.getConfigFile(config).exists() && !overwrite)
             {
                 // Create backup file.
                 int backupNumber = 1;
@@ -162,20 +218,24 @@ public class ConfigurationManager
 
                 do
                 {
-                    backupFile = new File(dir, this.getConfigFile().getName() + ".bak" + backupNumber);
+                    backupFile = new File(dir, this.getConfigFile(config).getName() + ".bak" + backupNumber);
                     backupNumber++;
                 }
                 while (backupFile.exists());
 
-                Files.copy(this.getConfigFile().toPath(), backupFile.toPath());
+                Files.copy(this.getConfigFile(config).toPath(), backupFile.toPath());
             }
 
-            if (this.getConfigFile().exists() || this.getConfigFile().createNewFile())
+            if (this.getConfigFile(config).exists() || this.getConfigFile(config).createNewFile())
             {
                 try
                 {
-                    Path path = Paths.get(this.getConfigFile().toURI());
-                    Files.write(path, CommentGeneration.writeWithComments(this.gson, this.configuration).getBytes());
+                    Path path = Paths.get(this.getConfigFile(config).toURI());
+
+                    if (config == Variants.GENERAL)
+                        Files.write(path, CommentGeneration.writeWithComments(this.gson, this.configuration).getBytes());
+                    if (config == Variants.ANIMAL_FOOD)
+                        Files.write(path, CommentGeneration.writeWithComments(this.gson, this.animalFoodConfiguration).getBytes());
                 }
                 catch (IllegalAccessException e)
                 {
@@ -192,7 +252,36 @@ public class ConfigurationManager
     }
 
 
+    public AnimalFoodConfiguration getAnimalFoodConfiguration()
+    {
+        return this.animalFoodConfiguration;
+    }
+
+
+    public enum Variants
+    {
+        GENERAL("config.json"),
+        ANIMAL_FOOD("animal_foods.json");
+
+        Variants(String file)
+        {
+            this.file = file;
+        }
+
+
+        public String getFile()
+        {
+            return this.file;
+        }
+
+
+        private final String file;
+    }
+
+
     private final Gson gson;
 
     private Configuration configuration;
+
+    private AnimalFoodConfiguration animalFoodConfiguration;
 }

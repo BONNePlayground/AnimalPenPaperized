@@ -164,6 +164,21 @@ public class CommentGeneration
     }
 
 
+    private static boolean hasTypeAdapter(Gson gson, Object field)
+    {
+        try
+        {
+            // Try to get the adapter factory for this type
+            // If no adapter exists, this will throw IllegalArgumentException
+            gson.getAdapter(TypeToken.get(field.getClass()));
+            return true;
+        }
+        catch (IllegalArgumentException e)
+        {
+            return false;
+        }
+    }
+
 
     /**
      * This method serializes collections into json text with comments.
@@ -193,6 +208,10 @@ public class CommentGeneration
                 jsonWithComments.append("{\n");
                 serializeMap(map, jsonWithComments, gson, indentLevel + 1);
                 jsonWithComments.append(indent).append("}");
+            }
+            else if (hasTypeAdapter(gson, item))
+            {
+                jsonWithComments.append(gson.toJson(item));
             }
             else if (isNotPrimitive(item))
             {
@@ -248,6 +267,10 @@ public class CommentGeneration
                 jsonWithComments.append("{\n");
                 serializeMap(map2, jsonWithComments, gson, indentLevel + 1);
                 jsonWithComments.append(indent).append("}");
+            }
+            else if (hasTypeAdapter(gson, value))
+            {
+                jsonWithComments.append(gson.toJson(value));
             }
             else if (isNotPrimitive(value))
             {
