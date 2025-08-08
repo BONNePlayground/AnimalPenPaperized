@@ -127,12 +127,18 @@ public class AnimalPenListener implements Listener
             return;
         }
 
-        // I CONTROL IT!!! NO CUSTOM INTERACTIONS HAHAHAHA
-        event.setCancelled(true);
-
         // Check for food items
         Player player = event.getPlayer();
         ItemStack itemStack = player.getInventory().getItem(event.getHand());
+
+        if (AnimalPenManager.isAnimalCage(itemStack))
+        {
+            // This does not interact with cages.
+            return;
+        }
+
+        // I CONTROL IT!!! NO CUSTOM INTERACTIONS HAHAHAHA
+        event.setCancelled(true);
 
         if (itemStack.isEmpty())
         {
@@ -143,12 +149,10 @@ public class AnimalPenListener implements Listener
         if (AnimalPenPlugin.CONFIG_MANAGER.getAnimalFoodConfiguration().isFoodItem(entity, itemStack))
         {
             AnimalPenManager.handleFood(entity, player, itemStack);
-            return;
         }
         else if (itemStack.getType() == Material.BRUSH)
         {
             AnimalPenManager.handleBrush(entity, player, itemStack);
-            return;
         }
         else if (itemStack.getType() == Material.WATER_BUCKET)
         {
@@ -168,6 +172,10 @@ public class AnimalPenListener implements Listener
         else if (itemStack.getType() == Material.BUCKET)
         {
             AnimalPenManager.handleBucket(entity, player, itemStack);
+        }
+        else if (itemStack.getType() == Material.GLASS_BOTTLE)
+        {
+            AnimalPenManager.handleGlassBottle(entity, player, itemStack);
         }
     }
 

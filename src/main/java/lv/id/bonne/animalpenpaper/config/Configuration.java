@@ -143,7 +143,13 @@ public class Configuration
                 60 * 20));
 
         // Bee and pollen
-        this.cooldownList.computeIfAbsent(Material.HONEY_BLOCK.getKey(), i -> new ArrayList<>()).
+        this.cooldownList.computeIfAbsent(Material.SHEARS.getKey(), i -> new ArrayList<>()).
+            add(new CooldownEntry(EntityType.BEE.getKey(),
+                60 * 20 + 20,
+                -1 * 20,
+                20));
+
+        this.cooldownList.computeIfAbsent(Material.GLASS_BOTTLE.getKey(), i -> new ArrayList<>()).
             add(new CooldownEntry(EntityType.BEE.getKey(),
                 60 * 20 + 20,
                 -1 * 20,

@@ -682,6 +682,87 @@ public class AnimalPenManager
 
     public static void handleShears(Entity entity, Player player, ItemStack itemStack)
     {
+        if (entity.getType() == EntityType.SHEEP)
+        {
+            AnimalPenManager.handleShearsWool(entity, player, itemStack);
+        }
+        else if (entity.getType() == EntityType.BEE)
+        {
+            AnimalPenManager.handleShearsHoney(entity, player, itemStack);
+        }
+    }
+
+
+    public static void handleShearsHoney(Entity entity, Player player, ItemStack itemStack)
+    {
+        if (entity.getType() != EntityType.BEE)
+        {
+            // Only sheep can be interacted with shears
+            return;
+        }
+
+        AnimalData data = AnimalPenManager.getAnimalData(entity);
+
+        if (data == null)
+        {
+            return;
+        }
+
+        if (data.hasCooldown(AnimalData.Interaction.SHEARS))
+        {
+            // under cooldown for feeding
+            return;
+        }
+
+        itemStack.damage(1, player);
+
+        int dropLimits = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getDropLimits(Material.HONEYCOMB);
+
+        if (dropLimits <= 0)
+        {
+            dropLimits = Integer.MAX_VALUE;
+        }
+
+        int itemCount = (int) Math.min(data.entityCount, dropLimits);
+
+        while (itemCount > 0)
+        {
+            ItemStack dropStack = new ItemStack(Material.HONEYCOMB);
+
+            if (itemCount > dropStack.getMaxStackSize())
+            {
+                dropStack.setAmount(dropStack.getMaxStackSize());
+                itemCount -= dropStack.getMaxStackSize();
+            }
+            else
+            {
+                dropStack.setAmount(itemCount);
+                itemCount = 0;
+            }
+
+            entity.getWorld().dropItem(entity.getLocation().add(0, 1, 0), dropStack);
+        }
+
+        player.swingMainHand();
+
+        entity.getWorld().playSound(entity,
+            Sound.BLOCK_BEEHIVE_SHEAR,
+            new Random().nextFloat(0.8f, 1.2f),
+            1);
+
+        data.setCooldown(AnimalData.Interaction.SHEARS,
+            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+                entity.getType(),
+                Material.SHEARS,
+                data.entityCount));
+
+        // Save data
+        AnimalPenManager.setAnimalPenData(entity, data);
+    }
+
+
+    public static void handleShearsWool(Entity entity, Player player, ItemStack itemStack)
+    {
         if (entity.getType() != EntityType.SHEEP)
         {
             // Only sheep can be interacted with shears
@@ -757,11 +838,28 @@ public class AnimalPenManager
 
     public static void handleBucket(Entity entity, Player player, ItemStack itemStack)
     {
-        if (entity.getType() != EntityType.CHICKEN &&
-            entity.getType() != EntityType.SNIFFER &&
-            entity.getType() != EntityType.TURTLE)
+        if (entity.getType() == EntityType.CHICKEN ||
+            entity.getType() == EntityType.SNIFFER ||
+            entity.getType() == EntityType.TURTLE)
         {
-            // Only chicken, snigger and turtle can be interacted with bucket
+            AnimalPenManager.handleBucketEggs(entity, player, itemStack);
+        }
+        else if (entity.getType() == EntityType.COW ||
+            entity.getType() == EntityType.MOOSHROOM ||
+            entity.getType() == EntityType.GOAT)
+        {
+            AnimalPenManager.handleBucketMilk(entity, player, itemStack);
+        }
+    }
+
+
+    public static void handleBucketMilk(Entity entity, Player player, ItemStack itemStack)
+    {
+        if (entity.getType() != EntityType.COW &&
+            entity.getType() != EntityType.MOOSHROOM &&
+            entity.getType() != EntityType.GOAT)
+        {
+            // Only COW, MOOSHROOM and GOAT can be interacted with bucket to get milk
             return;
         }
 
@@ -778,6 +876,91 @@ public class AnimalPenManager
             return;
         }
 
+        itemStack.subtract();
+        player.getInventory().addItem(new ItemStack(Material.MILK_BUCKET));
+
+        player.swingMainHand();
+
+        entity.getWorld().playSound(entity,
+            entity.getType() == EntityType.GOAT ? Sound.ENTITY_GOAT_MILK : Sound.ENTITY_COW_MILK,
+            new Random().nextFloat(0.8f, 1.2f),
+            1);
+
+        data.setCooldown(AnimalData.Interaction.BUCKET,
+            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+                entity.getType(),
+                Material.BUCKET,
+                data.entityCount));
+
+        // Save data
+        AnimalPenManager.setAnimalPenData(entity, data);
+    }
+
+
+    public static void handleGlassBottle(Entity entity, Player player, ItemStack itemStack)
+    {
+        if (entity.getType() != EntityType.BEE)
+        {
+            // Only bee has glass bottle interaction
+            return;
+        }
+
+        AnimalData data = AnimalPenManager.getAnimalData(entity);
+
+        if (data == null)
+        {
+            return;
+        }
+
+        if (data.hasCooldown(AnimalData.Interaction.GLASS_BOTTLE))
+        {
+            // under cooldown for feeding
+            return;
+        }
+
+        itemStack.subtract();
+        player.getInventory().addItem(new ItemStack(Material.HONEY_BOTTLE));
+
+        player.swingMainHand();
+
+        entity.getWorld().playSound(entity,
+            Sound.BLOCK_BEEHIVE_DRIP,
+            new Random().nextFloat(0.8f, 1.2f),
+            1);
+
+        data.setCooldown(AnimalData.Interaction.GLASS_BOTTLE,
+            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+                entity.getType(),
+                Material.GLASS_BOTTLE,
+                data.entityCount));
+
+        // Save data
+        AnimalPenManager.setAnimalPenData(entity, data);
+    }
+
+
+    public static void handleBucketEggs(Entity entity, Player player, ItemStack itemStack)
+    {
+        if (entity.getType() != EntityType.CHICKEN &&
+            entity.getType() != EntityType.SNIFFER &&
+            entity.getType() != EntityType.TURTLE)
+        {
+            // Only chicken, snigger and turtle can be interacted with bucket to get eggs
+            return;
+        }
+
+        AnimalData data = AnimalPenManager.getAnimalData(entity);
+
+        if (data == null)
+        {
+            return;
+        }
+
+        if (data.hasCooldown(AnimalData.Interaction.BUCKET))
+        {
+            // under cooldown for feeding
+            return;
+        }
 
         Material material;
         Sound sound;
