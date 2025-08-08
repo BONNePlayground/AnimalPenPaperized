@@ -1,6 +1,7 @@
 package lv.id.bonne.animalpenpaper.managers;
 
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -22,6 +23,9 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.*;
 
 import io.papermc.paper.potion.SuspiciousEffectEntry;
@@ -32,6 +36,11 @@ import lv.id.bonne.animalpenpaper.data.BlockData;
 import lv.id.bonne.animalpenpaper.data.BlockDataType;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextColor;
+
+import static java.time.temporal.ChronoField.MINUTE_OF_HOUR;
+import static java.time.temporal.ChronoField.SECOND_OF_MINUTE;
 
 
 /**
@@ -297,7 +306,7 @@ public class AnimalPenManager
                         livingEntity.setRemoveWhenFarAway(false);
                         livingEntity.setRotation(AnimalPenManager.blockFaceToYaw(blockData.blockFace), 0);
 
-                        AttributeInstance attribute = livingEntity.getAttribute(Attribute.GENERIC_SCALE);
+                        AttributeInstance attribute = livingEntity.getAttribute(Attribute.SCALE);
 
                         if (attribute != null) attribute.setBaseValue(0.5d);
                     }
@@ -320,6 +329,8 @@ public class AnimalPenManager
             AnimalPenPlugin.getInstance().getLogger().severe("Animal Pen entity is removed! Cannot access data!");
             return;
         }
+
+        AnimalPenPlugin.getInstance().task.startTrackingEntity(entity);
 
         entity.getPersistentDataContainer().set(ANIMAL_DATA_KEY,
             AnimalDataType.INSTANCE,
@@ -360,13 +371,10 @@ public class AnimalPenManager
             return;
         }
 
+        AnimalPenPlugin.getInstance().task.stopTrackingEntity(blockData.entity, block.getWorld());
+
         AnimalPenManager.removeEntity(block.getWorld(), blockData.entity);
         AnimalPenManager.removeEntity(block.getWorld(), blockData.countEntity);
-
-        blockData.cooldowns.forEach(text -> {
-            AnimalPenManager.removeEntity(block.getWorld(), text.text);
-            AnimalPenManager.removeEntity(block.getWorld(), text.icon);
-        });
 
         blockData.entity = null;
         blockData.countEntity = null;
@@ -456,6 +464,332 @@ public class AnimalPenManager
         {
             display.text(Component.text(entityCount));
         }
+    }
+
+
+    public static List<Pair<Material, Component>> generateTextMessages(Entity entity, AnimalData animalData, int tick)
+    {
+        EntityType entityType = entity.getType();
+
+        List<Pair<Material, Component>> lines = new ArrayList<>(4);
+
+        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+            entityType,
+            Material.APPLE,
+            animalData.entityCount) != 0)
+        {
+            // Food Items.
+
+            List<Material> foodItems =
+                AnimalPenPlugin.CONFIG_MANAGER.getAnimalFoodConfiguration().getFoodItems(entityType);
+
+            Material foodItem;
+
+            if (foodItems != null && !foodItems.isEmpty())
+            {
+                Component component;
+
+                if (!animalData.hasCooldown(AnimalData.Interaction.FOOD))
+                {
+                    component = Component.text("Ready!           ").
+                        style(Style.style().color(TextColor.color(5635925)).build());
+                }
+                else
+                {
+                    component = Component.text("Cooldown: ").append(
+                        Component.text(LocalTime.of(0, 0, 0).
+                            plusSeconds(animalData.getCooldown(AnimalData.Interaction.FOOD) / 20).
+                            format(AnimalPenManager.DATE_FORMATTER)));
+                }
+
+                if (foodItems.size() == 1)
+                {
+                    foodItem = foodItems.getFirst();
+                }
+                else
+                {
+                    int size = foodItems.size();
+                    int index = (tick / 100) % size;
+
+                    foodItem = foodItems.get(index);
+                }
+
+                lines.add(Pair.of(foodItem, component));
+            }
+        }
+
+        switch (entityType)
+        {
+            case ARMADILLO ->
+            {
+                Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
+                    animalData,
+                    Material.BRUSH,
+                    AnimalData.Interaction.BRUSH,
+                    Material.ARMADILLO_SCUTE);
+
+                if (textPairMessage != null)
+                {
+                    lines.add(textPairMessage);
+                }
+            }
+            case AXOLOTL ->
+            {
+                Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
+                    animalData,
+                    Material.WATER_BUCKET,
+                    AnimalData.Interaction.WATER_BUCKET,
+                    Material.AXOLOTL_BUCKET);
+
+                if (textPairMessage != null)
+                {
+                    lines.add(textPairMessage);
+                }
+            }
+            case COD ->
+            {
+                Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
+                    animalData,
+                    Material.WATER_BUCKET,
+                    AnimalData.Interaction.WATER_BUCKET,
+                    Material.COD_BUCKET);
+
+                if (textPairMessage != null)
+                {
+                    lines.add(textPairMessage);
+                }
+            }
+            case SALMON ->
+            {
+                Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
+                    animalData,
+                    Material.WATER_BUCKET,
+                    AnimalData.Interaction.WATER_BUCKET,
+                    Material.SALMON_BUCKET);
+
+                if (textPairMessage != null)
+                {
+                    lines.add(textPairMessage);
+                }
+            }
+            case PUFFERFISH ->
+            {
+                Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
+                    animalData,
+                    Material.WATER_BUCKET,
+                    AnimalData.Interaction.WATER_BUCKET,
+                    Material.PUFFERFISH_BUCKET);
+
+                if (textPairMessage != null)
+                {
+                    lines.add(textPairMessage);
+                }
+            }
+            case TROPICAL_FISH ->
+            {
+                Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
+                    animalData,
+                    Material.WATER_BUCKET,
+                    AnimalData.Interaction.WATER_BUCKET,
+                    Material.TROPICAL_FISH_BUCKET);
+
+                if (textPairMessage != null)
+                {
+                    lines.add(textPairMessage);
+                }
+            }
+            case TADPOLE ->
+            {
+                Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
+                    animalData,
+                    Material.WATER_BUCKET,
+                    AnimalData.Interaction.WATER_BUCKET,
+                    Material.TADPOLE_BUCKET);
+
+                if (textPairMessage != null)
+                {
+                    lines.add(textPairMessage);
+                }
+            }
+            case BEE ->
+            {
+                Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
+                    animalData,
+                    Material.SHEARS,
+                    AnimalData.Interaction.SHEARS,
+                    Material.HONEYCOMB);
+
+                if (textPairMessage != null)
+                {
+                    lines.add(textPairMessage);
+                }
+
+                textPairMessage = createTextPairMessage(entityType,
+                    animalData,
+                    Material.GLASS_BOTTLE,
+                    AnimalData.Interaction.SHEARS,
+                    Material.HONEY_BOTTLE);
+
+                if (textPairMessage != null)
+                {
+                    lines.add(textPairMessage);
+                }
+            }
+            case CHICKEN ->
+            {
+                Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
+                    animalData,
+                    Material.BUCKET,
+                    AnimalData.Interaction.BUCKET,
+                    Material.EGG);
+
+                if (textPairMessage != null)
+                {
+                    lines.add(textPairMessage);
+                }
+            }
+            case TURTLE ->
+            {
+                Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
+                    animalData,
+                    Material.BUCKET,
+                    AnimalData.Interaction.BUCKET,
+                    Material.TURTLE_EGG);
+
+                if (textPairMessage != null)
+                {
+                    lines.add(textPairMessage);
+                }
+            }
+            case COW, GOAT ->
+            {
+                Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
+                    animalData,
+                    Material.BUCKET,
+                    AnimalData.Interaction.BUCKET,
+                    Material.MILK_BUCKET);
+
+                if (textPairMessage != null)
+                {
+                    lines.add(textPairMessage);
+                }
+            }
+            case FROG ->
+            {
+                Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
+                    animalData,
+                    Material.MAGMA_BLOCK,
+                    AnimalData.Interaction.MAGMA_BLOCK,
+                    AnimalPenManager.getFrogLight((Frog) entity));
+
+                if (textPairMessage != null)
+                {
+                    lines.add(textPairMessage);
+                }
+            }
+            case MOOSHROOM ->
+            {
+                Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
+                    animalData,
+                    Material.BUCKET,
+                    AnimalData.Interaction.BUCKET,
+                    Material.MILK_BUCKET);
+
+                if (textPairMessage != null)
+                {
+                    lines.add(textPairMessage);
+                }
+
+                textPairMessage = createTextPairMessage(entityType,
+                    animalData,
+                    Material.BOWL,
+                    AnimalData.Interaction.BOWL,
+                    Material.MUSHROOM_STEW);
+
+                if (textPairMessage != null)
+                {
+                    lines.add(textPairMessage);
+                }
+            }
+            case SHEEP ->
+            {
+                Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
+                    animalData,
+                    Material.SHEARS,
+                    AnimalData.Interaction.SHEARS,
+                    AnimalPenManager.getWoolMaterial(((Sheep) entity).getColor()));
+
+                if (textPairMessage != null)
+                {
+                    lines.add(textPairMessage);
+                }
+            }
+            case SNIFFER ->
+            {
+                Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
+                    animalData,
+                    Material.BUCKET,
+                    AnimalData.Interaction.BUCKET,
+                    Material.SNIFFER_EGG);
+
+                if (textPairMessage != null)
+                {
+                    lines.add(textPairMessage);
+                }
+
+                textPairMessage = createTextPairMessage(entityType,
+                    animalData,
+                    Material.BOWL,
+                    AnimalData.Interaction.BOWL,
+                    (tick / 100) % 2 == 0 ? Material.TORCHFLOWER_SEEDS : Material.PITCHER_POD);
+
+                if (textPairMessage != null)
+                {
+                    lines.add(textPairMessage);
+                }
+            }
+        }
+
+        return lines;
+    }
+
+
+    private static Pair<Material, Component> createTextPairMessage(
+        EntityType entityType,
+        AnimalData animalData,
+        Material material,
+        AnimalData.Interaction interaction,
+        Material result)
+    {
+        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+            entityType,
+            material,
+            animalData.entityCount) == 0 ||
+            result.isEmpty())
+        {
+            return null;
+        }
+
+        Component component;
+
+        Material icon;
+
+        if (!animalData.hasCooldown(interaction))
+        {
+            component = Component.text("Ready!           ").
+                style(Style.style().color(TextColor.color(5635925)).build());
+            icon = material;
+        }
+        else
+        {
+            component = Component.text("Cooldown: ").append(
+                Component.text(LocalTime.of(0, 0, 0).
+                    plusSeconds(animalData.getCooldown(interaction) / 20).
+                    format(AnimalPenManager.DATE_FORMATTER)));
+            icon = result;
+        }
+
+        return Pair.of(icon, component);
     }
 
 
@@ -1106,24 +1440,7 @@ public class AnimalPenManager
         }
 
         Frog frog = (Frog) entity;
-        Material material;
-
-        if (frog.getVariant() == Frog.Variant.WARM)
-        {
-            material = Material.PEARLESCENT_FROGLIGHT;
-        }
-        else if (frog.getVariant() == Frog.Variant.COLD)
-        {
-            material = Material.VERDANT_FROGLIGHT;
-        }
-        else if (frog.getVariant() == Frog.Variant.TEMPERATE)
-        {
-            material = Material.OCHRE_FROGLIGHT;
-        }
-        else
-        {
-            return;
-        }
+        Material material = AnimalPenManager.getFrogLight(frog);
 
         itemStack.subtract(froglightCount);
 
@@ -1399,7 +1716,27 @@ public class AnimalPenManager
     }
 
 
-    private static float blockFaceToYaw(BlockFace blockFace) {
+    private static Material getFrogLight(Frog frog)
+    {
+        if (frog.getVariant() == Frog.Variant.WARM)
+        {
+            return Material.PEARLESCENT_FROGLIGHT;
+        }
+        else if (frog.getVariant() == Frog.Variant.COLD)
+        {
+            return Material.VERDANT_FROGLIGHT;
+        }
+        else if (frog.getVariant() == Frog.Variant.TEMPERATE)
+        {
+            return Material.OCHRE_FROGLIGHT;
+        }
+        else
+        {
+            return Material.PEARLESCENT_FROGLIGHT;
+        }
+    }
+
+    public static float blockFaceToYaw(BlockFace blockFace) {
         return switch (blockFace)
         {
             case NORTH -> 180f;
@@ -1455,4 +1792,12 @@ public class AnimalPenManager
         Map.entry(Material.WHITE_TULIP, SuspiciousEffectEntry.create(PotionEffectType.WEAKNESS, 180)),
         Map.entry(Material.WITHER_ROSE, SuspiciousEffectEntry.create(PotionEffectType.WITHER, 160))
     );
+
+
+    public static DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().
+        appendValue(MINUTE_OF_HOUR, 2).
+        optionalStart().
+        appendLiteral(':').
+        appendValue(SECOND_OF_MINUTE, 2).
+        toFormatter();
 }

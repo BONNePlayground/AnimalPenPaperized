@@ -11,6 +11,7 @@ import lv.id.bonne.animalpenpaper.config.ConfigurationManager;
 import lv.id.bonne.animalpenpaper.listeners.AnimalCageListener;
 import lv.id.bonne.animalpenpaper.listeners.AnimalPenListener;
 import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
+import lv.id.bonne.animalpenpaper.managers.AnimalPenTasks;
 
 
 public class AnimalPenPlugin extends JavaPlugin implements Listener
@@ -30,6 +31,10 @@ public class AnimalPenPlugin extends JavaPlugin implements Listener
 
         this.getServer().getPluginManager().registerEvents(new AnimalCageListener(), this);
         this.getServer().getPluginManager().registerEvents(new AnimalPenListener(), this);
+        this.getServer().getPluginManager().registerEvents(new AnimalPenTasks(), this);
+
+        this.task = new AnimalPenTasks();
+        this.task.runTask();
 
         this.registerAnimalPenRecipes();
 
@@ -40,6 +45,7 @@ public class AnimalPenPlugin extends JavaPlugin implements Listener
     @Override
     public void onDisable()
     {
+        this.task.bukkitTask.cancel();
         this.getServer().removeRecipe(new NamespacedKey(this, "animal_cage"));
         this.getLogger().info("AnimalPen disabled.");
     }
@@ -91,6 +97,8 @@ public class AnimalPenPlugin extends JavaPlugin implements Listener
 
 
     private static AnimalPenPlugin instance;
+
+    public AnimalPenTasks task;
 
     public static final ConfigurationManager CONFIG_MANAGER = new ConfigurationManager();
 }

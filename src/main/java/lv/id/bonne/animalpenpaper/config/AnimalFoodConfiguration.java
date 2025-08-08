@@ -15,9 +15,11 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Tag;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import lv.id.bonne.animalpenpaper.config.adapters.FoodItemTypeAdapter;
 import lv.id.bonne.animalpenpaper.config.annotations.JsonComment;
@@ -254,6 +256,17 @@ public class AnimalFoodConfiguration
     }
 
 
+    /**
+     * This method returns List of Materials that entity can eat.
+     */
+    public List<Material> getFoodItems(EntityType entityType)
+    {
+        return this.foodItems.getOrDefault(entityType.getKey(), Collections.emptyList()).stream().
+            flatMap(foodItem -> foodItem.allFoodItems.stream()).
+            collect(Collectors.toList());
+    }
+
+
 // ---------------------------------------------------------------------
 // Section: variables
 // ---------------------------------------------------------------------
@@ -269,16 +282,32 @@ public class AnimalFoodConfiguration
         {
             this.identifier = identifier;
             this.isTag = identifier.startsWith("#");
+            this.allFoodItems = new ArrayList<>(1);
 
             if (this.isTag)
             {
                 String tagName = identifier.substring(1);
                 this.tagKey = NamespacedKey.fromString(tagName);
                 this.material = null;
+
+                if (this.tagKey != null)
+                {
+                    Tag<Material> tag = Bukkit.getTag(Tag.REGISTRY_ITEMS, this.tagKey, Material.class);
+
+                    if (tag != null)
+                    {
+                        Arrays.stream(Material.values()).
+                            filter(tag::isTagged).
+                            forEach(this.allFoodItems::add);
+                    }
+                }
             }
             else
             {
                 this.material = Material.matchMaterial(identifier);
+
+                this.allFoodItems.add(this.material);
+
                 this.tagKey = null;
             }
         }
@@ -337,6 +366,11 @@ public class AnimalFoodConfiguration
          * TagKey for object if it is tah.
          */
         private final NamespacedKey tagKey;
+
+        /**
+         * The list of materials under given item tag.
+         */
+        private final List<Material> allFoodItems;
     }
 
 
