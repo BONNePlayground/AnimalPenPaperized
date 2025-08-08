@@ -1073,6 +1073,93 @@ public class AnimalPenManager
     }
 
 
+    public static void handleMagmaBlock(Entity entity, Player player, ItemStack itemStack)
+    {
+        if (entity.getType() != EntityType.FROG)
+        {
+            return;
+        }
+
+        AnimalData data = AnimalPenManager.getAnimalData(entity);
+
+        if (data == null)
+        {
+            return;
+        }
+
+        if (data.hasCooldown(AnimalData.Interaction.MAGMA_BLOCK))
+        {
+            // under cooldown for feeding
+            return;
+        }
+
+        int froglightCount = (int) Math.min(data.entityCount, itemStack.getAmount());
+
+        int dropLimits = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getDropLimits(Material.PEARLESCENT_FROGLIGHT);
+
+        if (dropLimits > 0)
+        {
+            froglightCount = Math.min(froglightCount, dropLimits);
+        }
+
+        Frog frog = (Frog) entity;
+        Material material;
+
+        if (frog.getVariant() == Frog.Variant.WARM)
+        {
+            material = Material.PEARLESCENT_FROGLIGHT;
+        }
+        else if (frog.getVariant() == Frog.Variant.COLD)
+        {
+            material = Material.VERDANT_FROGLIGHT;
+        }
+        else if (frog.getVariant() == Frog.Variant.TEMPERATE)
+        {
+            material = Material.OCHRE_FROGLIGHT;
+        }
+        else
+        {
+            return;
+        }
+
+        itemStack.subtract(froglightCount);
+
+        while (froglightCount > 0)
+        {
+            ItemStack frogLight = new ItemStack(material);
+
+            if (froglightCount > frogLight.getMaxStackSize())
+            {
+                frogLight.setAmount(frogLight.getMaxStackSize());
+                froglightCount -= frogLight.getMaxStackSize();
+            }
+            else
+            {
+                frogLight.setAmount(froglightCount);
+                froglightCount = 0;
+            }
+
+            entity.getWorld().dropItem(entity.getLocation().add(0, 1, 0), frogLight);
+        }
+
+        player.swingMainHand();
+
+        entity.getWorld().playSound(entity,
+            Sound.ENTITY_FROG_TONGUE,
+            new Random().nextFloat(0.8f, 1.2f),
+            1);
+
+        data.setCooldown(AnimalData.Interaction.MAGMA_BLOCK,
+            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+                entity.getType(),
+                Material.MAGMA_BLOCK,
+                data.entityCount));
+
+        // Save data
+        AnimalPenManager.setAnimalPenData(entity, data);
+    }
+
+
 // ---------------------------------------------------------------------
 // Section: Private methods
 // ---------------------------------------------------------------------
