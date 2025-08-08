@@ -8,7 +8,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.AxolotlBucketMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -19,11 +18,10 @@ import org.bukkit.loot.LootTable;
 import org.bukkit.loot.LootTables;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Unmodifiable;
 import java.util.*;
 
 import io.papermc.paper.potion.SuspiciousEffectEntry;
@@ -1322,6 +1320,52 @@ public class AnimalPenManager
     }
 
 
+    public static void handleSmallFlowers(Entity entity, Player player, ItemStack itemStack)
+    {
+        if (entity.getType() != EntityType.MOOSHROOM)
+        {
+            // Only bee has glass bottle interaction
+            return;
+        }
+
+        AnimalData data = AnimalPenManager.getAnimalData(entity);
+
+        if (data == null)
+        {
+            return;
+        }
+
+        MushroomCow mushroomCow = (MushroomCow) entity;
+
+        if (mushroomCow.getVariant() != MushroomCow.Variant.BROWN)
+        {
+            return;
+        }
+
+        if (mushroomCow.hasEffectsForNextStew())
+        {
+            return;
+        }
+
+        SuspiciousEffectEntry suspiciousEffectEntry = FLOWER_EFFECTS.get(itemStack.getType());
+
+        if (suspiciousEffectEntry == null)
+        {
+            return;
+        }
+
+        mushroomCow.addEffectToNextStew(suspiciousEffectEntry, false);
+
+        itemStack.subtract();
+        player.swingMainHand();
+
+        entity.getWorld().playSound(entity,
+            Sound.ENTITY_MOOSHROOM_EAT,
+            new Random().nextFloat(0.8f, 1.2f),
+            1);
+    }
+
+
 // ---------------------------------------------------------------------
 // Section: Private methods
 // ---------------------------------------------------------------------
@@ -1394,4 +1438,21 @@ public class AnimalPenManager
     private final static int ANIMAL_PEN_MODEL = 1001;
 
     private final static NamespacedKey UNIQUE_DATA_KEY = new NamespacedKey("animal_pen_plugin", "unique_key");
+
+    private static final Map<Material, SuspiciousEffectEntry> FLOWER_EFFECTS = Map.ofEntries(
+        Map.entry(Material.ALLIUM, SuspiciousEffectEntry.create(PotionEffectType.FIRE_RESISTANCE, 80)),
+        Map.entry(Material.AZURE_BLUET, SuspiciousEffectEntry.create(PotionEffectType.BLINDNESS, 160)),
+        Map.entry(Material.BLUE_ORCHID, SuspiciousEffectEntry.create(PotionEffectType.SATURATION, 7)),
+        Map.entry(Material.DANDELION, SuspiciousEffectEntry.create(PotionEffectType.SATURATION, 7)),
+        Map.entry(Material.CORNFLOWER, SuspiciousEffectEntry.create(PotionEffectType.JUMP_BOOST, 120)),
+        Map.entry(Material.LILY_OF_THE_VALLEY, SuspiciousEffectEntry.create(PotionEffectType.POISON, 240)),
+        Map.entry(Material.OXEYE_DAISY, SuspiciousEffectEntry.create(PotionEffectType.REGENERATION, 160)),
+        Map.entry(Material.POPPY, SuspiciousEffectEntry.create(PotionEffectType.NIGHT_VISION, 100)),
+        Map.entry(Material.TORCHFLOWER, SuspiciousEffectEntry.create(PotionEffectType.NIGHT_VISION, 100)),
+        Map.entry(Material.RED_TULIP, SuspiciousEffectEntry.create(PotionEffectType.WEAKNESS, 180)),
+        Map.entry(Material.ORANGE_TULIP, SuspiciousEffectEntry.create(PotionEffectType.WEAKNESS, 180)),
+        Map.entry(Material.PINK_TULIP, SuspiciousEffectEntry.create(PotionEffectType.WEAKNESS, 180)),
+        Map.entry(Material.WHITE_TULIP, SuspiciousEffectEntry.create(PotionEffectType.WEAKNESS, 180)),
+        Map.entry(Material.WITHER_ROSE, SuspiciousEffectEntry.create(PotionEffectType.WITHER, 160))
+    );
 }

@@ -7,6 +7,7 @@
 package lv.id.bonne.animalpenpaper.listeners;
 
 
+import com.destroystokyo.paper.MaterialTags;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -165,7 +166,7 @@ public class AnimalPenListener implements Listener
         {
             AnimalPenManager.handleShears(entity, player, itemStack);
         }
-        else if (AnimalPenListener.isDye(itemStack.getType()))
+        else if (MaterialTags.DYES.isTagged(itemStack))
         {
             AnimalPenManager.handleDyes(entity, player, itemStack);
         }
@@ -185,33 +186,17 @@ public class AnimalPenListener implements Listener
         {
             AnimalPenManager.handleBowl(entity, player, itemStack);
         }
-    }
-
-
-    private static boolean isDye(Material material)
-    {
-        return switch (material)
+        else if (AnimalPenListener.getTag(NamespacedKey.minecraft("small_flowers")).isTagged(itemStack.getType()))
         {
-            case BLACK_DYE,
-                 BLUE_DYE,
-                 BROWN_DYE,
-                 CYAN_DYE,
-                 GRAY_DYE,
-                 GREEN_DYE,
-                 LIGHT_BLUE_DYE,
-                 LIGHT_GRAY_DYE,
-                 LIME_DYE,
-                 MAGENTA_DYE,
-                 ORANGE_DYE,
-                 PINK_DYE,
-                 PURPLE_DYE,
-                 RED_DYE,
-                 WHITE_DYE,
-                 YELLOW_DYE -> true;
-            default -> false;
-        };
+            AnimalPenManager.handleSmallFlowers(entity, player, itemStack);
+        }
     }
 
+
+    private static Tag<Material> getTag(NamespacedKey tagKey)
+    {
+        return Bukkit.getTag(Tag.REGISTRY_ITEMS, tagKey, Material.class);
+    }
 
 
 // ---------------------------------------------------------------------
