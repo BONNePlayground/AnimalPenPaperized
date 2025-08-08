@@ -181,6 +181,10 @@ public class AnimalPenListener implements Listener
         {
             AnimalPenManager.handleMagmaBlock(entity, player, itemStack);
         }
+        else if (itemStack.getType() == Material.BOWL)
+        {
+            AnimalPenManager.handleBowl(entity, player, itemStack);
+        }
     }
 
 

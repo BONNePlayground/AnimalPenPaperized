@@ -12,16 +12,21 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.AxolotlBucketMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SuspiciousStewMeta;
 import org.bukkit.inventory.meta.TropicalFishBucketMeta;
+import org.bukkit.loot.LootContext;
+import org.bukkit.loot.LootTable;
+import org.bukkit.loot.LootTables;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import org.jetbrains.annotations.Unmodifiable;
+import java.util.*;
 
+import io.papermc.paper.potion.SuspiciousEffectEntry;
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
 import lv.id.bonne.animalpenpaper.data.AnimalDataType;
@@ -1153,6 +1158,163 @@ public class AnimalPenManager
             AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
                 entity.getType(),
                 Material.MAGMA_BLOCK,
+                data.entityCount));
+
+        // Save data
+        AnimalPenManager.setAnimalPenData(entity, data);
+    }
+
+
+    public static void handleBowl(Entity entity, Player player, ItemStack itemStack)
+    {
+        if (entity.getType() == EntityType.MOOSHROOM)
+        {
+            // Only bee has glass bottle interaction
+            AnimalPenManager.handleBowlSoup(entity, player, itemStack);
+        }
+        else if (entity.getType() == EntityType.SNIFFER)
+        {
+            // Only bee has glass bottle interaction
+            AnimalPenManager.handleBowlSeeds(entity, player, itemStack);
+        }
+    }
+
+
+    public static void handleBowlSoup(Entity entity, Player player, ItemStack itemStack)
+    {
+        if (entity.getType() != EntityType.MOOSHROOM)
+        {
+            // Only bee has glass bottle interaction
+            return;
+        }
+
+        AnimalData data = AnimalPenManager.getAnimalData(entity);
+
+        if (data == null)
+        {
+            return;
+        }
+
+        if (data.hasCooldown(AnimalData.Interaction.BOWL))
+        {
+            // under cooldown for feeding
+            return;
+        }
+
+        itemStack.subtract();
+
+        MushroomCow mushroomCow = (MushroomCow) entity;
+        List<SuspiciousEffectEntry> effectsForNextStew = mushroomCow.getStewEffects();
+        ItemStack stewItem = new ItemStack(Material.MUSHROOM_STEW);
+
+        if (!effectsForNextStew.isEmpty())
+        {
+            SuspiciousStewMeta itemMeta = (SuspiciousStewMeta) stewItem.getItemMeta();
+            effectsForNextStew.forEach(effect -> itemMeta.addCustomEffect(effect, false));
+            stewItem.setItemMeta(itemMeta);
+        }
+
+        player.getInventory().addItem(stewItem);
+        player.swingMainHand();
+
+        entity.getWorld().playSound(entity,
+            effectsForNextStew.isEmpty() ? Sound.ENTITY_MOOSHROOM_MILK : Sound.ENTITY_MOOSHROOM_SUSPICIOUS_MILK,
+            new Random().nextFloat(0.8f, 1.2f),
+            1);
+
+        data.setCooldown(AnimalData.Interaction.BOWL,
+            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+                entity.getType(),
+                Material.BOWL,
+                data.entityCount));
+
+        // Save data
+        AnimalPenManager.setAnimalPenData(entity, data);
+    }
+
+
+    public static void handleBowlSeeds(Entity entity, Player player, ItemStack itemStack)
+    {
+        if (entity.getType() != EntityType.SNIFFER)
+        {
+            return;
+        }
+
+        AnimalData data = AnimalPenManager.getAnimalData(entity);
+
+        if (data == null)
+        {
+            return;
+        }
+
+        if (data.hasCooldown(AnimalData.Interaction.BOWL))
+        {
+            // under cooldown for feeding
+            return;
+        }
+
+        LootTable lootTable = LootTables.SNIFFER_DIGGING.getLootTable();
+        LootContext lootParams = new LootContext.Builder(entity.getLocation()).lootedEntity(entity).build();
+
+        int dropLimits = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getDropLimits(Material.TORCHFLOWER_SEEDS);
+
+        if (dropLimits <= 0)
+        {
+            dropLimits = Integer.MAX_VALUE;
+        }
+
+        List<ItemStack> itemStackList = new ArrayList<>();
+
+        int seedCount = (int) Math.min(data.entityCount, dropLimits);
+        Random random = new Random();
+
+        while (seedCount > 0)
+        {
+            Collection<ItemStack> randomItems = lootTable.populateLoot(random, lootParams);
+
+            if (randomItems.isEmpty())
+            {
+                // Just a stop on infinite loop
+                break;
+            }
+
+            seedCount -= randomItems.stream().mapToInt(ItemStack::getAmount).sum();
+
+            randomItems.forEach(item -> {
+                boolean added = false;
+
+                for (ItemStack stack : itemStackList)
+                {
+                    if (item.isSimilar(stack) &&
+                        stack.getAmount() < stack.getMaxStackSize())
+                    {
+                        stack.add(item.getAmount());
+                        added = true;
+                        break;
+                    }
+                }
+
+                if (!added)
+                {
+                    itemStackList.add(item);
+                }
+            });
+        }
+
+        itemStackList.forEach(seedStack ->
+            entity.getWorld().dropItem(entity.getLocation().add(0, 1, 0), seedStack));
+
+        player.swingMainHand();
+
+        entity.getWorld().playSound(entity,
+            Sound.ENTITY_SNIFFER_DROP_SEED,
+            new Random().nextFloat(0.8f, 1.2f),
+            1);
+
+        data.setCooldown(AnimalData.Interaction.BOWL,
+            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+                entity.getType(),
+                Material.BOWL,
                 data.entityCount));
 
         // Save data

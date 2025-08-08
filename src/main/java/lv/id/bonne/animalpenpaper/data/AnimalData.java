@@ -78,6 +78,6 @@ public class AnimalData
 
     public enum Interaction
     {
-        BRUSH, WATER_BUCKET, SHEARS, DYES, BUCKET, GLASS_BOTTLE, MAGMA_BLOCK, FOOD
+        BRUSH, WATER_BUCKET, SHEARS, DYES, BUCKET, GLASS_BOTTLE, MAGMA_BLOCK, BOWL, FOOD
     }
 }
