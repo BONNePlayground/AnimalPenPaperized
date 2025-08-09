@@ -905,7 +905,10 @@ public class AnimalPenManager
             return;
         }
 
-        itemStack.damage(16, player);
+        if (player.getGameMode() != GameMode.CREATIVE)
+        {
+            itemStack.damage(16, player);
+        }
 
         entity.getWorld().dropItem(entity.getLocation().add(0, 1, 0),
             new ItemStack(Material.ARMADILLO_SCUTE));
@@ -1010,7 +1013,11 @@ public class AnimalPenManager
 
         data.entityCount -= 1;
 
-        itemStack.subtract();
+        if (player.getGameMode() != GameMode.CREATIVE)
+        {
+            itemStack.subtract();
+        }
+
         player.getInventory().addItem(newBucket);
 
         entity.getWorld().playSound(entity,
@@ -1065,7 +1072,10 @@ public class AnimalPenManager
             return;
         }
 
-        itemStack.damage(1, player);
+        if (player.getGameMode() != GameMode.CREATIVE)
+        {
+            itemStack.damage(1, player);
+        }
 
         int dropLimits = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getDropLimits(Material.HONEYCOMB);
 
@@ -1133,7 +1143,10 @@ public class AnimalPenManager
             return;
         }
 
-        itemStack.damage(1, player);
+        if (player.getGameMode() != GameMode.CREATIVE)
+        {
+            itemStack.damage(1, player);
+        }
 
         Sheep sheep = (Sheep) entity;
         sheep.shear();
@@ -1227,7 +1240,11 @@ public class AnimalPenManager
             return;
         }
 
-        itemStack.subtract();
+        if (player.getGameMode() != GameMode.CREATIVE)
+        {
+            itemStack.subtract();
+        }
+
         player.getInventory().addItem(new ItemStack(Material.MILK_BUCKET));
 
         player.swingMainHand();
@@ -1269,7 +1286,11 @@ public class AnimalPenManager
             return;
         }
 
-        itemStack.subtract();
+        if (player.getGameMode() != GameMode.CREATIVE)
+        {
+            itemStack.subtract();
+        }
+
         player.getInventory().addItem(new ItemStack(Material.HONEY_BOTTLE));
 
         player.swingMainHand();
@@ -1401,7 +1422,10 @@ public class AnimalPenManager
             return;
         }
 
-        itemStack.subtract();
+        if (player.getGameMode() != GameMode.CREATIVE)
+        {
+            itemStack.subtract();
+        }
 
         Sheep sheep = (Sheep) entity;
         sheep.setColor(AnimalPenManager.getDyeColor(itemStack.getType()));
@@ -1456,7 +1480,10 @@ public class AnimalPenManager
         Frog frog = (Frog) entity;
         Material material = AnimalPenManager.getFrogLight(frog);
 
-        itemStack.subtract(froglightCount);
+        if (player.getGameMode() != GameMode.CREATIVE)
+        {
+            itemStack.subtract(froglightCount);
+        }
 
         while (froglightCount > 0)
         {
@@ -1530,7 +1557,10 @@ public class AnimalPenManager
             return;
         }
 
-        itemStack.subtract();
+        if (player.getGameMode() != GameMode.CREATIVE)
+        {
+            itemStack.subtract();
+        }
 
         MushroomCow mushroomCow = (MushroomCow) entity;
         List<SuspiciousEffectEntry> effectsForNextStew = mushroomCow.getStewEffects();
@@ -1687,7 +1717,11 @@ public class AnimalPenManager
 
         mushroomCow.addEffectToNextStew(suspiciousEffectEntry, false);
 
-        itemStack.subtract();
+        if (player.getGameMode() != GameMode.CREATIVE)
+        {
+            itemStack.subtract();
+        }
+
         player.swingMainHand();
 
         entity.getWorld().playSound(entity,
@@ -1705,6 +1739,11 @@ public class AnimalPenManager
         {
             // Something is wrong. No entity on other end.
             return;
+        }
+
+        if (player.getGameMode() != GameMode.CREATIVE)
+        {
+            itemStack.damage(1, player);
         }
 
         data.entityCount -= 1;
