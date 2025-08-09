@@ -330,7 +330,7 @@ public class AnimalPenManager
             return;
         }
 
-        AnimalPenPlugin.getInstance().task.startTrackingEntity(entity);
+        AnimalPenPlugin.getInstance().task.startTrackingEntity(entity, false);
 
         entity.getPersistentDataContainer().set(ANIMAL_DATA_KEY,
             AnimalDataType.INSTANCE,

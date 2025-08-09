@@ -40,7 +40,7 @@ public class AnimalPenTasks implements Listener
         {
             if (AnimalPenManager.isAnimalPen(entity))
             {
-                startTrackingEntity(entity);
+                startTrackingEntity(entity, true);
             }
         }
     }
@@ -59,16 +59,19 @@ public class AnimalPenTasks implements Listener
     }
 
 
-    public void startTrackingEntity(Entity entity)
+    public void startTrackingEntity(Entity entity, boolean replace)
     {
         EntityReference reference = new EntityReference(entity.getUniqueId(), entity.getWorld().getUID());
 
-        if (cache.containsKey(reference))
+        if (!cache.containsKey(reference))
+        {
+            cache.put(reference, new ArrayList<>());
+        }
+        else if (replace)
         {
             this.stopTrackingEntity(entity);
+            cache.put(reference, new ArrayList<>());
         }
-
-        cache.put(reference, new ArrayList<>());
     }
 
 

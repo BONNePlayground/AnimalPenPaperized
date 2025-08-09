@@ -136,7 +136,7 @@ public class AnimalPenListener implements Listener
         }
 
         // Track on interaction
-        AnimalPenPlugin.getInstance().task.startTrackingEntity(entity);
+        AnimalPenPlugin.getInstance().task.startTrackingEntity(entity, false);
 
         // I CONTROL IT!!! NO CUSTOM INTERACTIONS HAHAHAHA
         event.setCancelled(true);
