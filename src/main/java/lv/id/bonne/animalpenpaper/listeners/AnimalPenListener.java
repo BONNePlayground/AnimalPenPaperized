@@ -12,7 +12,9 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.Slab;
+import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -23,6 +25,11 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.loot.LootContext;
+import org.bukkit.loot.LootTables;
+
+import java.util.Collection;
+import java.util.Random;
 
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
@@ -280,13 +287,50 @@ public class AnimalPenListener implements Listener
     @EventHandler
     public void onEntityDamage(EntityDamageEvent event)
     {
-        if (!AnimalPenManager.isAnimalPen(event.getEntity()))
+        Entity entity = event.getEntity();
+
+        if (!AnimalPenManager.isAnimalPen(entity))
         {
             return;
         }
 
         // Animal pen entities cannot be damaged.
         event.setCancelled(true);
+
+        Entity directEntity = event.getDamageSource().getDirectEntity();
+
+        if (directEntity == null || directEntity.getType() != EntityType.PLAYER)
+        {
+            // Only player can attack.
+            return;
+        }
+
+        if (event.getDamageSource().getDamageType() != DamageType.PLAYER_ATTACK)
+        {
+            // Not a direct attack
+            return;
+        }
+
+        Player player = (Player) directEntity;
+
+        ItemStack attackItem = player.getInventory().getItemInMainHand();
+
+        if (!AnimalPenListener.getTag(NamespacedKey.minecraft("swords")).isTagged(attackItem.getType()) &&
+            !AnimalPenListener.getTag(NamespacedKey.minecraft("axes")).isTagged(attackItem.getType()))
+        {
+            // Only swords and axes can attack.
+            return;
+        }
+
+        LootTables lootTables = LootTables.valueOf(entity.getType().name());
+        Collection<ItemStack> itemStacks = lootTables.getLootTable().populateLoot(new Random(),
+            new LootContext.Builder(entity.getLocation()).
+                killer(player).
+                lootedEntity(entity).
+                build());
+
+        Location location = entity.getLocation().add(0, 1, 0);
+        itemStacks.forEach(item -> entity.getWorld().dropItemNaturally(location, item));
     }
 
 
