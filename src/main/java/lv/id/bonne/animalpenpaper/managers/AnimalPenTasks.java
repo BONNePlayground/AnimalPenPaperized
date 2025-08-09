@@ -9,6 +9,7 @@ package lv.id.bonne.animalpenpaper.managers;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.*;
@@ -142,27 +143,32 @@ public class AnimalPenTasks implements Listener
                                         entity.getLocation().add(0, yOffset + 0.0625, 0),
                                         EntityType.ITEM_DISPLAY,
                                         CreatureSpawnEvent.SpawnReason.CUSTOM,
-                                        display ->
+                                        newEntity ->
                                         {
-                                            Transformation transform =
-                                                ((Display) display).getTransformation();
+                                            Display display = (Display) newEntity;
+
+                                            Transformation transform = display.getTransformation();
                                             transform.getScale().set(0.125f, 0.125f, 0.125f);
                                             transform.getTranslation().set(-0.45f, 0f, 0f);
-                                            ((Display) display).setTransformation(transform);
+                                            display.setTransformation(transform);
                                             display.setPersistent(false);
-                                            ((Display) display).setViewRange(0.1f);
+                                            display.setViewRange(0.1f);
                                         }));
                                     displayList.add((Display) entity.getWorld().spawnEntity(
                                         entity.getLocation().add(0, yOffset, 0),
                                         EntityType.TEXT_DISPLAY,
                                         CreatureSpawnEvent.SpawnReason.CUSTOM,
-                                        display ->
+                                        newEntity ->
                                         {
-                                            Transformation transform = ((Display) display).getTransformation();
+                                            TextDisplay display = (TextDisplay) newEntity;
+
+                                            Transformation transform = display.getTransformation();
                                             transform.getScale().set(0.4f, 0.4f, 0.4f);
-                                            ((Display) display).setTransformation(transform);
+                                            display.setTransformation(transform);
                                             display.setPersistent(false);
-                                            ((Display) display).setViewRange(0.1f);
+                                            display.setViewRange(0.1f);
+                                            display.setDefaultBackground(false);
+                                            display.setBackgroundColor(Color.fromARGB(0, 0, 0, 0));
                                         }));
 
                                     yOffset += 0.125;
