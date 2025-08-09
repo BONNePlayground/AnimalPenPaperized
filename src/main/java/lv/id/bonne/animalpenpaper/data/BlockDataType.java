@@ -8,8 +8,6 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 
@@ -57,10 +55,6 @@ public class BlockDataType implements PersistentDataType<String, BlockData>
         {
             BlockData data = GSON.fromJson(primitive, BlockData.class);
 
-            if (data.cooldowns == null)
-            {
-                data.cooldowns = new ArrayList<>();
-            }
             if (data.blockFace == null)
             {
                 data.blockFace = BlockFace.NORTH;
@@ -83,7 +77,6 @@ public class BlockDataType implements PersistentDataType<String, BlockData>
             // Return a default BlockData instead of crashing
             BlockData fallback = new BlockData();
             fallback.blockFace = BlockFace.NORTH;
-            fallback.cooldowns = new ArrayList<>();
             return fallback;
         }
     }

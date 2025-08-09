@@ -27,11 +27,6 @@ public class BlockData
     public UUID countEntity;
 
     /**
-     * The cooldown texts that are displayed above entity
-     */
-    public List<DisplayText> cooldowns;
-
-    /**
      * The block face how animal pen was placed.
      */
     public BlockFace blockFace;
@@ -44,15 +39,5 @@ public class BlockData
 
     public BlockData()
     {
-    }
-
-
-    public static class DisplayText
-    {
-        @Nullable
-        public UUID icon;
-
-        @Nullable
-        public UUID text;
     }
 }

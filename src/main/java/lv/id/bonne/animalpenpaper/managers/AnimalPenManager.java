@@ -342,9 +342,23 @@ public class AnimalPenManager
 
     public static void setAnimalPenData(Entity entity, AnimalData newData)
     {
-        entity.getPersistentDataContainer().set(ANIMAL_DATA_KEY,
-            AnimalDataType.INSTANCE,
-            newData);
+        if (newData.entityCount <= 0)
+        {
+            // Entity is removed. Do propper stuff.
+            ItemStack itemStack = AnimalPenManager.createEmptyAnimalCage();
+            entity.getWorld().dropItem(entity.getLocation(), itemStack);
+
+            AnimalPenPlugin.getInstance().task.stopTrackingEntity(entity);
+
+            entity.getPersistentDataContainer().remove(ANIMAL_DATA_KEY);
+            entity.remove();
+        }
+        else
+        {
+            entity.getPersistentDataContainer().set(ANIMAL_DATA_KEY,
+                AnimalDataType.INSTANCE,
+                newData);
+        }
 
         Block block = entity.getLocation().getBlock();
 
@@ -372,22 +386,22 @@ public class AnimalPenManager
         }
 
         AnimalPenPlugin.getInstance().task.stopTrackingEntity(blockData.entity, block.getWorld());
-
         AnimalPenManager.removeEntity(block.getWorld(), blockData.entity);
-        AnimalPenManager.removeEntity(block.getWorld(), blockData.countEntity);
 
         blockData.entity = null;
-        blockData.countEntity = null;
-        blockData.cooldowns.clear();
 
         if (withSave)
         {
+            AnimalPenManager.updateCountTextEntity(block, blockData, 0, penKey);
+
             block.getWorld().getPersistentDataContainer().set(penKey,
                 BlockDataType.INSTANCE,
                 blockData);
         }
         else
         {
+            AnimalPenManager.removeEntity(block.getWorld(), blockData.countEntity);
+
             block.getWorld().getPersistentDataContainer().remove(penKey);
         }
     }
@@ -1680,6 +1694,70 @@ public class AnimalPenManager
             Sound.ENTITY_MOOSHROOM_EAT,
             new Random().nextFloat(0.8f, 1.2f),
             1);
+    }
+
+
+    public static void handleKilling(Entity entity, Player player, ItemStack itemStack)
+    {
+        AnimalData data = AnimalPenManager.getAnimalData(entity);
+
+        if (data == null)
+        {
+            // Something is wrong. No entity on other end.
+            return;
+        }
+
+        data.entityCount -= 1;
+        AnimalPenManager.setAnimalPenData(entity, data);
+
+        LootTable lootTable = Bukkit.getLootTable(NamespacedKey.minecraft("entities/" + entity.getType().getKey().value()));
+
+        if (lootTable != null)
+        {
+            Collection<ItemStack> itemStacks = lootTable.populateLoot(new Random(),
+                new LootContext.Builder(entity.getLocation()).
+                    killer(player).
+                    lootedEntity(entity).
+                    build());
+
+            Location location = entity.getLocation().add(0, 1, 0);
+            itemStacks.forEach(item -> entity.getWorld().dropItemNaturally(location, item));
+        }
+
+        if (entity instanceof LivingEntity livingEntity)
+        {
+            Sound deathSound = livingEntity.getDeathSound();
+
+            if (deathSound != null)
+            {
+                entity.getWorld().playSound(entity.getLocation(),
+                    deathSound,
+                    new Random().nextFloat(0.5f, 1f),
+                    1f);
+            }
+            else
+            {
+                entity.getWorld().playSound(entity.getLocation(),
+                    Sound.ENTITY_GENERIC_DEATH,
+                    new Random().nextFloat(0.5f, 1f),
+                    1f);
+            }
+        }
+
+        entity.getWorld().spawnParticle(Particle.SMOKE,
+            entity.getLocation().add(0, 0.5, 0),
+            10,
+            0.3,
+            0.3,
+            0.3,
+            0.01);
+        entity.getWorld().spawnParticle(Particle.ANGRY_VILLAGER,
+            entity.getLocation().add(0, 0.5, 0),
+            2,
+            0.2,
+            0.2,
+            0.2,
+            0);
     }
 
 

@@ -15,7 +15,6 @@ import org.bukkit.block.data.type.Slab;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -26,11 +25,6 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.loot.LootContext;
-import org.bukkit.loot.LootTable;
-
-import java.util.Collection;
-import java.util.Random;
 
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
@@ -323,65 +317,7 @@ public class AnimalPenListener implements Listener
             return;
         }
 
-        AnimalData data = AnimalPenManager.getAnimalData(entity);
-
-        if (data == null)
-        {
-            // Something is wrong. No entity on other end.
-            return;
-        }
-
-        data.entityCount -= 1;
-        AnimalPenManager.setAnimalPenData(entity, data);
-
-        LootTable lootTable = Bukkit.getLootTable(NamespacedKey.minecraft("entities/" + entity.getType().getKey().value()));
-
-        if (lootTable != null)
-        {
-            Collection<ItemStack> itemStacks = lootTable.populateLoot(new Random(),
-                new LootContext.Builder(entity.getLocation()).
-                    killer(player).
-                    lootedEntity(entity).
-                    build());
-
-            Location location = entity.getLocation().add(0, 1, 0);
-            itemStacks.forEach(item -> entity.getWorld().dropItemNaturally(location, item));
-        }
-
-        if (entity instanceof LivingEntity livingEntity)
-        {
-            Sound deathSound = livingEntity.getDeathSound();
-
-            if (deathSound != null)
-            {
-                entity.getWorld().playSound(entity.getLocation(),
-                    deathSound,
-                    new Random().nextFloat(0.5f, 1f),
-                    1f);
-            }
-            else
-            {
-                entity.getWorld().playSound(entity.getLocation(),
-                    Sound.ENTITY_GENERIC_DEATH,
-                    new Random().nextFloat(0.5f, 1f),
-                    1f);
-            }
-        }
-
-        entity.getWorld().spawnParticle(Particle.SMOKE,
-            entity.getLocation().add(0, 0.5, 0),
-            10,
-            0.3,
-            0.3,
-            0.3,
-            0.01);
-        entity.getWorld().spawnParticle(Particle.ANGRY_VILLAGER,
-            entity.getLocation().add(0, 0.5, 0),
-            2,
-            0.2,
-            0.2,
-            0.2,
-            0);
+        AnimalPenManager.handleKilling(entity, player, attackItem);
     }
 
 
