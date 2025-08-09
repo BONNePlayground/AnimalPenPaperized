@@ -290,7 +290,7 @@ public class AnimalPenManager
         Entity entity;
 
         // Entity to display
-        if (blockData.entity == null)
+        if (blockData.entity == null || block.getWorld().getEntity(blockData.entity) == null)
         {
             entity = block.getWorld().spawnEntity(block.getLocation().add(0.5, 0.5, 0.5),
                 newData.entityType,
@@ -445,7 +445,7 @@ public class AnimalPenManager
     {
         Entity entity;
 
-        if (blockData.countEntity == null)
+        if (blockData.countEntity == null || block.getWorld().getEntity(blockData.countEntity) == null)
         {
             entity = block.getWorld().spawnEntity(
                 block.getLocation().add(AnimalPenManager.center(blockData.blockFace)),
