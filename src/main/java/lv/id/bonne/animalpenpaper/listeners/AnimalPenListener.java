@@ -190,6 +190,48 @@ public class AnimalPenListener implements Listener
     }
 
 
+    @EventHandler(ignoreCancelled = false)
+    public void onEntityLootDropping(EntityDamageEvent event)
+    {
+        Entity entity = event.getEntity();
+
+        if (!AnimalPenManager.isAnimalPen(entity))
+        {
+            return;
+        }
+
+        // Animal pen entities cannot be damaged.
+        event.setCancelled(true);
+
+        Entity directEntity = event.getDamageSource().getDirectEntity();
+
+        if (directEntity == null || directEntity.getType() != EntityType.PLAYER)
+        {
+            // Only player can attack.
+            return;
+        }
+
+        if (event.getDamageSource().getDamageType() != DamageType.PLAYER_ATTACK)
+        {
+            // Not a direct attack
+            return;
+        }
+
+        Player player = (Player) directEntity;
+
+        ItemStack attackItem = player.getInventory().getItemInMainHand();
+
+        if (!AnimalPenListener.getTag(NamespacedKey.minecraft("swords")).isTagged(attackItem.getType()) &&
+            !AnimalPenListener.getTag(NamespacedKey.minecraft("axes")).isTagged(attackItem.getType()))
+        {
+            // Only swords and axes can attack.
+            return;
+        }
+
+        AnimalPenManager.handleKilling(entity, player, attackItem);
+    }
+
+
     private static Tag<Material> getTag(NamespacedKey tagKey)
     {
         return Bukkit.getTag(Tag.REGISTRY_ITEMS, tagKey, Material.class);
@@ -291,33 +333,6 @@ public class AnimalPenListener implements Listener
 
         // Animal pen entities cannot be damaged.
         event.setCancelled(true);
-
-        Entity directEntity = event.getDamageSource().getDirectEntity();
-
-        if (directEntity == null || directEntity.getType() != EntityType.PLAYER)
-        {
-            // Only player can attack.
-            return;
-        }
-
-        if (event.getDamageSource().getDamageType() != DamageType.PLAYER_ATTACK)
-        {
-            // Not a direct attack
-            return;
-        }
-
-        Player player = (Player) directEntity;
-
-        ItemStack attackItem = player.getInventory().getItemInMainHand();
-
-        if (!AnimalPenListener.getTag(NamespacedKey.minecraft("swords")).isTagged(attackItem.getType()) &&
-            !AnimalPenListener.getTag(NamespacedKey.minecraft("axes")).isTagged(attackItem.getType()))
-        {
-            // Only swords and axes can attack.
-            return;
-        }
-
-        AnimalPenManager.handleKilling(entity, player, attackItem);
     }
 
 
