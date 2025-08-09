@@ -155,7 +155,7 @@ public class AnimalPenTasks implements Listener
                                             transform.getTranslation().set(-0.45f, 0f, 0f);
                                             display.setTransformation(transform);
                                             display.setPersistent(false);
-                                            display.setViewRange(0.1f);
+                                            display.setViewRange(0.05f);
                                         }));
                                     displayList.add((Display) entity.getWorld().spawnEntity(
                                         entity.getLocation().add(0, yOffset, 0),
@@ -169,7 +169,7 @@ public class AnimalPenTasks implements Listener
                                             transform.getScale().set(0.4f, 0.4f, 0.4f);
                                             display.setTransformation(transform);
                                             display.setPersistent(false);
-                                            display.setViewRange(0.1f);
+                                            display.setViewRange(0.05f);
                                             display.setDefaultBackground(false);
                                             display.setBackgroundColor(Color.fromARGB(0, 0, 0, 0));
                                         }));
