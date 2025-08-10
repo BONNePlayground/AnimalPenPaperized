@@ -357,7 +357,7 @@ public class AnimalPenListener implements Listener
     @EventHandler
     public void onEntityTransformEvent(EntityTransformEvent event)
     {
-        if (AnimalPenManager.isAnimalPen(event.getEntity()))
+        if (event.getTransformedEntities().stream().anyMatch(AnimalPenManager::isAnimalPen))
         {
             // Animal pen entities cannot be transformed.
             event.setCancelled(true);
