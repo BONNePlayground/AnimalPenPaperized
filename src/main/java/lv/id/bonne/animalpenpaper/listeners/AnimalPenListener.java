@@ -221,6 +221,12 @@ public class AnimalPenListener implements Listener
 
         ItemStack attackItem = player.getInventory().getItemInMainHand();
 
+        if (player.hasCooldown(attackItem))
+        {
+            // Under cooldown
+            return;
+        }
+
         if (!AnimalPenListener.getTag(NamespacedKey.minecraft("swords")).isTagged(attackItem.getType()) &&
             !AnimalPenListener.getTag(NamespacedKey.minecraft("axes")).isTagged(attackItem.getType()))
         {
