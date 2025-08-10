@@ -249,6 +249,48 @@ public class AnimalPenManager
     }
 
 
+    public static void validateAnimalPen(@NotNull Entity entity)
+    {
+        Block block = entity.getLocation().getBlock();
+
+        if (block.getType() != Material.SMOOTH_STONE_SLAB)
+        {
+            return;
+        }
+
+        NamespacedKey penKey = new NamespacedKey(AnimalPenPlugin.getInstance(),
+            block.getX() + "_" + block.getY() + "_" + block.getZ() + "_animal_pen");
+
+        BlockData blockData = block.getWorld().getPersistentDataContainer().get(penKey, BlockDataType.INSTANCE);
+
+        if (blockData == null)
+        {
+            AnimalPenPlugin.getInstance().getLogger().warning("Failed to load animal pen block. Restoring...");
+            blockData = new BlockData();
+        }
+
+        if (blockData.entity == null)
+        {
+            // fix
+            blockData.entity = entity.getUniqueId();
+            blockData.blockFace = entity.getFacing();
+
+            Collection<Entity> nearbyEntities = block.getWorld().
+                getNearbyEntities(block.getBoundingBox().expand(1),
+                findEntity -> findEntity.getType() == EntityType.TEXT_DISPLAY &&
+                    findEntity.getFacing() == entity.getFacing() &&
+                    findEntity.getPersistentDataContainer().has(penKey));
+
+            if (!nearbyEntities.isEmpty())
+            {
+                blockData.countEntity = nearbyEntities.iterator().next().getUniqueId();
+            }
+
+            block.getWorld().getPersistentDataContainer().set(penKey, BlockDataType.INSTANCE, blockData);
+        }
+    }
+
+
     /**
      * Returns animal data associated with given block.
      */
@@ -466,6 +508,8 @@ public class AnimalPenManager
                         display.setVisibleByDefault(true);
                         display.setSeeThrough(false);
                     }
+
+                    newEntity.getPersistentDataContainer().set(penKey, PersistentDataType.BOOLEAN, true);
                 });
 
             blockData.countEntity = entity.getUniqueId();

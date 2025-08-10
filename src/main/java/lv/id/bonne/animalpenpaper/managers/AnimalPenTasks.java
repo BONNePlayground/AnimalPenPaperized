@@ -40,6 +40,7 @@ public class AnimalPenTasks implements Listener
         {
             if (AnimalPenManager.isAnimalPen(entity))
             {
+                AnimalPenManager.validateAnimalPen(entity);
                 startTrackingEntity(entity, true);
             }
         }

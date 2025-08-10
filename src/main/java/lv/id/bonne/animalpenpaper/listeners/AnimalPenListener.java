@@ -81,7 +81,7 @@ public class AnimalPenListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onAnimalPenBreak(BlockBreakEvent event)
     {
         if (!AnimalPenManager.isAnimalPen(event.getBlock()))
