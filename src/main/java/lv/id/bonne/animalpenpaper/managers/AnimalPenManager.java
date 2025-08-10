@@ -7,6 +7,11 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.damage.CraftDamageSource;
+import org.bukkit.craftbukkit.entity.*;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
+import org.bukkit.damage.DamageSource;
+import org.bukkit.damage.DamageType;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
@@ -38,6 +43,7 @@ import lv.id.bonne.animalpenpaper.util.StyleUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
+import net.minecraft.advancements.CriteriaTriggers;
 
 import static java.time.temporal.ChronoField.MINUTE_OF_HOUR;
 import static java.time.temporal.ChronoField.SECOND_OF_MINUTE;
@@ -846,6 +852,8 @@ public class AnimalPenManager
 
         stackSize = (int) Math.min((maxCount - data.entityCount) * 2, stackSize);
 
+        AnimalPenManager.triggerItemUse(entity, player, itemStack, stackSize % 2 == 1 ? stackSize - 1 : stackSize);
+
         if (player.getGameMode() != GameMode.CREATIVE)
         {
             if (stackSize % 2 == 1)
@@ -858,7 +866,8 @@ public class AnimalPenManager
             }
         }
 
-        data.entityCount += stackSize / 2;
+        int amount = stackSize / 2;
+        data.entityCount += amount;
 
         entity.getWorld().spawnParticle(Particle.HEART,
             entity.getLocation(),
@@ -881,6 +890,29 @@ public class AnimalPenManager
 
         // Save data
         AnimalPenManager.setAnimalPenData(entity, data);
+
+        if (!(entity instanceof Breedable))
+        {
+            // Ignore non-breedable mobs
+            return;
+        }
+
+        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isTriggerAdvancements())
+        {
+            // Trigger event and statistics for breeding.
+            for (int i = 0; i < amount; i++)
+            {
+                CriteriaTriggers.BRED_ANIMALS.trigger(((CraftPlayer) player).getHandle(),
+                    ((CraftAnimals) entity).getHandle(),
+                    ((CraftAnimals) entity).getHandle(),
+                    ((CraftAnimals) entity).getHandle());
+            }
+        }
+
+        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isIncreaseStatistics())
+        {
+            player.incrementStatistic(Statistic.ANIMALS_BRED, amount);
+        }
     }
 
 
@@ -904,6 +936,8 @@ public class AnimalPenManager
             // under cooldown for feeding
             return;
         }
+
+        AnimalPenManager.triggerItemUse(entity, player, itemStack, 1);
 
         if (player.getGameMode() != GameMode.CREATIVE)
         {
@@ -1013,6 +1047,8 @@ public class AnimalPenManager
 
         data.entityCount -= 1;
 
+        AnimalPenManager.triggerItemUse(entity, player, itemStack, 1);
+
         if (player.getGameMode() != GameMode.CREATIVE)
         {
             itemStack.subtract();
@@ -1035,6 +1071,13 @@ public class AnimalPenManager
 
         // Save data
         AnimalPenManager.setAnimalPenData(entity, data);
+
+        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isTriggerAdvancements())
+        {
+            // Trigger bucket filling
+            CriteriaTriggers.FILLED_BUCKET.trigger(((CraftPlayer) player).getHandle(),
+                ((CraftItemStack) newBucket).handle);
+        }
     }
 
 
@@ -1071,6 +1114,8 @@ public class AnimalPenManager
             // under cooldown for feeding
             return;
         }
+
+        AnimalPenManager.triggerItemUse(entity, player, itemStack, 1);
 
         if (player.getGameMode() != GameMode.CREATIVE)
         {
@@ -1142,6 +1187,8 @@ public class AnimalPenManager
             // under cooldown for feeding
             return;
         }
+
+        AnimalPenManager.triggerItemUse(entity, player, itemStack, 1);
 
         if (player.getGameMode() != GameMode.CREATIVE)
         {
@@ -1240,6 +1287,8 @@ public class AnimalPenManager
             return;
         }
 
+        AnimalPenManager.triggerItemUse(entity, player, itemStack, 1);
+
         if (player.getGameMode() != GameMode.CREATIVE)
         {
             itemStack.subtract();
@@ -1285,6 +1334,8 @@ public class AnimalPenManager
             // under cooldown for feeding
             return;
         }
+
+        AnimalPenManager.triggerItemUse(entity, player, itemStack, 1);
 
         if (player.getGameMode() != GameMode.CREATIVE)
         {
@@ -1422,6 +1473,8 @@ public class AnimalPenManager
             return;
         }
 
+        AnimalPenManager.triggerItemUse(entity, player, itemStack, 1);
+
         if (player.getGameMode() != GameMode.CREATIVE)
         {
             itemStack.subtract();
@@ -1556,6 +1609,8 @@ public class AnimalPenManager
             // under cooldown for feeding
             return;
         }
+
+        AnimalPenManager.triggerItemUse(entity, player, itemStack, 1);
 
         if (player.getGameMode() != GameMode.CREATIVE)
         {
@@ -1717,6 +1772,8 @@ public class AnimalPenManager
 
         mushroomCow.addEffectToNextStew(suspiciousEffectEntry, false);
 
+        AnimalPenManager.triggerItemUse(entity, player, itemStack, 1);
+
         if (player.getGameMode() != GameMode.CREATIVE)
         {
             itemStack.subtract();
@@ -1739,6 +1796,11 @@ public class AnimalPenManager
         {
             // Something is wrong. No entity on other end.
             return;
+        }
+
+        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isIncreaseStatistics())
+        {
+            player.incrementStatistic(Statistic.USE_ITEM, itemStack.getType());
         }
 
         if (player.getGameMode() != GameMode.CREATIVE)
@@ -1797,12 +1859,41 @@ public class AnimalPenManager
             0.2,
             0.2,
             0);
+
+        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isTriggerAdvancements())
+        {
+            CriteriaTriggers.PLAYER_KILLED_ENTITY.trigger(((CraftPlayer) player).getHandle(),
+                ((CraftEntity) entity).getHandle(),
+                ((CraftDamageSource) DamageSource.builder(DamageType.PLAYER_ATTACK).build()).getHandle());
+        }
+
+        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isIncreaseStatistics())
+        {
+            player.incrementStatistic(Statistic.MOB_KILLS);
+            player.incrementStatistic(Statistic.KILL_ENTITY, entity.getType());
+        }
     }
 
 
 // ---------------------------------------------------------------------
 // Section: Private methods
 // ---------------------------------------------------------------------
+
+
+    private static void triggerItemUse(Entity entity, Player player, ItemStack itemStack, int amount)
+    {
+        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isTriggerAdvancements())
+        {
+            CriteriaTriggers.PLAYER_INTERACTED_WITH_ENTITY.trigger(((CraftPlayer) player).getHandle(),
+                ((CraftItemStack) itemStack).handle,
+                ((CraftEntity) entity).getHandle());
+        }
+
+        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isIncreaseStatistics())
+        {
+            player.incrementStatistic(Statistic.USE_ITEM, itemStack.getType(), amount);
+        }
+    }
 
 
     private static Material getWoolMaterial(DyeColor color)
