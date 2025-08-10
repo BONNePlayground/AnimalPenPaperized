@@ -117,7 +117,7 @@ public class AnimalCageListener implements Listener
     /**
      * This listener checks if player can release entity from animal cage.
      */
-    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onEntityRelease(PlayerInteractEvent event)
     {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK)
@@ -176,7 +176,7 @@ public class AnimalCageListener implements Listener
     /**
      * This listener cheks is player can interact with animal cage on animal pen
      */
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onInteractWithPenWithAnimalCage(PlayerInteractEvent event)
     {
         Player player = event.getPlayer();
@@ -269,10 +269,11 @@ public class AnimalCageListener implements Listener
     /**
      * This listener checks if player can interact with animal pen having empty hand
      */
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onInteractWithPenWithEmptyHand(PlayerInteractEvent event)
     {
-        if (event.getItem() != null && !event.getItem().getType().isAir())
+        if (event.getItem() != null && !event.getItem().getType().isAir() ||
+            event.getHand() == EquipmentSlot.OFF_HAND)
         {
             return;
         }
