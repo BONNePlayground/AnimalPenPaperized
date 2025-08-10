@@ -8,6 +8,7 @@ package lv.id.bonne.animalpenpaper.listeners;
 
 
 import com.destroystokyo.paper.MaterialTags;
+import com.destroystokyo.paper.event.entity.EntityZapEvent;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -349,6 +350,17 @@ public class AnimalPenListener implements Listener
         if (AnimalPenManager.isAnimalPen(event.getEntity()))
         {
             // Animal pen entities cannot be killed.
+            event.setCancelled(true);
+        }
+    }
+
+
+    @EventHandler
+    public void onEntityTransformEvent(EntityZapEvent event)
+    {
+        if (event.getTransformedEntities().stream().anyMatch(AnimalPenManager::isAnimalPen))
+        {
+            // Animal pen entities cannot be transformed.
             event.setCancelled(true);
         }
     }
