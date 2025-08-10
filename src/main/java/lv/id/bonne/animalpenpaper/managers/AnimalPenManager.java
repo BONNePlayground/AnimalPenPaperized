@@ -1793,12 +1793,13 @@ public class AnimalPenManager
             return;
         }
 
-        int scutes = animalData.removeExtra(AnimalData.Extra.SCUTE);
+        // Deserialization always casts numbers into double
+        double scutes = animalData.removeExtra(AnimalData.Extra.SCUTE);
 
         AnimalPenManager.dropItems(entity.getWorld(),
             entity.getLocation().add(0, 1, 0),
             Material.TURTLE_SCUTE,
-            scutes);
+            (int) scutes);
     }
 
 
@@ -1908,7 +1909,7 @@ public class AnimalPenManager
             ((Sheep) entity).setSheared(false);
         }
     }
-    
+
 
 // ---------------------------------------------------------------------
 // Section: Private methods
