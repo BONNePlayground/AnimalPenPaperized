@@ -24,6 +24,8 @@ import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntityTransformEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -347,6 +349,39 @@ public class AnimalPenListener implements Listener
         if (AnimalPenManager.isAnimalPen(event.getEntity()))
         {
             // Animal pen entities cannot be killed.
+            event.setCancelled(true);
+        }
+    }
+
+
+    @EventHandler
+    public void onEntityTransformEvent(EntityTransformEvent event)
+    {
+        if (AnimalPenManager.isAnimalPen(event.getEntity()))
+        {
+            // Animal pen entities cannot be transformed.
+            event.setCancelled(true);
+        }
+    }
+
+
+    @EventHandler
+    public void onWaterPlace(PlayerBucketEmptyEvent event)
+    {
+        if (AnimalPenManager.isAnimalPen(event.getBlock()))
+        {
+            // Animal pen cannot be waterlogged
+            event.setCancelled(true);
+        }
+    }
+
+
+    @EventHandler
+    public void onWaterSpread(BlockFromToEvent event)
+    {
+        if (AnimalPenManager.isAnimalPen(event.getToBlock()))
+        {
+            // Animal pen cannot be waterlogged
             event.setCancelled(true);
         }
     }
