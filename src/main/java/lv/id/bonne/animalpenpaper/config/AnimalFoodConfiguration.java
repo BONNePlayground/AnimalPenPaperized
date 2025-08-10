@@ -95,15 +95,15 @@ public class AnimalFoodConfiguration
             new FoodItem("#minecraft:chicken_food")
         ));
 
-        // Cow
-        this.foodItems.computeIfAbsent(NamespacedKey.minecraft("cow"), i -> List.of(
-            new FoodItem("#minecraft:cow_food")
-        ));
-
         // Cod
         this.foodItems.computeIfAbsent(NamespacedKey.minecraft("cod"), i -> List.of(
             new FoodItem("minecraft:seagrass"),
             new FoodItem("minecraft:kelp")
+        ));
+
+        // Cow
+        this.foodItems.computeIfAbsent(NamespacedKey.minecraft("cow"), i -> List.of(
+            new FoodItem("#minecraft:cow_food")
         ));
 
         // Dolphin
@@ -149,6 +149,11 @@ public class AnimalFoodConfiguration
         // Llama
         this.foodItems.computeIfAbsent(NamespacedKey.minecraft("llama"), i -> List.of(
             new FoodItem("#minecraft:llama_food")
+        ));
+
+        // Mooshroom
+        this.foodItems.computeIfAbsent(NamespacedKey.minecraft("mooshroom"), i -> List.of(
+            new FoodItem("#minecraft:cow_food")
         ));
 
         // Mule
@@ -203,6 +208,11 @@ public class AnimalFoodConfiguration
             new FoodItem("#minecraft:sheep_food")
         ));
 
+        // Skeleton Horse
+        this.foodItems.computeIfAbsent(NamespacedKey.minecraft("skeleton_horse"), i -> List.of(
+            new FoodItem("#minecraft:horse_food")
+        ));
+
         // Sniffer
         this.foodItems.computeIfAbsent(NamespacedKey.minecraft("sniffer"), i -> List.of(
             new FoodItem("#minecraft:sniffer_food")
@@ -237,6 +247,11 @@ public class AnimalFoodConfiguration
         // Wolf
         this.foodItems.computeIfAbsent(NamespacedKey.minecraft("wolf"), i -> List.of(
             new FoodItem("#minecraft:wolf_food")
+        ));
+
+        // Zombie Horse
+        this.foodItems.computeIfAbsent(NamespacedKey.minecraft("zombie_horse"), i -> List.of(
+            new FoodItem("#minecraft:horse_food")
         ));
     }
 
