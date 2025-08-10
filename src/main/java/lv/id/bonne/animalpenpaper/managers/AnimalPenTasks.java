@@ -16,6 +16,7 @@ import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.event.world.EntitiesUnloadEvent;
 import org.bukkit.inventory.ItemStack;
@@ -43,6 +44,28 @@ public class AnimalPenTasks implements Listener
                 AnimalPenManager.validateAnimalPen(entity);
                 startTrackingEntity(entity, true);
             }
+        }
+    }
+
+
+    @EventHandler
+    public void onPlayerCrouching(PlayerToggleSneakEvent event)
+    {
+        if (!AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isShowCooldownsOnlyOnShift())
+        {
+            return;
+        }
+
+        if (!event.isSneaking())
+        {
+            cache.values().stream().flatMap(List::stream).
+                forEach(display -> event.getPlayer().hideEntity(AnimalPenPlugin.getInstance(), display));
+        }
+        else
+        {
+            cache.values().stream().flatMap(List::stream).
+                filter(display -> display.getLocation().distanceSquared(event.getPlayer().getLocation()) <= 100).
+                forEach(display -> event.getPlayer().showEntity(AnimalPenPlugin.getInstance(), display));
         }
     }
 
@@ -166,7 +189,15 @@ public class AnimalPenTasks implements Listener
                                             transform.getTranslation().set(-0.45f, 0f, 0f);
                                             display.setTransformation(transform);
                                             display.setPersistent(false);
-                                            display.setViewRange(0.05f);
+
+                                            if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isShowCooldownsOnlyOnShift())
+                                            {
+                                                display.setVisibleByDefault(false);
+                                            }
+                                            else
+                                            {
+                                                display.setViewRange(0.05f);
+                                            }
                                         }));
                                     displayList.add((Display) entity.getWorld().spawnEntity(
                                         entity.getLocation().add(0, yOffset, 0),
@@ -180,9 +211,17 @@ public class AnimalPenTasks implements Listener
                                             transform.getScale().set(0.4f, 0.4f, 0.4f);
                                             display.setTransformation(transform);
                                             display.setPersistent(false);
-                                            display.setViewRange(0.05f);
                                             display.setDefaultBackground(false);
                                             display.setBackgroundColor(Color.fromARGB(0, 0, 0, 0));
+
+                                            if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isShowCooldownsOnlyOnShift())
+                                            {
+                                                display.setVisibleByDefault(false);
+                                            }
+                                            else
+                                            {
+                                                display.setViewRange(0.05f);
+                                            }
                                         }));
 
                                     yOffset += 0.125;

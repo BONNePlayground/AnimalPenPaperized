@@ -51,7 +51,8 @@ public class Configuration
             this.maxStoredAnimalVariants == null ||
             this.maxStoredAnimalVariants < 0 ||
             this.triggerAdvancements == null ||
-            this.increaseStatistics == null;
+            this.increaseStatistics == null ||
+            this.showCooldownsOnlyOnShift == null;
     }
 
 
@@ -110,6 +111,11 @@ public class Configuration
         if (this.triggerAdvancements == null || init)
         {
             this.triggerAdvancements = false;
+        }
+
+        if (this.showCooldownsOnlyOnShift == null || init)
+        {
+            this.showCooldownsOnlyOnShift = false;
         }
 
         if (init)
@@ -400,6 +406,17 @@ public class Configuration
     }
 
 
+    /**
+     * Is show cooldowns only on shift boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isShowCooldownsOnlyOnShift()
+    {
+        return this.showCooldownsOnlyOnShift;
+    }
+
+
 // ---------------------------------------------------------------------
 // Section: variables
 // ---------------------------------------------------------------------
@@ -510,6 +527,13 @@ public class Configuration
     @Expose
     @SerializedName("animal_limit_in_pen")
     private long maximalAnimalCount = Integer.MAX_VALUE;
+
+    @JsonComment("Allows to toggle if animal cooldowns should be showed only if player is crouching.")
+    @JsonComment("This may* increase performance impact as will not require recalculations on shift.")
+    @JsonComment("Default value = false")
+    @Expose
+    @SerializedName("show_cooldowns_only_on_crouch")
+    private Boolean showCooldownsOnlyOnShift;
 
     @JsonComment("Allows to enable animal growing in animal pen.")
     @JsonComment("The more animals are inside it, the larger it will be.")
