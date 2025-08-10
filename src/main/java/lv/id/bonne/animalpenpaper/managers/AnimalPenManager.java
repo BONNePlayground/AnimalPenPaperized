@@ -862,7 +862,7 @@ public class AnimalPenManager
 // ---------------------------------------------------------------------
 
 
-    public static void handleFood(Entity entity, Player player, ItemStack itemStack)
+    public static void handleFood(LivingEntity entity, Player player, ItemStack itemStack)
     {
         AnimalData data = AnimalPenManager.getAnimalData(entity);
 
@@ -886,6 +886,16 @@ public class AnimalPenManager
         }
 
         int stackSize = itemStack.getAmount();
+
+        if (entity.getType() == EntityType.AXOLOTL &&
+            itemStack.getType() == Material.TROPICAL_FISH_BUCKET &&
+            itemStack.getMaxStackSize() == 1)
+        {
+            // Tropical fishes will be taken from all buckets in player inventory.
+            Map<Integer, ? extends ItemStack> all = player.getInventory().all(Material.TROPICAL_FISH_BUCKET);
+            stackSize = all.size();
+        }
+
         stackSize = (int) Math.min(data.entityCount, stackSize);
 
         if (stackSize < 2)
@@ -900,7 +910,23 @@ public class AnimalPenManager
 
         if (player.getGameMode() != GameMode.CREATIVE)
         {
-            if (stackSize % 2 == 1)
+            if (entity.getType() == EntityType.AXOLOTL &&
+                itemStack.getType() == Material.TROPICAL_FISH_BUCKET &&
+                itemStack.getMaxStackSize() == 1)
+            {
+                int removedItems = stackSize % 2 == 1 ? stackSize - 1 : stackSize;
+
+                while (removedItems-- > 0)
+                {
+                    int slot = player.getInventory().first(Material.TROPICAL_FISH_BUCKET);
+
+                    if (slot != -1)
+                    {
+                        player.getInventory().setItem(slot, null);
+                    }
+                }
+            }
+            else if (stackSize % 2 == 1)
             {
                 itemStack.subtract(stackSize - 1);
             }
@@ -920,7 +946,7 @@ public class AnimalPenManager
             0.05);
 
         entity.getWorld().playSound(entity,
-            Sound.ENTITY_GENERIC_EAT,
+            entity.getEatingSound(itemStack),
             new Random().nextFloat(0.8f, 1.2f),
             1);
 
@@ -1803,7 +1829,7 @@ public class AnimalPenManager
     }
 
 
-    public static void handleKilling(Entity entity, Player player, ItemStack itemStack)
+    public static void handleKilling(LivingEntity entity, Player player, ItemStack itemStack)
     {
         AnimalData data = AnimalPenManager.getAnimalData(entity);
 
@@ -1847,24 +1873,21 @@ public class AnimalPenManager
             itemStacks.forEach(item -> entity.getWorld().dropItemNaturally(location, item));
         }
 
-        if (entity instanceof LivingEntity livingEntity)
-        {
-            Sound deathSound = livingEntity.getDeathSound();
+        Sound deathSound = entity.getDeathSound();
 
-            if (deathSound != null)
-            {
-                entity.getWorld().playSound(entity.getLocation(),
-                    deathSound,
-                    new Random().nextFloat(0.5f, 1f),
-                    1f);
-            }
-            else
-            {
-                entity.getWorld().playSound(entity.getLocation(),
-                    Sound.ENTITY_GENERIC_DEATH,
-                    new Random().nextFloat(0.5f, 1f),
-                    1f);
-            }
+        if (deathSound != null)
+        {
+            entity.getWorld().playSound(entity.getLocation(),
+                deathSound,
+                new Random().nextFloat(0.5f, 1f),
+                1f);
+        }
+        else
+        {
+            entity.getWorld().playSound(entity.getLocation(),
+                Sound.ENTITY_GENERIC_DEATH,
+                new Random().nextFloat(0.5f, 1f),
+                1f);
         }
 
         entity.getWorld().spawnParticle(Particle.SMOKE,

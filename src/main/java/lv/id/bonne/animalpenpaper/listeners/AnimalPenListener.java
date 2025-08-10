@@ -15,6 +15,7 @@ import org.bukkit.block.data.type.Slab;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -116,12 +117,10 @@ public class AnimalPenListener implements Listener
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityInteract(PlayerInteractEntityEvent event)
     {
-        Entity entity = event.getRightClicked();
-        boolean isAnimalPen = AnimalPenManager.isAnimalPen(entity);
+        Entity eventEntity = event.getRightClicked();
 
-        if (!isAnimalPen)
+        if (!AnimalPenManager.isAnimalPen(eventEntity) || !(eventEntity instanceof LivingEntity entity))
         {
-            // Not animal pen
             return;
         }
 
@@ -193,9 +192,9 @@ public class AnimalPenListener implements Listener
     @EventHandler(ignoreCancelled = false)
     public void onEntityLootDropping(EntityDamageEvent event)
     {
-        Entity entity = event.getEntity();
+        Entity eventEntity = event.getEntity();
 
-        if (!AnimalPenManager.isAnimalPen(entity))
+        if (!AnimalPenManager.isAnimalPen(eventEntity) || !(eventEntity instanceof LivingEntity entity))
         {
             return;
         }
