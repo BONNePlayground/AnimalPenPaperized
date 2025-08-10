@@ -5,6 +5,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.damage.CraftDamageSource;
@@ -350,13 +351,25 @@ public class AnimalPenManager
 
                     if (newEntity instanceof LivingEntity livingEntity)
                     {
+                        livingEntity.setCollidable(false);
                         livingEntity.setAI(false);
                         livingEntity.setRemoveWhenFarAway(false);
                         livingEntity.setRotation(AnimalPenManager.blockFaceToYaw(blockData.blockFace), 0);
 
                         AttributeInstance attribute = livingEntity.getAttribute(Attribute.SCALE);
 
-                        if (attribute != null) attribute.setBaseValue(0.5d);
+                        if (attribute != null)
+                        {
+                            attribute.setBaseValue(AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getAnimalSize());
+
+                            if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isGrowAnimals())
+                            {
+                                attribute.addModifier(new AttributeModifier(ANIMAL_SIZE_MODIFIER,
+                                    AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getGrowthMultiplier() * newData.entityCount,
+                                    AttributeModifier.Operation.ADD_NUMBER
+                                ));
+                            }
+                        }
                     }
                 });
 
@@ -370,6 +383,22 @@ public class AnimalPenManager
         else
         {
             entity = block.getWorld().getEntity(blockData.entity);
+
+            if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isGrowAnimals() &&
+                entity instanceof LivingEntity livingEntity)
+            {
+                AttributeInstance attribute = livingEntity.getAttribute(Attribute.SCALE);
+
+                if (attribute != null)
+                {
+                    attribute.removeModifier(ANIMAL_SIZE_MODIFIER);
+
+                    attribute.addModifier(new AttributeModifier(ANIMAL_SIZE_MODIFIER,
+                        AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getGrowthMultiplier() * newData.entityCount,
+                        AttributeModifier.Operation.ADD_NUMBER
+                    ));
+                }
+            }
         }
 
         if (entity == null)
@@ -406,6 +435,22 @@ public class AnimalPenManager
             entity.getPersistentDataContainer().set(ANIMAL_DATA_KEY,
                 AnimalDataType.INSTANCE,
                 newData);
+
+            if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isGrowAnimals() &&
+                entity instanceof LivingEntity livingEntity)
+            {
+                AttributeInstance attribute = livingEntity.getAttribute(Attribute.SCALE);
+
+                if (attribute != null)
+                {
+                    attribute.removeModifier(ANIMAL_SIZE_MODIFIER);
+
+                    attribute.addModifier(new AttributeModifier(ANIMAL_SIZE_MODIFIER,
+                        AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getGrowthMultiplier() * newData.entityCount,
+                        AttributeModifier.Operation.ADD_NUMBER
+                    ));
+                }
+            }
         }
 
         Block block = entity.getLocation().getBlock();
@@ -2074,6 +2119,8 @@ public class AnimalPenManager
     private final static int ANIMAL_PEN_MODEL = 1001;
 
     private final static NamespacedKey UNIQUE_DATA_KEY = new NamespacedKey("animal_pen_plugin", "unique_key");
+
+    private final static NamespacedKey ANIMAL_SIZE_MODIFIER = new NamespacedKey("animal_pen_plugin", "animal_size");
 
     private static final Map<Material, SuspiciousEffectEntry> FLOWER_EFFECTS = Map.ofEntries(
         Map.entry(Material.ALLIUM, SuspiciousEffectEntry.create(PotionEffectType.FIRE_RESISTANCE, 80)),
