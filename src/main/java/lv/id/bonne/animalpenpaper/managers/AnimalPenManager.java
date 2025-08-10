@@ -1823,6 +1823,13 @@ public class AnimalPenManager
             itemStack.damage(1, player);
         }
 
+        int cooldown = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getAttackCooldown();
+
+        if (cooldown > 0)
+        {
+            player.setCooldown(itemStack, cooldown);
+        }
+
         data.entityCount -= 1;
         AnimalPenManager.setAnimalPenData(entity, data);
 
