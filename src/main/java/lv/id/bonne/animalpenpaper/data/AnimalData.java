@@ -4,6 +4,7 @@ package lv.id.bonne.animalpenpaper.data;
 import org.bukkit.entity.EntityType;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 
 public class AnimalData
@@ -26,7 +27,7 @@ public class AnimalData
     /**
      * The map that stores extra data.
      */
-    public Map<String, Integer> extra = new HashMap<>();
+    public Map<Extra, Object> extra = new HashMap<>();
 
     /**
      * Current version of data storage.
@@ -58,15 +59,27 @@ public class AnimalData
     }
 
 
-    public void setExtra(String key, int value)
+    public void setExtra(Extra key, Object value)
     {
         this.extra.put(key, value);
     }
 
 
-    public int getExtra(String key)
+    public <T> T removeExtra(Extra extra)
     {
-        return this.extra.getOrDefault(key, 0);
+        return (T) this.extra.remove(extra);
+    }
+
+
+    public <T> T getExtra(Extra key)
+    {
+        return (T) this.extra.get(key);
+    }
+
+
+    public boolean hasExtra(Extra extra)
+    {
+        return this.extra.containsKey(extra);
     }
 
 
@@ -79,5 +92,10 @@ public class AnimalData
     public enum Interaction
     {
         BRUSH, WATER_BUCKET, SHEARS, DYES, BUCKET, GLASS_BOTTLE, MAGMA_BLOCK, BOWL, FOOD
+    }
+
+    public enum Extra
+    {
+        SCUTE
     }
 }

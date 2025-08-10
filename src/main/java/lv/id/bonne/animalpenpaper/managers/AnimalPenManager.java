@@ -932,6 +932,18 @@ public class AnimalPenManager
                 Material.APPLE,
                 stackSize));
 
+        if (entity.getType() == EntityType.TURTLE)
+        {
+            // Handle scutes
+            data.setExtra(AnimalData.Extra.SCUTE, amount);
+
+            if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isDropScuteAtStart())
+            {
+                // Drop scutes at the start.
+                AnimalPenManager.handleScutes(entity, data);
+            }
+        }
+
         // Save data
         AnimalPenManager.setAnimalPenData(entity, data);
 
@@ -988,8 +1000,10 @@ public class AnimalPenManager
             itemStack.damage(16, player);
         }
 
-        entity.getWorld().dropItem(entity.getLocation().add(0, 1, 0),
-            new ItemStack(Material.ARMADILLO_SCUTE));
+        AnimalPenManager.dropItems(entity.getWorld(),
+            entity.getLocation().add(0, 1, 0),
+            Material.ARMADILLO_SCUTE,
+            1);
 
         entity.getWorld().playSound(entity,
             Sound.ENTITY_ARMADILLO_BRUSH,
@@ -1166,32 +1180,10 @@ public class AnimalPenManager
             itemStack.damage(1, player);
         }
 
-        int dropLimits = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getDropLimits(Material.HONEYCOMB);
-
-        if (dropLimits <= 0)
-        {
-            dropLimits = Integer.MAX_VALUE;
-        }
-
-        int itemCount = (int) Math.min(data.entityCount, dropLimits);
-
-        while (itemCount > 0)
-        {
-            ItemStack dropStack = new ItemStack(Material.HONEYCOMB);
-
-            if (itemCount > dropStack.getMaxStackSize())
-            {
-                dropStack.setAmount(dropStack.getMaxStackSize());
-                itemCount -= dropStack.getMaxStackSize();
-            }
-            else
-            {
-                dropStack.setAmount(itemCount);
-                itemCount = 0;
-            }
-
-            entity.getWorld().dropItem(entity.getLocation().add(0, 1, 0), dropStack);
-        }
+        AnimalPenManager.dropItems(entity.getWorld(),
+            entity.getLocation().add(0, 1, 0),
+            Material.HONEYCOMB,
+            3);
 
         player.swingMainHand();
 
@@ -1260,23 +1252,10 @@ public class AnimalPenManager
             woolCount += random.nextInt(3);
         }
 
-        while (woolCount > 0)
-        {
-            ItemStack woolStack = new ItemStack(woolMaterial);
-
-            if (woolCount > 64)
-            {
-                woolStack.setAmount(64);
-                woolCount -= 64;
-            }
-            else
-            {
-                woolStack.setAmount(woolCount);
-                woolCount = 0;
-            }
-
-            entity.getWorld().dropItem(entity.getLocation().add(0, 1, 0), woolStack);
-        }
+        AnimalPenManager.dropItems(entity.getWorld(),
+            entity.getLocation().add(0, 1, 0),
+            woolMaterial,
+            woolCount);
 
         player.swingMainHand();
 
@@ -1460,23 +1439,10 @@ public class AnimalPenManager
 
         int itemCount = (int) Math.min(data.entityCount, dropLimits);
 
-        while (itemCount > 0)
-        {
-            ItemStack dropStack = new ItemStack(material);
-
-            if (itemCount > dropStack.getMaxStackSize())
-            {
-                dropStack.setAmount(dropStack.getMaxStackSize());
-                itemCount -= dropStack.getMaxStackSize();
-            }
-            else
-            {
-                dropStack.setAmount(itemCount);
-                itemCount = 0;
-            }
-
-            entity.getWorld().dropItem(entity.getLocation().add(0, 1, 0), dropStack);
-        }
+        AnimalPenManager.dropItems(entity.getWorld(),
+            entity.getLocation().add(0, 1, 0),
+            material,
+            itemCount);
 
         player.swingMainHand();
 
@@ -1582,23 +1548,10 @@ public class AnimalPenManager
             itemStack.subtract(froglightCount);
         }
 
-        while (froglightCount > 0)
-        {
-            ItemStack frogLight = new ItemStack(material);
-
-            if (froglightCount > frogLight.getMaxStackSize())
-            {
-                frogLight.setAmount(frogLight.getMaxStackSize());
-                froglightCount -= frogLight.getMaxStackSize();
-            }
-            else
-            {
-                frogLight.setAmount(froglightCount);
-                froglightCount = 0;
-            }
-
-            entity.getWorld().dropItem(entity.getLocation().add(0, 1, 0), frogLight);
-        }
+        AnimalPenManager.dropItems(entity.getWorld(),
+            entity.getLocation().add(0, 1, 0),
+            material,
+            froglightCount);
 
         player.swingMainHand();
 
@@ -1832,6 +1785,23 @@ public class AnimalPenManager
     }
 
 
+    public static void handleScutes(Entity entity, AnimalData animalData)
+    {
+        if (!animalData.hasExtra(AnimalData.Extra.SCUTE))
+        {
+            // Nothing to process
+            return;
+        }
+
+        int scutes = animalData.removeExtra(AnimalData.Extra.SCUTE);
+
+        AnimalPenManager.dropItems(entity.getWorld(),
+            entity.getLocation().add(0, 1, 0),
+            Material.TURTLE_SCUTE,
+            scutes);
+    }
+
+
     public static void handleKilling(Entity entity, Player player, ItemStack itemStack)
     {
         AnimalData data = AnimalPenManager.getAnimalData(entity);
@@ -1920,8 +1890,54 @@ public class AnimalPenManager
 
 
 // ---------------------------------------------------------------------
+// Section: Processing methods
+// ---------------------------------------------------------------------
+
+
+    public static void processCooldownFinish(Entity entity, AnimalData.Interaction key, AnimalData animalData)
+    {
+        if (entity.getType() == EntityType.TURTLE &&
+            key == AnimalData.Interaction.FOOD &&
+            !AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isDropScuteAtStart())
+        {
+            AnimalPenManager.handleScutes(entity, animalData);
+        }
+        else if (entity.getType() == EntityType.SHEEP &&
+            key == AnimalData.Interaction.SHEARS)
+        {
+            ((Sheep) entity).setSheared(false);
+        }
+    }
+    
+
+// ---------------------------------------------------------------------
 // Section: Private methods
 // ---------------------------------------------------------------------
+
+
+    /**
+     * This method drops item stacks of given material in given amount naturally at the given location.
+     */
+    private static void dropItems(World world, Location location, Material material, int amount)
+    {
+        while (amount > 0)
+        {
+            ItemStack dropItem = new ItemStack(material);
+
+            if (amount > dropItem.getMaxStackSize())
+            {
+                dropItem.setAmount(dropItem.getMaxStackSize());
+                amount -= dropItem.getMaxStackSize();
+            }
+            else
+            {
+                dropItem.setAmount(amount);
+                amount = 0;
+            }
+
+            world.dropItemNaturally(location, dropItem);
+        }
+    }
 
 
     private static void triggerItemUse(Entity entity, Player player, ItemStack itemStack, int amount)

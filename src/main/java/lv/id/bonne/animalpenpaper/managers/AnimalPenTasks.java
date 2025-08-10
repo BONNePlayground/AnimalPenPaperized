@@ -123,7 +123,17 @@ public class AnimalPenTasks implements Listener
                             List<Display> displayList = cache.get(entityReference);
 
                             // Reduce cooldowns by 20
-                            animalData.cooldowns.replaceAll((key, value) -> Math.max(0, value - 20));
+                            animalData.cooldowns.replaceAll((key, value) -> {
+                                int newValue = Math.max(0, value - 20);
+
+                                if (newValue == 0 && value > 0)
+                                {
+                                    AnimalPenManager.processCooldownFinish(entity, key, animalData);
+                                }
+
+                                return newValue;
+                            });
+
                             // Update data
                             AnimalPenManager.setAnimalPenData(entity, animalData);
 
