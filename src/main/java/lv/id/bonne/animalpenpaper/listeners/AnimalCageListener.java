@@ -248,7 +248,7 @@ public class AnimalCageListener implements Listener
         }
 
         // Now just combine both data, and clear item.
-        penData.setEntityCount(itemData.entityCount());
+        penData.addEntityCount(itemData.entityCount());
 
         // Merge cooldowns
         itemData.getCooldowns().forEach((key, value) -> penData.getCooldowns().merge(key, value, Math::max));
