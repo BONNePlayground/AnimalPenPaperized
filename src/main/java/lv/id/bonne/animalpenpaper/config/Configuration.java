@@ -15,6 +15,8 @@ import org.bukkit.entity.EntityType;
 import java.util.*;
 
 import lv.id.bonne.animalpenpaper.config.annotations.JsonComment;
+import lv.id.bonne.animalpenpaper.config.annotations.SerializeWithComments;
+
 
 /**
  * The type Configuration.
@@ -425,6 +427,7 @@ public class Configuration
     /**
      * The type Cooldown entry.
      */
+    @SerializeWithComments
     public static class CooldownEntry
     {
         /**

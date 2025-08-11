@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import lv.id.bonne.animalpenpaper.config.annotations.JsonComment;
+import lv.id.bonne.animalpenpaper.config.annotations.SerializeWithComments;
 
 
 /**
@@ -119,17 +120,17 @@ public class CommentGeneration
                     serializeMap(map, jsonWithComments, gson, indentLevel + 1);
                     jsonWithComments.append(indent).append("}");
                 }
-                else if (hasTypeAdapter(gson, field))
-                {
-                    jsonWithComments.append(gson.toJson(fieldValue));
-                }
-                else if (isNotPrimitive(fieldValue))
+                else if (isSerializableWithComments(fieldValue))
                 {
                     // Serialize object as recursive object.
                     jsonWithComments.append("{\n");
                     serializeObjectWithComments(fieldValue, jsonWithComments, gson, indentLevel + 1);
                     jsonWithComments.append("\n");
                     jsonWithComments.append(indent).append("}");
+                }
+                else if (hasTypeAdapter(gson, field))
+                {
+                    jsonWithComments.append(gson.toJson(fieldValue));
                 }
                 else
                 {
@@ -209,17 +210,17 @@ public class CommentGeneration
                 serializeMap(map, jsonWithComments, gson, indentLevel + 1);
                 jsonWithComments.append(indent).append("}");
             }
-            else if (hasTypeAdapter(gson, item))
-            {
-                jsonWithComments.append(gson.toJson(item));
-            }
-            else if (isNotPrimitive(item))
+            else if (isSerializableWithComments(item))
             {
                 // Serialize object as recursive object.
                 jsonWithComments.append("{\n");
                 serializeObjectWithComments(item, jsonWithComments, gson, indentLevel + 1);
                 jsonWithComments.append("\n");
                 jsonWithComments.append(indent).append("}");
+            }
+            else if (hasTypeAdapter(gson, item))
+            {
+                jsonWithComments.append(gson.toJson(item));
             }
             else
             {
@@ -268,17 +269,17 @@ public class CommentGeneration
                 serializeMap(map2, jsonWithComments, gson, indentLevel + 1);
                 jsonWithComments.append(indent).append("}");
             }
-            else if (hasTypeAdapter(gson, value))
-            {
-                jsonWithComments.append(gson.toJson(value));
-            }
-            else if (isNotPrimitive(value))
+            else if (isSerializableWithComments(value))
             {
                 // Serialize object as recursive object.
                 jsonWithComments.append("{\n");
                 serializeObjectWithComments(value, jsonWithComments, gson, indentLevel + 1);
                 jsonWithComments.append("\n");
                 jsonWithComments.append(indent).append("}");
+            }
+            else if (hasTypeAdapter(gson, value))
+            {
+                jsonWithComments.append(gson.toJson(value));
             }
             else
             {
@@ -299,11 +300,8 @@ public class CommentGeneration
     /**
      * This method returns if an object is not primitive.
      */
-    private static boolean isNotPrimitive(Object obj)
+    private static boolean isSerializableWithComments(Object obj)
     {
-        return !(obj instanceof String) &&
-            !obj.getClass().isPrimitive() &&
-            !(obj instanceof Number) &&
-            !(obj instanceof Boolean);
+        return obj.getClass().isAnnotationPresent(SerializeWithComments.class);
     }
 }

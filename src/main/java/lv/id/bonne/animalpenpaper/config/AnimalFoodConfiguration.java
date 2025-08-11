@@ -8,7 +8,6 @@ package lv.id.bonne.animalpenpaper.config;
 
 
 import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -21,7 +20,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import lv.id.bonne.animalpenpaper.config.adapters.FoodItemTypeAdapter;
 import lv.id.bonne.animalpenpaper.config.annotations.JsonComment;
 
 
@@ -290,7 +288,6 @@ public class AnimalFoodConfiguration
     /**
      * This class manages food item matching with either item or tag.
      */
-    @JsonAdapter(FoodItemTypeAdapter.class)
     public static class FoodItem
     {
         public FoodItem(String identifier)
