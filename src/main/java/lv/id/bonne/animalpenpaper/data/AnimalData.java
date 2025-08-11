@@ -1,10 +1,14 @@
 package lv.id.bonne.animalpenpaper.data;
 
 
+import com.google.gson.annotations.JsonAdapter;
+import org.bukkit.entity.EntitySnapshot;
 import org.bukkit.entity.EntityType;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import lv.id.bonne.animalpenpaper.config.adapters.EntitySnapshotTypeAdapter;
 
 
 public class AnimalData
@@ -30,15 +34,22 @@ public class AnimalData
     public Map<Extra, Object> extra = new HashMap<>();
 
     /**
+     * The value stores current entity snapshot
+     */
+    @JsonAdapter(EntitySnapshotTypeAdapter.class)
+    public EntitySnapshot entitySnapshot = null;
+
+    /**
      * Current version of data storage.
      */
     public int version = 1;
 
 
-    public AnimalData(EntityType entityType, long entityCount)
+    public AnimalData(EntityType entityType, EntitySnapshot entitySnapshot, long entityCount)
     {
         this.entityType = entityType;
         this.entityCount = entityCount;
+        this.entitySnapshot = entitySnapshot;
     }
 
 

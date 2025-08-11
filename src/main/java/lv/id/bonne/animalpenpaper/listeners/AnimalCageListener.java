@@ -93,7 +93,7 @@ public class AnimalCageListener implements Listener
         }
         else
         {
-            storedData = new AnimalData(entityType, 0);
+            storedData = new AnimalData(entityType, entity.createSnapshot(), 0);
         }
 
         long maxAmount = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getMaximalAnimalCount();
@@ -105,7 +105,7 @@ public class AnimalCageListener implements Listener
             return;
         }
 
-        AnimalPenManager.addAnimal(item, entityType, 1);
+        AnimalPenManager.addAnimal(item, entityType, entity.createSnapshot(), 1);
 
         entity.remove();
         player.swingMainHand();
@@ -153,12 +153,18 @@ public class AnimalCageListener implements Listener
         Location spawnLoc = block.getLocation().add(0.5, 1, 0.5);
         World world = player.getWorld();
 
-        Entity entity = world.spawnEntity(spawnLoc,
-            entityType,
-            CreatureSpawnEvent.SpawnReason.CUSTOM,
-            spawnedEntity -> {
-                // TODO: apply variants for entities.
-            });
+        Entity entity;
+
+        if (storedData.entitySnapshot != null)
+        {
+            entity = storedData.entitySnapshot.createEntity(spawnLoc);
+        }
+        else
+        {
+            entity = world.spawnEntity(spawnLoc,
+                entityType,
+                CreatureSpawnEvent.SpawnReason.CUSTOM);
+        }
 
         if (!(entity instanceof Animals))
         {
@@ -233,7 +239,7 @@ public class AnimalCageListener implements Listener
             }
 
             // Clone half of data to new item
-            itemData = new AnimalData(penData.entityType, penData.entityCount / 2);
+            itemData = new AnimalData(penData.entityType, penData.entitySnapshot, penData.entityCount / 2);
             itemData.cooldowns = new HashMap<>(penData.cooldowns);
             itemData.extra = new HashMap<>(penData.extra);
 

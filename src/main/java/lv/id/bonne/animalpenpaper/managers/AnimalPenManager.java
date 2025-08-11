@@ -73,14 +73,14 @@ public class AnimalPenManager
     }
 
 
-    public static AnimalData addAnimal(ItemStack handItem, @NotNull EntityType type, long amount)
+    public static AnimalData addAnimal(ItemStack handItem, @NotNull EntityType type, EntitySnapshot entitySnapshot, long amount)
     {
         ItemMeta itemMeta = handItem.getItemMeta();
 
         PersistentDataContainer dataContainer = itemMeta.getPersistentDataContainer();
         AnimalData animalData = dataContainer.getOrDefault(AnimalPenManager.ANIMAL_DATA_KEY,
             AnimalDataType.INSTANCE,
-            new AnimalData(type, 0));
+            new AnimalData(type, entitySnapshot, 0));
 
         animalData.entityCount += amount;
 
@@ -338,37 +338,43 @@ public class AnimalPenManager
         // Entity to display
         if (blockData.entity == null || block.getWorld().getEntity(blockData.entity) == null)
         {
-            entity = block.getWorld().spawnEntity(block.getLocation().add(0.5, 0.5, 0.5),
-                newData.entityType,
-                CreatureSpawnEvent.SpawnReason.CUSTOM,
-                (newEntity) -> {
-                    newEntity.setGravity(false);
-                    newEntity.setNoPhysics(true);
-                    newEntity.setPersistent(true);
+            if (newData.entitySnapshot != null)
+            {
+                entity = newData.entitySnapshot.createEntity(block.getLocation().add(0.5, 0.5, 0.5));
+            }
+            else
+            {
+                entity = block.getWorld().spawnEntity(block.getLocation().add(0.5, 0.5, 0.5),
+                    newData.entityType,
+                    CreatureSpawnEvent.SpawnReason.CUSTOM);
+            }
 
-                    if (newEntity instanceof LivingEntity livingEntity)
+            entity.setGravity(false);
+            entity.setNoPhysics(true);
+            entity.setPersistent(true);
+
+            if (entity instanceof LivingEntity livingEntity)
+            {
+                livingEntity.setCollidable(false);
+                livingEntity.setAI(false);
+                livingEntity.setRemoveWhenFarAway(false);
+                livingEntity.setRotation(AnimalPenManager.blockFaceToYaw(blockData.blockFace), 0);
+
+                AttributeInstance attribute = livingEntity.getAttribute(Attribute.SCALE);
+
+                if (attribute != null)
+                {
+                    attribute.setBaseValue(AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getAnimalSize());
+
+                    if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isGrowAnimals())
                     {
-                        livingEntity.setCollidable(false);
-                        livingEntity.setAI(false);
-                        livingEntity.setRemoveWhenFarAway(false);
-                        livingEntity.setRotation(AnimalPenManager.blockFaceToYaw(blockData.blockFace), 0);
-
-                        AttributeInstance attribute = livingEntity.getAttribute(Attribute.SCALE);
-
-                        if (attribute != null)
-                        {
-                            attribute.setBaseValue(AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getAnimalSize());
-
-                            if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isGrowAnimals())
-                            {
-                                attribute.addModifier(new AttributeModifier(ANIMAL_SIZE_MODIFIER,
-                                    AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getGrowthMultiplier() * newData.entityCount,
-                                    AttributeModifier.Operation.ADD_NUMBER
-                                ));
-                            }
-                        }
+                        attribute.addModifier(new AttributeModifier(ANIMAL_SIZE_MODIFIER,
+                            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getGrowthMultiplier() * newData.entityCount,
+                            AttributeModifier.Operation.ADD_NUMBER
+                        ));
                     }
-                });
+                }
+            }
 
             blockData.entity = entity.getUniqueId();
 
