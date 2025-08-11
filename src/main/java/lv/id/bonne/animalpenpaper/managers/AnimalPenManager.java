@@ -294,6 +294,44 @@ public class AnimalPenManager
 
             block.getWorld().getPersistentDataContainer().set(penKey, BlockDataType.INSTANCE, blockData);
         }
+
+        if (entity instanceof LivingEntity livingEntity)
+        {
+            // Validate attributes
+            AttributeInstance attribute = livingEntity.getAttribute(Attribute.SCALE);
+
+            if (attribute != null &&
+                livingEntity instanceof Animals)
+            {
+                if (attribute.getBaseValue() != AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getAnimalSize())
+                {
+                    attribute.setBaseValue(AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getAnimalSize());
+                }
+
+                if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isGrowAnimals())
+                {
+                    AnimalData animalData = AnimalPenManager.getAnimalData(entity);
+
+                    if (animalData != null)
+                    {
+                        AttributeModifier modifier = attribute.getModifier(ANIMAL_SIZE_MODIFIER);
+                        float multiplier =
+                            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getGrowthMultiplier() *
+                                animalData.entityCount();
+
+                        if (modifier != null && modifier.getAmount() != multiplier)
+                        {
+                            attribute.getModifier(ANIMAL_SIZE_MODIFIER);
+
+                            attribute.addModifier(new AttributeModifier(ANIMAL_SIZE_MODIFIER,
+                                multiplier,
+                                AttributeModifier.Operation.ADD_NUMBER
+                            ));
+                        }
+                    }
+                }
+            }
+        }
     }
 
 
