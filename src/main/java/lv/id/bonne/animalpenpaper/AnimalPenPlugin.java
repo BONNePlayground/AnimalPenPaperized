@@ -7,6 +7,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import lv.id.bonne.animalpenpaper.commands.AnimalPenCommands;
 import lv.id.bonne.animalpenpaper.config.ConfigurationManager;
 import lv.id.bonne.animalpenpaper.listeners.AnimalCageListener;
 import lv.id.bonne.animalpenpaper.listeners.AnimalPenListener;
@@ -28,6 +30,8 @@ public class AnimalPenPlugin extends JavaPlugin implements Listener
     public void onEnable()
     {
         AnimalPenPlugin.CONFIG_MANAGER.readConfig();
+
+        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, AnimalPenCommands::register);
 
         this.getServer().getPluginManager().registerEvents(new AnimalCageListener(), this);
         this.getServer().getPluginManager().registerEvents(new AnimalPenListener(), this);
