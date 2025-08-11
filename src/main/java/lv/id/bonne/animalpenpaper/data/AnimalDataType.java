@@ -4,23 +4,17 @@ package lv.id.bonne.animalpenpaper.data;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import org.bukkit.entity.EntitySnapshot;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
-import java.util.HashMap;
 
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
+import lv.id.bonne.animalpenpaper.config.adapters.EntitySnapshotTypeAdapter;
 
 
 public class AnimalDataType implements PersistentDataType<String, AnimalData>
 {
-
-    public static final AnimalDataType INSTANCE = new AnimalDataType();
-
-    private static final Gson GSON = new GsonBuilder()
-        .setPrettyPrinting()
-        .create();
-
 
     @Override
     @NotNull
@@ -50,7 +44,7 @@ public class AnimalDataType implements PersistentDataType<String, AnimalData>
         {
             AnimalPenPlugin.getInstance().getLogger().warning("Failed to serialize AnimalData: " + e.getMessage());
             // Return a minimal valid JSON as fallback
-            return "{\"version\":1,\"cooldowns\":{},\"extra\":{}}";
+            return "{\"version\":1,\"cooldowns\":{}}";
         }
     }
 
@@ -62,15 +56,6 @@ public class AnimalDataType implements PersistentDataType<String, AnimalData>
         try
         {
             AnimalData data = GSON.fromJson(primitive, AnimalData.class);
-
-            if (data.cooldowns == null)
-            {
-                data.cooldowns = new HashMap<>();
-            }
-            if (data.extra == null)
-            {
-                data.extra = new HashMap<>();
-            }
 
             // Handle version migration
             if (data.version == 0)
@@ -87,10 +72,20 @@ public class AnimalDataType implements PersistentDataType<String, AnimalData>
             AnimalPenPlugin.getInstance().getLogger().warning("Raw JSON: " + primitive);
 
             // Return a default AnimalData instead of crashing
-            AnimalData fallback = new AnimalData();
-            fallback.entityType = null;
-            fallback.entityCount = 0;
-            return fallback;
+            return new AnimalData(null, null, 0);
         }
     }
+
+
+    /**
+     * Object instance for data assigning/accessing
+     */
+    public static final AnimalDataType INSTANCE = new AnimalDataType();
+
+    /**
+     * Gson serializer.
+     */
+    private static final Gson GSON = new GsonBuilder().
+        registerTypeAdapter(EntitySnapshot.class, new EntitySnapshotTypeAdapter()).
+        create();
 }

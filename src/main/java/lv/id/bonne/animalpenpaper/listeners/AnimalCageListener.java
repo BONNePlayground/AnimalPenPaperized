@@ -1,7 +1,8 @@
 package lv.id.bonne.animalpenpaper.listeners;
 
 
-import org.bukkit.*;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -14,11 +15,9 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.HashMap;
-
-import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
+import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
 import net.kyori.adventure.text.Component;
 
@@ -53,23 +52,20 @@ public class AnimalCageListener implements Listener
 
         if (!(entity instanceof Animals animal))
         {
-            player.sendMessage(Component.text("This is not a valid animal.").
-                style(StyleUtil.RED_COLOR));
+            player.sendMessage(Component.text("This is not a valid animal.").style(StyleUtil.RED_COLOR));
             return;
         }
 
         if (animal.isDead() || !animal.isAdult() || !animal.hasAI())
         {
-            player.sendMessage(Component.text("Cannot capture dead or baby animals.").
-                style(StyleUtil.RED_COLOR));
+            player.sendMessage(Component.text("Cannot capture dead or baby animals.").style(StyleUtil.RED_COLOR));
             return;
         }
 
         if (entity instanceof Tameable tameable && tameable.isTamed() ||
             entity instanceof AbstractHorse horse && horse.isTamed())
         {
-            player.sendMessage(Component.text("Cannot capture tamed animals.").
-                style(StyleUtil.RED_COLOR));
+            player.sendMessage(Component.text("Cannot capture tamed animals.").style(StyleUtil.RED_COLOR));
             return;
         }
 
@@ -85,10 +81,9 @@ public class AnimalCageListener implements Listener
         AnimalData storedData = AnimalPenManager.getAnimalData(item);
 
         // Check if item already contains another type
-        if (storedData != null && storedData.entityType != entityType)
+        if (storedData != null && storedData.entityType() != entityType)
         {
-            player.sendMessage(Component.text("This cage contains a different animal.").
-                style(StyleUtil.RED_COLOR));
+            player.sendMessage(Component.text("This cage contains a different animal.").style(StyleUtil.RED_COLOR));
             return;
         }
         else
@@ -98,10 +93,9 @@ public class AnimalCageListener implements Listener
 
         long maxAmount = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getMaximalAnimalCount();
 
-        if (maxAmount > 0 && storedData.entityCount + 1 > maxAmount)
+        if (maxAmount > 0 && storedData.entityCount() + 1 > maxAmount)
         {
-            player.sendMessage(Component.text("Cage is full.").
-                style(StyleUtil.RED_COLOR));
+            player.sendMessage(Component.text("Cage is full.").style(StyleUtil.RED_COLOR));
             return;
         }
 
@@ -109,8 +103,7 @@ public class AnimalCageListener implements Listener
 
         entity.remove();
         player.swingMainHand();
-        player.sendMessage(Component.text("Captured " + entity.getType().name()).
-            style(StyleUtil.GREEN_COLOR));
+        player.sendMessage(Component.text("Captured " + entity.getType().name()).style(StyleUtil.GREEN_COLOR));
     }
 
 
@@ -148,22 +141,20 @@ public class AnimalCageListener implements Listener
             return;
         }
 
-        EntityType entityType = storedData.entityType;
+        EntityType entityType = storedData.entityType();
 
         Location spawnLoc = block.getLocation().add(0.5, 1, 0.5);
         World world = player.getWorld();
 
         Entity entity;
 
-        if (storedData.entitySnapshot != null)
+        if (storedData.entitySnapshot() != null)
         {
-            entity = storedData.entitySnapshot.createEntity(spawnLoc);
+            entity = storedData.entitySnapshot().createEntity(spawnLoc);
         }
         else
         {
-            entity = world.spawnEntity(spawnLoc,
-                entityType,
-                CreatureSpawnEvent.SpawnReason.CUSTOM);
+            entity = world.spawnEntity(spawnLoc, entityType, CreatureSpawnEvent.SpawnReason.CUSTOM);
         }
 
         if (!(entity instanceof Animals))
@@ -174,8 +165,7 @@ public class AnimalCageListener implements Listener
         AnimalPenManager.removeAnimal(item, 1);
 
         player.swingMainHand();
-        player.sendMessage(Component.text("Released " + entity.getType().name()).
-            style(StyleUtil.GREEN_COLOR));
+        player.sendMessage(Component.text("Released " + entity.getType().name()).style(StyleUtil.GREEN_COLOR));
     }
 
 
@@ -224,45 +214,44 @@ public class AnimalCageListener implements Listener
             item.setAmount(-1);
             player.getInventory().setItem(event.getHand(), item);
             player.swingMainHand();
-            player.sendMessage(Component.text("Inserted into animal pen").
-                style(StyleUtil.GREEN_COLOR));
+            player.sendMessage(Component.text("Inserted into animal pen").style(StyleUtil.GREEN_COLOR));
 
             return;
         }
 
         if (itemData == null)
         {
-            if (!player.isSneaking() || penData.entityCount < 2)
+            if (!player.isSneaking() || penData.entityCount() < 2)
             {
                 // Only on sneaking or there is something to split
                 return;
             }
 
             // Clone half of data to new item
-            itemData = new AnimalData(penData.entityType, penData.entitySnapshot, penData.entityCount / 2);
-            itemData.cooldowns = new HashMap<>(penData.cooldowns);
-            itemData.extra = new HashMap<>(penData.extra);
+            itemData = new AnimalData(penData.entityType(), penData.entitySnapshot(), penData.entityCount() / 2);
+            itemData.getCooldowns().putAll(penData.getCooldowns());
+            itemData.setScutes(penData.scutes());
 
             AnimalPenManager.setItemData(item, itemData);
 
-            penData.entityCount -= itemData.entityCount;
+            penData.reduceEntityCount(itemData.entityCount());
 
             AnimalPenManager.setAnimalPenData(block, penData);
 
             return;
         }
 
-        if (penData.entityType != itemData.entityType)
+        if (penData.entityType() != itemData.entityType())
         {
             // Cannot merge different entities
             return;
         }
 
         // Now just combine both data, and clear item.
-        penData.entityCount += itemData.entityCount;
+        penData.setEntityCount(itemData.entityCount());
 
         // Merge cooldowns
-        itemData.cooldowns.forEach((key, value) -> penData.cooldowns.merge(key, value, Math::max));
+        itemData.getCooldowns().forEach((key, value) -> penData.getCooldowns().merge(key, value, Math::max));
 
         // TODO: extra and variant
 
@@ -278,8 +267,7 @@ public class AnimalCageListener implements Listener
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onInteractWithPenWithEmptyHand(PlayerInteractEvent event)
     {
-        if (event.getItem() != null && !event.getItem().getType().isAir() ||
-            event.getHand() == EquipmentSlot.OFF_HAND)
+        if (event.getItem() != null && !event.getItem().getType().isAir() || event.getHand() == EquipmentSlot.OFF_HAND)
         {
             return;
         }
@@ -310,7 +298,7 @@ public class AnimalCageListener implements Listener
 
         AnimalPenManager.clearBlockData(block, true);
 
-        event.getPlayer().getInventory().setItem(event.getHand() == null ?
-            EquipmentSlot.HAND : event.getHand(), itemStack);
+        event.getPlayer().getInventory().
+            setItem(event.getHand() == null ? EquipmentSlot.HAND : event.getHand(), itemStack);
     }
 }

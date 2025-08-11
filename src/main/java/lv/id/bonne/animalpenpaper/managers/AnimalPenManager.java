@@ -73,7 +73,10 @@ public class AnimalPenManager
     }
 
 
-    public static AnimalData addAnimal(ItemStack handItem, @NotNull EntityType type, EntitySnapshot entitySnapshot, long amount)
+    public static AnimalData addAnimal(ItemStack handItem,
+        @NotNull EntityType type,
+        EntitySnapshot entitySnapshot,
+        long amount)
     {
         ItemMeta itemMeta = handItem.getItemMeta();
 
@@ -82,13 +85,14 @@ public class AnimalPenManager
             AnimalDataType.INSTANCE,
             new AnimalData(type, entitySnapshot, 0));
 
-        animalData.entityCount += amount;
+        animalData.addEntityCount(amount);
 
         dataContainer.set(AnimalPenManager.ANIMAL_DATA_KEY, AnimalDataType.INSTANCE, animalData);
 
         itemMeta.lore(List.of(Component.empty(),
-            Component.text("Animal: ").style(StyleUtil.GRAY).append(Component.translatable(animalData.entityType.translationKey())),
-            Component.text("Count: ").style(StyleUtil.GRAY).append(Component.text(animalData.entityCount)),
+            Component.text("Animal: ").style(StyleUtil.GRAY)
+                .append(Component.translatable(animalData.entityType().translationKey())),
+            Component.text("Count: ").style(StyleUtil.GRAY).append(Component.text(animalData.entityCount())),
             Component.empty(),
             Component.text("Shift Right-click on block to release it").style(StyleUtil.GRAY)));
 
@@ -110,9 +114,9 @@ public class AnimalPenManager
             return item;
         }
 
-        animalData.entityCount -= amount;
+        animalData.reduceEntityCount(amount);
 
-        if (animalData.entityCount <= 0)
+        if (animalData.entityCount() <= 0)
         {
             dataContainer.remove(AnimalPenManager.ANIMAL_DATA_KEY);
             itemMeta.lore(List.of(Component.empty(),
@@ -123,8 +127,9 @@ public class AnimalPenManager
             dataContainer.set(AnimalPenManager.ANIMAL_DATA_KEY, AnimalDataType.INSTANCE, animalData);
 
             itemMeta.lore(List.of(Component.empty(),
-                Component.text("Animal: ").style(StyleUtil.GRAY).append(Component.translatable(animalData.entityType.translationKey())),
-                Component.text("Count: ").style(StyleUtil.GRAY).append(Component.text(animalData.entityCount)),
+                Component.text("Animal: ").style(StyleUtil.GRAY)
+                    .append(Component.translatable(animalData.entityType().translationKey())),
+                Component.text("Count: ").style(StyleUtil.GRAY).append(Component.text(animalData.entityCount())),
                 Component.empty(),
                 Component.text("Shift Right-click on block to release it").style(StyleUtil.GRAY)));
         }
@@ -161,11 +166,13 @@ public class AnimalPenManager
         }
         else
         {
-            itemMeta.getPersistentDataContainer().set(AnimalPenManager.ANIMAL_DATA_KEY, AnimalDataType.INSTANCE, animalData);
+            itemMeta.getPersistentDataContainer()
+                .set(AnimalPenManager.ANIMAL_DATA_KEY, AnimalDataType.INSTANCE, animalData);
 
             itemMeta.lore(List.of(Component.empty(),
-                Component.text("Animal: ").style(StyleUtil.GRAY).append(Component.translatable(animalData.entityType.translationKey())),
-                Component.text("Count: ").style(StyleUtil.GRAY).append(Component.text(animalData.entityCount)),
+                Component.text("Animal: ").style(StyleUtil.GRAY)
+                    .append(Component.translatable(animalData.entityType().translationKey())),
+                Component.text("Count: ").style(StyleUtil.GRAY).append(Component.text(animalData.entityCount())),
                 Component.empty(),
                 Component.text("Shift Right-click on block to release it").style(StyleUtil.GRAY)));
         }
@@ -177,7 +184,8 @@ public class AnimalPenManager
     /**
      * Create an empty animal cage
      */
-    public static ItemStack createEmptyAnimalCage() {
+    public static ItemStack createEmptyAnimalCage()
+    {
         ItemStack bottle = new ItemStack(Material.GLASS_BOTTLE);
         ItemMeta meta = bottle.getItemMeta();
         if (meta == null) return bottle;
@@ -275,9 +283,9 @@ public class AnimalPenManager
 
             Collection<Entity> nearbyEntities = block.getWorld().
                 getNearbyEntities(block.getBoundingBox().expand(1),
-                findEntity -> findEntity.getType() == EntityType.TEXT_DISPLAY &&
-                    findEntity.getFacing() == entity.getFacing() &&
-                    findEntity.getPersistentDataContainer().has(penKey));
+                    findEntity -> findEntity.getType() == EntityType.TEXT_DISPLAY &&
+                        findEntity.getFacing() == entity.getFacing() &&
+                        findEntity.getPersistentDataContainer().has(penKey));
 
             if (!nearbyEntities.isEmpty())
             {
@@ -338,14 +346,14 @@ public class AnimalPenManager
         // Entity to display
         if (blockData.entity == null || block.getWorld().getEntity(blockData.entity) == null)
         {
-            if (newData.entitySnapshot != null)
+            if (newData.entitySnapshot() != null)
             {
-                entity = newData.entitySnapshot.createEntity(block.getLocation().add(0.5, 0.5, 0.5));
+                entity = newData.entitySnapshot().createEntity(block.getLocation().add(0.5, 0.5, 0.5));
             }
             else
             {
                 entity = block.getWorld().spawnEntity(block.getLocation().add(0.5, 0.5, 0.5),
-                    newData.entityType,
+                    newData.entityType(),
                     CreatureSpawnEvent.SpawnReason.CUSTOM);
             }
 
@@ -369,7 +377,8 @@ public class AnimalPenManager
                     if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isGrowAnimals())
                     {
                         attribute.addModifier(new AttributeModifier(ANIMAL_SIZE_MODIFIER,
-                            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getGrowthMultiplier() * newData.entityCount,
+                            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getGrowthMultiplier() *
+                                newData.entityCount(),
                             AttributeModifier.Operation.ADD_NUMBER
                         ));
                     }
@@ -397,7 +406,7 @@ public class AnimalPenManager
                     attribute.removeModifier(ANIMAL_SIZE_MODIFIER);
 
                     attribute.addModifier(new AttributeModifier(ANIMAL_SIZE_MODIFIER,
-                        AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getGrowthMultiplier() * newData.entityCount,
+                        AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getGrowthMultiplier() * newData.entityCount(),
                         AttributeModifier.Operation.ADD_NUMBER
                     ));
                 }
@@ -416,13 +425,13 @@ public class AnimalPenManager
             AnimalDataType.INSTANCE,
             newData);
 
-        updateCountTextEntity(block, blockData, newData.entityCount, penKey);
+        updateCountTextEntity(block, blockData, newData.entityCount(), penKey);
     }
 
 
     public static void setAnimalPenData(Entity entity, AnimalData newData)
     {
-        if (newData.entityCount <= 0)
+        if (newData.entityCount() <= 0)
         {
             // Entity is removed. Do propper stuff.
             ItemStack itemStack = AnimalPenManager.createEmptyAnimalCage();
@@ -449,7 +458,7 @@ public class AnimalPenManager
                     attribute.removeModifier(ANIMAL_SIZE_MODIFIER);
 
                     attribute.addModifier(new AttributeModifier(ANIMAL_SIZE_MODIFIER,
-                        AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getGrowthMultiplier() * newData.entityCount,
+                        AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getGrowthMultiplier() * newData.entityCount(),
                         AttributeModifier.Operation.ADD_NUMBER
                     ));
                 }
@@ -465,7 +474,7 @@ public class AnimalPenManager
             BlockDataType.INSTANCE,
             new BlockData());
 
-        updateCountTextEntity(block, blockData, newData.entityCount, penKey);
+        updateCountTextEntity(block, blockData, newData.entityCount(), penKey);
     }
 
 
@@ -520,7 +529,8 @@ public class AnimalPenManager
     /**
      * Create an animal pen
      */
-    public static ItemStack createAnimalPen() {
+    public static ItemStack createAnimalPen()
+    {
         ItemStack smoothStoneSlab = new ItemStack(Material.SMOOTH_STONE_SLAB);
         ItemMeta meta = smoothStoneSlab.getItemMeta();
         if (meta == null) return smoothStoneSlab;
@@ -547,7 +557,8 @@ public class AnimalPenManager
                 block.getLocation().add(AnimalPenManager.center(blockData.blockFace)),
                 EntityType.TEXT_DISPLAY,
                 CreatureSpawnEvent.SpawnReason.CUSTOM,
-                (newEntity) -> {
+                (newEntity) ->
+                {
                     newEntity.setPersistent(true);
                     newEntity.setRotation(AnimalPenManager.blockFaceToYaw(blockData.blockFace), 0);
 
@@ -588,7 +599,7 @@ public class AnimalPenManager
         if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
             entityType,
             Material.APPLE,
-            animalData.entityCount) != 0)
+            animalData.entityCount()) != 0)
         {
             // Food Items.
 
@@ -601,7 +612,7 @@ public class AnimalPenManager
             {
                 Component component;
 
-                if (!animalData.hasCooldown(AnimalData.Interaction.FOOD))
+                if (!animalData.hasCooldown(Material.APPLE))
                 {
                     component = Component.text("Ready!           ").
                         style(Style.style().color(TextColor.color(5635925)).build());
@@ -610,7 +621,7 @@ public class AnimalPenManager
                 {
                     component = Component.text("Cooldown: ").append(
                         Component.text(LocalTime.of(0, 0, 0).
-                            plusSeconds(animalData.getCooldown(AnimalData.Interaction.FOOD) / 20).
+                            plusSeconds(animalData.getCooldown(Material.APPLE) / 20).
                             format(AnimalPenManager.DATE_FORMATTER)));
                 }
 
@@ -637,7 +648,6 @@ public class AnimalPenManager
                 Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
                     animalData,
                     Material.BRUSH,
-                    AnimalData.Interaction.BRUSH,
                     Material.ARMADILLO_SCUTE);
 
                 if (textPairMessage != null)
@@ -650,7 +660,6 @@ public class AnimalPenManager
                 Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
                     animalData,
                     Material.WATER_BUCKET,
-                    AnimalData.Interaction.WATER_BUCKET,
                     Material.AXOLOTL_BUCKET);
 
                 if (textPairMessage != null)
@@ -663,7 +672,6 @@ public class AnimalPenManager
                 Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
                     animalData,
                     Material.WATER_BUCKET,
-                    AnimalData.Interaction.WATER_BUCKET,
                     Material.COD_BUCKET);
 
                 if (textPairMessage != null)
@@ -676,7 +684,6 @@ public class AnimalPenManager
                 Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
                     animalData,
                     Material.WATER_BUCKET,
-                    AnimalData.Interaction.WATER_BUCKET,
                     Material.SALMON_BUCKET);
 
                 if (textPairMessage != null)
@@ -689,7 +696,6 @@ public class AnimalPenManager
                 Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
                     animalData,
                     Material.WATER_BUCKET,
-                    AnimalData.Interaction.WATER_BUCKET,
                     Material.PUFFERFISH_BUCKET);
 
                 if (textPairMessage != null)
@@ -702,7 +708,6 @@ public class AnimalPenManager
                 Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
                     animalData,
                     Material.WATER_BUCKET,
-                    AnimalData.Interaction.WATER_BUCKET,
                     Material.TROPICAL_FISH_BUCKET);
 
                 if (textPairMessage != null)
@@ -715,7 +720,6 @@ public class AnimalPenManager
                 Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
                     animalData,
                     Material.WATER_BUCKET,
-                    AnimalData.Interaction.WATER_BUCKET,
                     Material.TADPOLE_BUCKET);
 
                 if (textPairMessage != null)
@@ -725,34 +729,48 @@ public class AnimalPenManager
             }
             case BEE ->
             {
-                Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
-                    animalData,
-                    Material.SHEARS,
-                    AnimalData.Interaction.SHEARS,
-                    Material.HONEYCOMB);
+                Pair<Material, Component> textPairMessage;
 
-                if (textPairMessage != null)
+                if (!animalData.hasCooldown(Material.SHEARS) &&
+                    !animalData.hasCooldown(Material.GLASS_BOTTLE))
                 {
-                    lines.add(textPairMessage);
+                    if ((tick / 100) % 2 == 0)
+                    {
+                        textPairMessage = createTextPairMessage(entityType,
+                            animalData,
+                            Material.SHEARS,
+                            Material.HONEYCOMB);
+                    }
+                    else
+                    {
+                        textPairMessage = createTextPairMessage(entityType,
+                            animalData,
+                            Material.GLASS_BOTTLE,
+                            Material.HONEY_BOTTLE);
+                    }
+                }
+                else if (animalData.hasCooldown(Material.SHEARS))
+                {
+                    textPairMessage = createTextPairMessage(entityType,
+                        animalData,
+                        Material.SHEARS,
+                        Material.HONEYCOMB);
+                }
+                else
+                {
+                    textPairMessage = createTextPairMessage(entityType,
+                        animalData,
+                        Material.GLASS_BOTTLE,
+                        Material.HONEY_BOTTLE);
                 }
 
-                textPairMessage = createTextPairMessage(entityType,
-                    animalData,
-                    Material.GLASS_BOTTLE,
-                    AnimalData.Interaction.SHEARS,
-                    Material.HONEY_BOTTLE);
-
-                if (textPairMessage != null)
-                {
-                    lines.add(textPairMessage);
-                }
+                lines.add(textPairMessage);
             }
             case CHICKEN ->
             {
                 Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
                     animalData,
                     Material.BUCKET,
-                    AnimalData.Interaction.BUCKET,
                     Material.EGG);
 
                 if (textPairMessage != null)
@@ -765,7 +783,6 @@ public class AnimalPenManager
                 Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
                     animalData,
                     Material.BUCKET,
-                    AnimalData.Interaction.BUCKET,
                     Material.TURTLE_EGG);
 
                 if (textPairMessage != null)
@@ -778,7 +795,6 @@ public class AnimalPenManager
                 Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
                     animalData,
                     Material.BUCKET,
-                    AnimalData.Interaction.BUCKET,
                     Material.MILK_BUCKET);
 
                 if (textPairMessage != null)
@@ -791,7 +807,6 @@ public class AnimalPenManager
                 Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
                     animalData,
                     Material.MAGMA_BLOCK,
-                    AnimalData.Interaction.MAGMA_BLOCK,
                     AnimalPenManager.getFrogLight((Frog) entity));
 
                 if (textPairMessage != null)
@@ -804,7 +819,6 @@ public class AnimalPenManager
                 Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
                     animalData,
                     Material.BUCKET,
-                    AnimalData.Interaction.BUCKET,
                     Material.MILK_BUCKET);
 
                 if (textPairMessage != null)
@@ -815,7 +829,6 @@ public class AnimalPenManager
                 textPairMessage = createTextPairMessage(entityType,
                     animalData,
                     Material.BOWL,
-                    AnimalData.Interaction.BOWL,
                     Material.MUSHROOM_STEW);
 
                 if (textPairMessage != null)
@@ -828,7 +841,16 @@ public class AnimalPenManager
                 Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
                     animalData,
                     Material.SHEARS,
-                    AnimalData.Interaction.SHEARS,
+                    AnimalPenManager.getWoolMaterial(((Sheep) entity).getColor()));
+
+                if (textPairMessage != null)
+                {
+                    lines.add(textPairMessage);
+                }
+
+                textPairMessage = createTextPairMessage(entityType,
+                    animalData,
+                    Material.WHITE_DYE,
                     AnimalPenManager.getWoolMaterial(((Sheep) entity).getColor()));
 
                 if (textPairMessage != null)
@@ -841,7 +863,6 @@ public class AnimalPenManager
                 Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
                     animalData,
                     Material.BUCKET,
-                    AnimalData.Interaction.BUCKET,
                     Material.SNIFFER_EGG);
 
                 if (textPairMessage != null)
@@ -852,7 +873,6 @@ public class AnimalPenManager
                 textPairMessage = createTextPairMessage(entityType,
                     animalData,
                     Material.BOWL,
-                    AnimalData.Interaction.BOWL,
                     (tick / 100) % 2 == 0 ? Material.TORCHFLOWER_SEEDS : Material.PITCHER_POD);
 
                 if (textPairMessage != null)
@@ -870,13 +890,12 @@ public class AnimalPenManager
         EntityType entityType,
         AnimalData animalData,
         Material material,
-        AnimalData.Interaction interaction,
         Material result)
     {
         if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
             entityType,
             material,
-            animalData.entityCount) == 0 ||
+            animalData.entityCount()) == 0 ||
             result.isEmpty())
         {
             return null;
@@ -886,7 +905,7 @@ public class AnimalPenManager
 
         Material icon;
 
-        if (!animalData.hasCooldown(interaction))
+        if (!animalData.hasCooldown(material))
         {
             component = Component.text("Ready!           ").
                 style(Style.style().color(TextColor.color(5635925)).build());
@@ -896,7 +915,7 @@ public class AnimalPenManager
         {
             component = Component.text("Cooldown: ").append(
                 Component.text(LocalTime.of(0, 0, 0).
-                    plusSeconds(animalData.getCooldown(interaction) / 20).
+                    plusSeconds(animalData.getCooldown(material) / 20).
                     format(AnimalPenManager.DATE_FORMATTER)));
             icon = result;
         }
@@ -919,7 +938,7 @@ public class AnimalPenManager
             return;
         }
 
-        if (data.hasCooldown(AnimalData.Interaction.FOOD))
+        if (data.hasCooldown(Material.APPLE))
         {
             // under cooldown for feeding
             return;
@@ -927,7 +946,7 @@ public class AnimalPenManager
 
         long maxCount = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getMaximalAnimalCount();
 
-        if (maxCount > 0 && data.entityCount >= maxCount)
+        if (maxCount > 0 && data.entityCount() >= maxCount)
         {
             // Too many entities already in pen
             return;
@@ -944,7 +963,7 @@ public class AnimalPenManager
             stackSize = all.size();
         }
 
-        stackSize = (int) Math.min(data.entityCount, stackSize);
+        stackSize = (int) Math.min(data.entityCount(), stackSize);
 
         if (stackSize < 2)
         {
@@ -952,7 +971,7 @@ public class AnimalPenManager
             return;
         }
 
-        stackSize = (int) Math.min((maxCount - data.entityCount) * 2, stackSize);
+        stackSize = (int) Math.min((maxCount - data.entityCount()) * 2, stackSize);
 
         AnimalPenManager.triggerItemUse(entity, player, itemStack, stackSize % 2 == 1 ? stackSize - 1 : stackSize);
 
@@ -985,7 +1004,7 @@ public class AnimalPenManager
         }
 
         int amount = stackSize / 2;
-        data.entityCount += amount;
+        data.addEntityCount(amount);
 
         entity.getWorld().spawnParticle(Particle.HEART,
             entity.getLocation(),
@@ -1000,7 +1019,7 @@ public class AnimalPenManager
 
         player.swingMainHand();
 
-        data.setCooldown(AnimalData.Interaction.FOOD,
+        data.setCooldown(Material.APPLE,
             AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
                 entity.getType(),
                 Material.APPLE,
@@ -1009,7 +1028,7 @@ public class AnimalPenManager
         if (entity.getType() == EntityType.TURTLE)
         {
             // Handle scutes
-            data.setExtra(AnimalData.Extra.SCUTE, amount);
+            data.setScutes(amount);
 
             if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isDropScuteAtStart())
             {
@@ -1061,7 +1080,7 @@ public class AnimalPenManager
             return;
         }
 
-        if (data.hasCooldown(AnimalData.Interaction.BRUSH))
+        if (data.hasCooldown(Material.BRUSH))
         {
             // under cooldown for feeding
             return;
@@ -1086,11 +1105,11 @@ public class AnimalPenManager
 
         player.swingMainHand();
 
-        data.setCooldown(AnimalData.Interaction.BRUSH,
+        data.setCooldown(Material.BRUSH,
             AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
                 entity.getType(),
                 Material.BRUSH,
-                data.entityCount));
+                data.entityCount()));
 
         // Save data
         AnimalPenManager.setAnimalPenData(entity, data);
@@ -1117,7 +1136,7 @@ public class AnimalPenManager
             return;
         }
 
-        if (data.hasCooldown(AnimalData.Interaction.WATER_BUCKET))
+        if (data.hasCooldown(Material.WATER_BUCKET))
         {
             // under cooldown for feeding
             return;
@@ -1140,17 +1159,17 @@ public class AnimalPenManager
             }
             case COD ->
             {
-                newBucket =  new ItemStack(Material.COD_BUCKET);
+                newBucket = new ItemStack(Material.COD_BUCKET);
                 sound = Sound.ITEM_BUCKET_FILL_FISH;
             }
             case PUFFERFISH ->
             {
-                newBucket =  new ItemStack(Material.PUFFERFISH_BUCKET);
+                newBucket = new ItemStack(Material.PUFFERFISH_BUCKET);
                 sound = Sound.ITEM_BUCKET_FILL_FISH;
             }
             case SALMON ->
             {
-                newBucket =  new ItemStack(Material.SALMON_BUCKET);
+                newBucket = new ItemStack(Material.SALMON_BUCKET);
                 sound = Sound.ITEM_BUCKET_FILL_FISH;
             }
             case TADPOLE ->
@@ -1177,7 +1196,7 @@ public class AnimalPenManager
             }
         }
 
-        data.entityCount -= 1;
+        data.reduceEntityCount(1);
 
         AnimalPenManager.triggerItemUse(entity, player, itemStack, 1);
 
@@ -1195,11 +1214,11 @@ public class AnimalPenManager
 
         player.swingMainHand();
 
-        data.setCooldown(AnimalData.Interaction.WATER_BUCKET,
+        data.setCooldown(Material.WATER_BUCKET,
             AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
                 entity.getType(),
                 Material.WATER_BUCKET,
-                data.entityCount));
+                data.entityCount()));
 
         // Save data
         AnimalPenManager.setAnimalPenData(entity, data);
@@ -1241,7 +1260,7 @@ public class AnimalPenManager
             return;
         }
 
-        if (data.hasCooldown(AnimalData.Interaction.SHEARS))
+        if (data.hasCooldown(Material.SHEARS) || data.hasCooldown(Material.GLASS_BOTTLE))
         {
             // under cooldown for feeding
             return;
@@ -1266,11 +1285,11 @@ public class AnimalPenManager
             new Random().nextFloat(0.8f, 1.2f),
             1);
 
-        data.setCooldown(AnimalData.Interaction.SHEARS,
+        data.setCooldown(Material.SHEARS,
             AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
                 entity.getType(),
                 Material.SHEARS,
-                data.entityCount));
+                data.entityCount()));
 
         // Save data
         AnimalPenManager.setAnimalPenData(entity, data);
@@ -1292,7 +1311,7 @@ public class AnimalPenManager
             return;
         }
 
-        if (data.hasCooldown(AnimalData.Interaction.SHEARS))
+        if (data.hasCooldown(Material.SHEARS))
         {
             // under cooldown for feeding
             return;
@@ -1321,7 +1340,7 @@ public class AnimalPenManager
 
         Random random = new Random();
 
-        for (int i = 0; i < data.entityCount && woolCount < dropLimits; i++)
+        for (int i = 0; i < data.entityCount() && woolCount < dropLimits; i++)
         {
             woolCount += random.nextInt(3);
         }
@@ -1333,11 +1352,11 @@ public class AnimalPenManager
 
         player.swingMainHand();
 
-        data.setCooldown(AnimalData.Interaction.SHEARS,
+        data.setCooldown(Material.SHEARS,
             AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
                 entity.getType(),
                 Material.SHEARS,
-                data.entityCount));
+                data.entityCount()));
 
         // Save data
         AnimalPenManager.setAnimalPenData(entity, data);
@@ -1378,7 +1397,7 @@ public class AnimalPenManager
             return;
         }
 
-        if (data.hasCooldown(AnimalData.Interaction.BUCKET))
+        if (data.hasCooldown(Material.BUCKET))
         {
             // under cooldown for feeding
             return;
@@ -1400,11 +1419,11 @@ public class AnimalPenManager
             new Random().nextFloat(0.8f, 1.2f),
             1);
 
-        data.setCooldown(AnimalData.Interaction.BUCKET,
+        data.setCooldown(Material.BUCKET,
             AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
                 entity.getType(),
                 Material.BUCKET,
-                data.entityCount));
+                data.entityCount()));
 
         // Save data
         AnimalPenManager.setAnimalPenData(entity, data);
@@ -1426,7 +1445,7 @@ public class AnimalPenManager
             return;
         }
 
-        if (data.hasCooldown(AnimalData.Interaction.GLASS_BOTTLE))
+        if (data.hasCooldown(Material.SHEARS) || data.hasCooldown(Material.GLASS_BOTTLE))
         {
             // under cooldown for feeding
             return;
@@ -1448,11 +1467,11 @@ public class AnimalPenManager
             new Random().nextFloat(0.8f, 1.2f),
             1);
 
-        data.setCooldown(AnimalData.Interaction.GLASS_BOTTLE,
+        data.setCooldown(Material.GLASS_BOTTLE,
             AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
                 entity.getType(),
                 Material.GLASS_BOTTLE,
-                data.entityCount));
+                data.entityCount()));
 
         // Save data
         AnimalPenManager.setAnimalPenData(entity, data);
@@ -1476,7 +1495,7 @@ public class AnimalPenManager
             return;
         }
 
-        if (data.hasCooldown(AnimalData.Interaction.BUCKET))
+        if (data.hasCooldown(Material.BUCKET))
         {
             // under cooldown for feeding
             return;
@@ -1487,19 +1506,23 @@ public class AnimalPenManager
 
         switch (entity.getType())
         {
-            case CHICKEN -> {
+            case CHICKEN ->
+            {
                 material = Material.EGG;
                 sound = Sound.ENTITY_CHICKEN_EGG;
             }
-            case SNIFFER -> {
+            case SNIFFER ->
+            {
                 material = Material.SNIFFER_EGG;
                 sound = Sound.BLOCK_SNIFFER_EGG_PLOP;
             }
-            case TURTLE -> {
+            case TURTLE ->
+            {
                 material = Material.TURTLE_EGG;
                 sound = Sound.ENTITY_TURTLE_LAY_EGG;
             }
-            default -> {
+            default ->
+            {
                 return;
             }
         }
@@ -1511,7 +1534,7 @@ public class AnimalPenManager
             dropLimits = Integer.MAX_VALUE;
         }
 
-        int itemCount = (int) Math.min(data.entityCount, dropLimits);
+        int itemCount = (int) Math.min(data.entityCount(), dropLimits);
 
         AnimalPenManager.dropItems(entity.getWorld(),
             entity.getLocation().add(0, 1, 0),
@@ -1525,11 +1548,11 @@ public class AnimalPenManager
             new Random().nextFloat(0.8f, 1.2f),
             1);
 
-        data.setCooldown(AnimalData.Interaction.BUCKET,
+        data.setCooldown(Material.BUCKET,
             AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
                 entity.getType(),
                 Material.BUCKET,
-                data.entityCount));
+                data.entityCount()));
 
         // Save data
         AnimalPenManager.setAnimalPenData(entity, data);
@@ -1551,7 +1574,7 @@ public class AnimalPenManager
             return;
         }
 
-        if (data.hasCooldown(AnimalData.Interaction.DYES))
+        if (data.hasCooldown(Material.WHITE_DYE))
         {
             // under cooldown for feeding
             return;
@@ -1574,11 +1597,11 @@ public class AnimalPenManager
             new Random().nextFloat(0.8f, 1.2f),
             1);
 
-        data.setCooldown(AnimalData.Interaction.DYES,
+        data.setCooldown(Material.WHITE_DYE,
             AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
                 entity.getType(),
                 Material.WHITE_DYE,
-                data.entityCount));
+                data.entityCount()));
 
         // Save data
         AnimalPenManager.setAnimalPenData(entity, data);
@@ -1599,15 +1622,16 @@ public class AnimalPenManager
             return;
         }
 
-        if (data.hasCooldown(AnimalData.Interaction.MAGMA_BLOCK))
+        if (data.hasCooldown(Material.MAGMA_BLOCK))
         {
             // under cooldown for feeding
             return;
         }
 
-        int froglightCount = (int) Math.min(data.entityCount, itemStack.getAmount());
+        int froglightCount = (int) Math.min(data.entityCount(), itemStack.getAmount());
 
-        int dropLimits = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getDropLimits(Material.PEARLESCENT_FROGLIGHT);
+        int dropLimits =
+            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getDropLimits(Material.PEARLESCENT_FROGLIGHT);
 
         if (dropLimits > 0)
         {
@@ -1634,11 +1658,11 @@ public class AnimalPenManager
             new Random().nextFloat(0.8f, 1.2f),
             1);
 
-        data.setCooldown(AnimalData.Interaction.MAGMA_BLOCK,
+        data.setCooldown(Material.MAGMA_BLOCK,
             AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
                 entity.getType(),
                 Material.MAGMA_BLOCK,
-                data.entityCount));
+                data.entityCount()));
 
         // Save data
         AnimalPenManager.setAnimalPenData(entity, data);
@@ -1675,7 +1699,7 @@ public class AnimalPenManager
             return;
         }
 
-        if (data.hasCooldown(AnimalData.Interaction.BOWL))
+        if (data.hasCooldown(Material.BOWL))
         {
             // under cooldown for feeding
             return;
@@ -1707,11 +1731,11 @@ public class AnimalPenManager
             new Random().nextFloat(0.8f, 1.2f),
             1);
 
-        data.setCooldown(AnimalData.Interaction.BOWL,
+        data.setCooldown(Material.BOWL,
             AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
                 entity.getType(),
                 Material.BOWL,
-                data.entityCount));
+                data.entityCount()));
 
         // Save data
         AnimalPenManager.setAnimalPenData(entity, data);
@@ -1732,7 +1756,7 @@ public class AnimalPenManager
             return;
         }
 
-        if (data.hasCooldown(AnimalData.Interaction.BOWL))
+        if (data.hasCooldown(Material.BOWL))
         {
             // under cooldown for feeding
             return;
@@ -1750,7 +1774,7 @@ public class AnimalPenManager
 
         List<ItemStack> itemStackList = new ArrayList<>();
 
-        int seedCount = (int) Math.min(data.entityCount, dropLimits);
+        int seedCount = (int) Math.min(data.entityCount(), dropLimits);
         Random random = new Random();
 
         while (seedCount > 0)
@@ -1765,7 +1789,8 @@ public class AnimalPenManager
 
             seedCount -= randomItems.stream().mapToInt(ItemStack::getAmount).sum();
 
-            randomItems.forEach(item -> {
+            randomItems.forEach(item ->
+            {
                 boolean added = false;
 
                 for (ItemStack stack : itemStackList)
@@ -1796,11 +1821,11 @@ public class AnimalPenManager
             new Random().nextFloat(0.8f, 1.2f),
             1);
 
-        data.setCooldown(AnimalData.Interaction.BOWL,
+        data.setCooldown(Material.BOWL,
             AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
                 entity.getType(),
                 Material.BOWL,
-                data.entityCount));
+                data.entityCount()));
 
         // Save data
         AnimalPenManager.setAnimalPenData(entity, data);
@@ -1861,19 +1886,19 @@ public class AnimalPenManager
 
     public static void handleScutes(Entity entity, AnimalData animalData)
     {
-        if (!animalData.hasExtra(AnimalData.Extra.SCUTE))
+        if (animalData.scutes() == 0)
         {
             // Nothing to process
             return;
         }
 
-        // Deserialization always casts numbers into double
-        double scutes = animalData.removeExtra(AnimalData.Extra.SCUTE);
+        int scutes = animalData.scutes();
+        animalData.setScutes(0);
 
         AnimalPenManager.dropItems(entity.getWorld(),
             entity.getLocation().add(0, 1, 0),
             Material.TURTLE_SCUTE,
-            (int) scutes);
+            scutes);
     }
 
 
@@ -1904,10 +1929,11 @@ public class AnimalPenManager
             player.setCooldown(itemStack, cooldown);
         }
 
-        data.entityCount -= 1;
+        data.reduceEntityCount(1);
         AnimalPenManager.setAnimalPenData(entity, data);
 
-        LootTable lootTable = Bukkit.getLootTable(NamespacedKey.minecraft("entities/" + entity.getType().getKey().value()));
+        LootTable lootTable =
+            Bukkit.getLootTable(NamespacedKey.minecraft("entities/" + entity.getType().getKey().value()));
 
         if (lootTable != null)
         {
@@ -1973,16 +1999,16 @@ public class AnimalPenManager
 // ---------------------------------------------------------------------
 
 
-    public static void processCooldownFinish(Entity entity, AnimalData.Interaction key, AnimalData animalData)
+    public static void processCooldownFinish(Entity entity, Material key, AnimalData animalData)
     {
         if (entity.getType() == EntityType.TURTLE &&
-            key == AnimalData.Interaction.FOOD &&
+            key == Material.APPLE &&
             !AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isDropScuteAtStart())
         {
             AnimalPenManager.handleScutes(entity, animalData);
         }
         else if (entity.getType() == EntityType.SHEEP &&
-            key == AnimalData.Interaction.SHEARS)
+            key == Material.SHEARS)
         {
             ((Sheep) entity).setSheared(false);
         }
@@ -2083,7 +2109,9 @@ public class AnimalPenManager
         }
     }
 
-    public static float blockFaceToYaw(BlockFace blockFace) {
+
+    public static float blockFaceToYaw(BlockFace blockFace)
+    {
         return switch (blockFace)
         {
             case NORTH -> 180f;
@@ -2106,6 +2134,7 @@ public class AnimalPenManager
             default -> NORTH_CENTER;
         };
     }
+
 
     public final static NamespacedKey ANIMAL_DATA_KEY = new NamespacedKey("animal_pen_plugin", "animal_data");
 
