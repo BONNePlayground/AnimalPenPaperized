@@ -356,9 +356,9 @@ public class AnimalPenListener implements Listener
 
 
     @EventHandler
-    public void onEntityTransformEvent(EntityZapEvent event)
+    public void onEntityZapEvent(EntityZapEvent event)
     {
-        if (event.getTransformedEntities().stream().anyMatch(AnimalPenManager::isAnimalPen))
+        if (AnimalPenManager.isAnimalPen(event.getEntity()))
         {
             // Animal pen entities cannot be transformed.
             event.setCancelled(true);
@@ -369,7 +369,7 @@ public class AnimalPenListener implements Listener
     @EventHandler
     public void onEntityTransformEvent(EntityTransformEvent event)
     {
-        if (event.getTransformedEntities().stream().anyMatch(AnimalPenManager::isAnimalPen))
+        if (AnimalPenManager.isAnimalPen(event.getEntity()))
         {
             // Animal pen entities cannot be transformed.
             event.setCancelled(true);
