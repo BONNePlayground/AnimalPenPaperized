@@ -5,7 +5,9 @@ import com.google.gson.annotations.JsonAdapter;
 import org.bukkit.Material;
 import org.bukkit.entity.EntitySnapshot;
 import org.bukkit.entity.EntityType;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import lv.id.bonne.animalpenpaper.config.adapters.EntitySnapshotTypeAdapter;
@@ -185,6 +187,28 @@ public class AnimalData
     }
 
 
+    /**
+     * Gets variants.
+     *
+     * @return the variants
+     */
+    public List<EntitySnapshot> getVariants()
+    {
+        return this.variants;
+    }
+
+
+    /**
+     * Add variant.
+     *
+     * @param snapshot the snapshot
+     */
+    public void addVariant(EntitySnapshot snapshot)
+    {
+        this.variants.add(snapshot);
+    }
+
+
 // ---------------------------------------------------------------------
 // Section: Variables
 // ---------------------------------------------------------------------
@@ -194,6 +218,11 @@ public class AnimalData
      * The map that stores cooldowns.
      */
     private final Map<Material, Integer> cooldowns = new HashMap<>();
+
+    /**
+     * The list of animal variants.
+     */
+    private final List<EntitySnapshot> variants = new ArrayList<>();
 
     /**
      * The value stores current entity snapshot

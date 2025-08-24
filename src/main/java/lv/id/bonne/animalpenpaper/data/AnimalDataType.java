@@ -44,7 +44,7 @@ public class AnimalDataType implements PersistentDataType<String, AnimalData>
         {
             AnimalPenPlugin.getInstance().getLogger().warning("Failed to serialize AnimalData: " + e.getMessage());
             // Return a minimal valid JSON as fallback
-            return "{\"version\":1,\"cooldowns\":{}}";
+            return "{\"version\":1,\"cooldowns\":{}, \"variants\":[]}";
         }
     }
 

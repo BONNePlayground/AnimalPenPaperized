@@ -3,9 +3,10 @@ package lv.id.bonne.animalpenpaper;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.event.Listener;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.*;
 
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import lv.id.bonne.animalpenpaper.commands.AnimalPenCommands;
@@ -14,9 +15,10 @@ import lv.id.bonne.animalpenpaper.listeners.AnimalCageListener;
 import lv.id.bonne.animalpenpaper.listeners.AnimalPenListener;
 import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
 import lv.id.bonne.animalpenpaper.managers.AnimalPenTasks;
+import lv.id.bonne.animalpenpaper.managers.AnimalPenVariantManager;
 
 
-public class AnimalPenPlugin extends JavaPlugin implements Listener
+public class AnimalPenPlugin extends JavaPlugin
 {
     @Override
     public void onLoad()
@@ -36,6 +38,7 @@ public class AnimalPenPlugin extends JavaPlugin implements Listener
         this.getServer().getPluginManager().registerEvents(new AnimalCageListener(), this);
         this.getServer().getPluginManager().registerEvents(new AnimalPenListener(), this);
         this.getServer().getPluginManager().registerEvents(new AnimalPenTasks(), this);
+        this.getServer().getPluginManager().registerEvents(new AnimalPenVariantManager(), this);
 
         this.task = new AnimalPenTasks();
         this.task.runTask();

@@ -15,6 +15,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Iterator;
+
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
 import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
@@ -252,11 +254,43 @@ public class AnimalCageListener implements Listener
 
         // Merge cooldowns
         itemData.getCooldowns().forEach((key, value) -> penData.getCooldowns().merge(key, value, Math::max));
+        itemData.getCooldowns().clear();
 
-        // TODO: extra and variant
+        // Merge scute data
+        penData.setScutes(penData.scutes() + itemData.scutes());
+        itemData.setScutes(0);
 
-        // Save everything
-        AnimalPenManager.setItemData(item, null);
+        // Check variants
+        final int maxStoredVariants = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getMaxStoredVariants();
+
+        if (itemData.entityCount() > 1 &&
+            penData.getVariants().size() + itemData.getVariants().size() > maxStoredVariants)
+        {
+            player.sendMessage(Component.text("Cannot store all variants into animal pen."));
+            penData.reduceEntityCount(1);
+            itemData.setEntityCount(1);
+
+            // Save reduced item data
+            AnimalPenManager.setItemData(item, itemData);
+        }
+        else
+        {
+            int size = penData.getVariants().size();
+            Iterator<EntitySnapshot> iterator = itemData.getVariants().iterator();
+
+            while (size < maxStoredVariants && iterator.hasNext())
+            {
+                penData.addVariant(iterator.next());
+                size++;
+            }
+
+            // just clear remining ones.
+            itemData.getVariants().clear();
+
+            // Clear item data
+            AnimalPenManager.setItemData(item, null);
+        }
+
         AnimalPenManager.setAnimalPenData(block, penData);
     }
 

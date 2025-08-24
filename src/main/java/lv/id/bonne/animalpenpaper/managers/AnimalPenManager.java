@@ -87,6 +87,11 @@ public class AnimalPenManager
 
         animalData.addEntityCount(amount);
 
+        if (animalData.getVariants().size() <= AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getMaxStoredVariants())
+        {
+            animalData.addVariant(entitySnapshot);
+        }
+
         dataContainer.set(AnimalPenManager.ANIMAL_DATA_KEY, AnimalDataType.INSTANCE, animalData);
 
         itemMeta.lore(List.of(Component.empty(),
