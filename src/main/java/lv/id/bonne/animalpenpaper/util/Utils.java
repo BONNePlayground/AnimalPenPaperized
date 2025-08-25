@@ -169,11 +169,11 @@ public class Utils
     }
 
 
-    private static final Vector NORTH_CENTER = new Vector(0.5, 0.125, 0);
+    private static final Vector NORTH_CENTER = new Vector(0.502, 0.125, 0);
 
-    private static final Vector SOUTH_CENTER = new Vector(0.5, 0.125, 1);
+    private static final Vector SOUTH_CENTER = new Vector(0.502, 0.125, 1);
 
-    private static final Vector EAST_CENTER = new Vector(1, 0.125, 0.5);
+    private static final Vector EAST_CENTER = new Vector(1, 0.125, 0.5025);
 
-    private static final Vector WEST_CENTER = new Vector(0, 0.125, 0.5);
+    private static final Vector WEST_CENTER = new Vector(0, 0.125, 0.502);
 }

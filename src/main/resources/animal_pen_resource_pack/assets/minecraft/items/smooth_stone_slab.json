@@ -105,22 +105,8 @@
       {
         "when": "animal_pen:aquarium",
         "model": {
-          "type": "minecraft:select",
-          "property": "minecraft:custom_model_data",
-          "index": 1,
-          "cases": [
-            {
-              "when": "animal_pen:aquarium_full",
-              "model": {
-                "type": "minecraft:model",
-                "model": "animal_pen:block/aquarium_full"
-              }
-            }
-          ],
-          "fallback": {
-            "type": "minecraft:model",
-            "model": "animal_pen:block/aquarium_empty"
-          }
+          "type": "minecraft:model",
+          "model": "animal_pen:block/aquarium_empty"
         }
       }
     ],

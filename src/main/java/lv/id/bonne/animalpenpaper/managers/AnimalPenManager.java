@@ -253,7 +253,7 @@ public class AnimalPenManager
 
         // Create decoration entity
         Entity decorationEntity = block.getWorld().spawnEntity(
-            block.getLocation().add(0.5, 0.75, 0.5),
+            block.getLocation().add(0.5, 0.501, 0.5),
             EntityType.ITEM_DISPLAY,
             CreatureSpawnEvent.SpawnReason.CUSTOM,
             newEntity ->
@@ -270,7 +270,7 @@ public class AnimalPenManager
                     display.setItemStack(itemStack);
 
                     Transformation transform = display.getTransformation();
-                    transform.getScale().set(0.99f, 0.99f, 0.99f);
+                    transform.getScale().set(1.001f, 1f, 1.001f);
                     display.setTransformation(transform);
                 }
 
