@@ -7,9 +7,9 @@
 package lv.id.bonne.animalpenpaper.listeners;
 
 
-import com.destroystokyo.paper.MaterialTags;
 import com.destroystokyo.paper.event.entity.EntityZapEvent;
-import org.bukkit.*;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.Slab;
@@ -19,7 +19,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
-import org.bukkit.event.entity.*;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
@@ -27,19 +30,19 @@ import org.bukkit.inventory.ItemStack;
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
 import lv.id.bonne.animalpenpaper.data.BlockData;
-import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
+import lv.id.bonne.animalpenpaper.managers.AquariumManager;
 import lv.id.bonne.animalpenpaper.util.Utils;
 
 
 /**
  * This listener manages animal pen interactions.
  */
-public class AnimalPenListener implements Listener
+public class AquariumListener implements Listener
 {
     @EventHandler(ignoreCancelled = true)
     public void onAnimalPenPlace(BlockPlaceEvent event)
     {
-        if (!AnimalPenManager.isAnimalPen(event.getItemInHand()))
+        if (!AquariumManager.isAquarium(event.getItemInHand()))
         {
             // Not animal pen
             return;
@@ -72,14 +75,14 @@ public class AnimalPenListener implements Listener
         BlockData data = new BlockData();
         data.blockFace = blockFace;
 
-        AnimalPenManager.completePenCreation(block, data, event.getItemInHand());
+        AquariumManager.completeAquariumCreation(block, data, event.getItemInHand());
     }
 
 
     @EventHandler(ignoreCancelled = true)
     public void onAnimalPenBreak(BlockBreakEvent event)
     {
-        if (!AnimalPenManager.isAnimalPen(event.getBlock()))
+        if (!AquariumManager.isAquarium(event.getBlock()))
         {
             // Not animal pen
             return;
@@ -88,21 +91,28 @@ public class AnimalPenListener implements Listener
         Block block = event.getBlock();
 
         // Get data.
-        AnimalData animalData = AnimalPenManager.getAnimalData(block);
+        AnimalData animalData = AquariumManager.getAnimalData(block);
 
         if (animalData != null)
         {
-            ItemStack itemStack = AnimalPenManager.createEmptyAnimalCage();
-            AnimalPenManager.setAnimalCageData(itemStack, animalData);
+            ItemStack itemStack = AquariumManager.createEmptyWaterContainer();
+            AquariumManager.setWaterContainerData(itemStack, animalData);
 
             // Drop data
             block.getWorld().dropItem(block.getLocation(), itemStack);
         }
 
-        ItemStack animalPenItem = AnimalPenManager.getAnimalPenItem(block);
+        if (block.getBlockData() instanceof Slab slab)
+        {
+            block.getRelative(BlockFace.UP).setType(Material.AIR);
+            slab.setWaterlogged(false);
+            block.setBlockData(slab);
+        }
+
+        ItemStack animalPenItem = AquariumManager.getAquariumItem(block);
 
         // Remove entities
-        AnimalPenManager.clearBlockData(block, false);
+        AquariumManager.clearBlockData(block, false);
 
         // Drop proper item
         event.setDropItems(false);
@@ -115,7 +125,7 @@ public class AnimalPenListener implements Listener
     {
         Entity eventEntity = event.getRightClicked();
 
-        if (!AnimalPenManager.isAnimalPen(eventEntity) || !(eventEntity instanceof LivingEntity entity))
+        if (!AquariumManager.isAquarium(eventEntity) || !(eventEntity instanceof LivingEntity entity))
         {
             return;
         }
@@ -124,14 +134,14 @@ public class AnimalPenListener implements Listener
         Player player = event.getPlayer();
         ItemStack itemStack = player.getInventory().getItem(event.getHand());
 
-        if (AnimalPenManager.isAnimalCage(itemStack))
+        if (AquariumManager.isWaterContainer(itemStack))
         {
             // This does not interact with cages.
             return;
         }
 
         // Track on interaction
-        AnimalPenPlugin.getInstance().task.startTrackingEntity(entity, false, true);
+        AnimalPenPlugin.getInstance().task.startTrackingEntity(entity, false, false);
 
         // I CONTROL IT!!! NO CUSTOM INTERACTIONS HAHAHAHA
         event.setCancelled(true);
@@ -144,43 +154,11 @@ public class AnimalPenListener implements Listener
 
         if (AnimalPenPlugin.CONFIG_MANAGER.getAnimalFoodConfiguration().isFoodItem(entity, itemStack))
         {
-            AnimalPenManager.handleFood(entity, player, itemStack);
-        }
-        else if (itemStack.getType() == Material.BRUSH)
-        {
-            AnimalPenManager.handleBrush(entity, player, itemStack);
+            AquariumManager.handleFood(entity, player, itemStack);
         }
         else if (itemStack.getType() == Material.WATER_BUCKET)
         {
-            AnimalPenManager.handleWaterBucket(entity, player, itemStack);
-        }
-        else if (itemStack.getType() == Material.SHEARS)
-        {
-            AnimalPenManager.handleShears(entity, player, itemStack);
-        }
-        else if (MaterialTags.DYES.isTagged(itemStack))
-        {
-            AnimalPenManager.handleDyes(entity, player, itemStack);
-        }
-        else if (itemStack.getType() == Material.BUCKET)
-        {
-            AnimalPenManager.handleBucket(entity, player, itemStack);
-        }
-        else if (itemStack.getType() == Material.GLASS_BOTTLE)
-        {
-            AnimalPenManager.handleGlassBottle(entity, player, itemStack);
-        }
-        else if (itemStack.getType() == Material.MAGMA_BLOCK)
-        {
-            AnimalPenManager.handleMagmaBlock(entity, player, itemStack);
-        }
-        else if (itemStack.getType() == Material.BOWL)
-        {
-            AnimalPenManager.handleBowl(entity, player, itemStack);
-        }
-        else if (Utils.getTag(NamespacedKey.minecraft("small_flowers")).isTagged(itemStack.getType()))
-        {
-            AnimalPenManager.handleSmallFlowers(entity, player, itemStack);
+            AquariumManager.handleWaterBucket(entity, player, itemStack);
         }
     }
 
@@ -190,7 +168,7 @@ public class AnimalPenListener implements Listener
     {
         Entity eventEntity = event.getEntity();
 
-        if (!AnimalPenManager.isAnimalPen(eventEntity) || !(eventEntity instanceof LivingEntity entity))
+        if (!AquariumManager.isAquarium(eventEntity) || !(eventEntity instanceof LivingEntity entity))
         {
             return;
         }
@@ -229,7 +207,7 @@ public class AnimalPenListener implements Listener
             return;
         }
 
-        AnimalPenManager.handleKilling(entity, player, attackItem);
+        AquariumManager.handleKilling(entity, player, attackItem);
     }
 
 
@@ -241,7 +219,7 @@ public class AnimalPenListener implements Listener
     @EventHandler
     public void onAnimalPenExplode(BlockExplodeEvent event)
     {
-        boolean hasAnimalPen = event.blockList().stream().anyMatch(AnimalPenManager::isAnimalPen);
+        boolean hasAnimalPen = event.blockList().stream().anyMatch(AquariumManager::isAquarium);
 
         if (!hasAnimalPen)
         {
@@ -250,14 +228,14 @@ public class AnimalPenListener implements Listener
         }
 
         // Prevent animal pens from explosions.
-        event.blockList().removeIf(AnimalPenManager::isAnimalPen);
+        event.blockList().removeIf(AquariumManager::isAquarium);
     }
 
 
     @EventHandler
     public void onAnimalPenExplode(EntityExplodeEvent event)
     {
-        boolean hasAnimalPen = event.blockList().stream().anyMatch(AnimalPenManager::isAnimalPen);
+        boolean hasAnimalPen = event.blockList().stream().anyMatch(AquariumManager::isAquarium);
 
         if (!hasAnimalPen)
         {
@@ -266,14 +244,14 @@ public class AnimalPenListener implements Listener
         }
 
         // Prevent animal pens from explosions.
-        event.blockList().removeIf(AnimalPenManager::isAnimalPen);
+        event.blockList().removeIf(AquariumManager::isAquarium);
     }
 
 
     @EventHandler
     public void onAnimalPenPush(BlockPistonExtendEvent event)
     {
-        boolean hasAnimalPen = event.getBlocks().stream().anyMatch(AnimalPenManager::isAnimalPen);
+        boolean hasAnimalPen = event.getBlocks().stream().anyMatch(AquariumManager::isAquarium);
 
         if (!hasAnimalPen)
         {
@@ -289,7 +267,7 @@ public class AnimalPenListener implements Listener
     @EventHandler
     public void onAnimalPenPush(BlockPistonRetractEvent event)
     {
-        boolean hasAnimalPen = event.getBlocks().stream().anyMatch(AnimalPenManager::isAnimalPen);
+        boolean hasAnimalPen = event.getBlocks().stream().anyMatch(AquariumManager::isAquarium);
 
         if (!hasAnimalPen)
         {
@@ -305,7 +283,7 @@ public class AnimalPenListener implements Listener
     @EventHandler
     public void onAnimalPenPlaceBlock(BlockCanBuildEvent event)
     {
-        if (!AnimalPenManager.isAnimalPen(event.getBlock()))
+        if (!AquariumManager.isAquarium(event.getBlock()))
         {
             // Not animal pen
             return;
@@ -321,7 +299,7 @@ public class AnimalPenListener implements Listener
     {
         Entity entity = event.getEntity();
 
-        if (!AnimalPenManager.isAnimalPen(entity))
+        if (!AquariumManager.isAquarium(entity))
         {
             return;
         }
@@ -334,7 +312,7 @@ public class AnimalPenListener implements Listener
     @EventHandler
     public void onEntityRemoveEvent(EntityDeathEvent event)
     {
-        if (AnimalPenManager.isAnimalPen(event.getEntity()))
+        if (AquariumManager.isAquarium(event.getEntity()))
         {
             // Animal pen entities cannot be killed.
             event.setCancelled(true);
@@ -345,7 +323,7 @@ public class AnimalPenListener implements Listener
     @EventHandler
     public void onEntityZapEvent(EntityZapEvent event)
     {
-        if (AnimalPenManager.isAnimalPen(event.getEntity()))
+        if (AquariumManager.isAquarium(event.getEntity()))
         {
             // Animal pen entities cannot be transformed.
             event.setCancelled(true);
@@ -356,7 +334,7 @@ public class AnimalPenListener implements Listener
     @EventHandler
     public void onEntityTransformEvent(EntityTransformEvent event)
     {
-        if (AnimalPenManager.isAnimalPen(event.getEntity()))
+        if (AquariumManager.isAquarium(event.getEntity()))
         {
             // Animal pen entities cannot be transformed.
             event.setCancelled(true);
@@ -367,7 +345,7 @@ public class AnimalPenListener implements Listener
     @EventHandler
     public void onWaterPlace(PlayerBucketEmptyEvent event)
     {
-        if (AnimalPenManager.isAnimalPen(event.getBlock()))
+        if (AquariumManager.isAquarium(event.getBlock()))
         {
             // Animal pen cannot be waterlogged
             event.setCancelled(true);
@@ -378,9 +356,27 @@ public class AnimalPenListener implements Listener
     @EventHandler
     public void onWaterSpread(BlockFromToEvent event)
     {
-        if (AnimalPenManager.isAnimalPen(event.getToBlock()))
+        if (AquariumManager.isAquarium(event.getToBlock()))
         {
-            // Animal pen cannot be waterlogged
+            // Aquarium cannot be waterlogged
+            event.setCancelled(true);
+        }
+
+        if (AquariumManager.isAquarium(event.getBlock()))
+        {
+            // Aquarium cannot spread water
+            event.setCancelled(true);
+        }
+
+        if (AquariumManager.isAquarium(event.getToBlock().getRelative(BlockFace.DOWN)))
+        {
+            // Aquarium cannot be waterlogged
+            event.setCancelled(true);
+        }
+
+        if (AquariumManager.isAquarium(event.getBlock().getRelative(BlockFace.DOWN)))
+        {
+            // Aquarium cannot spread water
             event.setCancelled(true);
         }
     }

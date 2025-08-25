@@ -31,6 +31,34 @@
             "model": "animal_pen:item/animal_cage_filled"
           }
         }
+      },
+      {
+        "when": "animal_pen:water_animal_container",
+        "model": {
+          "type": "minecraft:model",
+          "model": "animal_pen:item/water_animal_container"
+        }
+      },
+      {
+        "when": "animal_pen:water_animal_container_filled",
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:custom_model_data",
+          "index": 1,
+          "cases": [
+            {
+              "when": "minecraft:cod",
+              "model": {
+                "type": "minecraft:model",
+                "model": "animal_pen:item/water_animal_container_filled"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "animal_pen:item/water_animal_container_filled"
+          }
+        }
       }
     ],
     "fallback": {

@@ -42,7 +42,12 @@ public class AnimalPenTasks implements Listener
             if (AnimalPenManager.isAnimalPen(entity))
             {
                 AnimalPenManager.validateAnimalPen(entity);
-                startTrackingEntity(entity, true);
+                this.startTrackingEntity(entity, true, true);
+            }
+            else if (AquariumManager.isAquarium(entity))
+            {
+                AquariumManager.validateAquarium(entity);
+                this.startTrackingEntity(entity, true, false);
             }
         }
     }
@@ -77,15 +82,19 @@ public class AnimalPenTasks implements Listener
         {
             if (AnimalPenManager.isAnimalPen(entity))
             {
-                stopTrackingEntity(entity);
+                this.stopTrackingEntity(entity, true);
+            }
+            else if (AquariumManager.isAquarium(entity))
+            {
+                this.stopTrackingEntity(entity, false);
             }
         }
     }
 
 
-    public void startTrackingEntity(Entity entity, boolean replace)
+    public void startTrackingEntity(Entity entity, boolean replace, boolean isPen)
     {
-        EntityReference reference = new EntityReference(entity.getUniqueId(), entity.getWorld().getUID());
+        EntityReference reference = new EntityReference(entity.getUniqueId(), entity.getWorld().getUID(), isPen);
 
         if (!cache.containsKey(reference))
         {
@@ -93,13 +102,13 @@ public class AnimalPenTasks implements Listener
         }
         else if (replace)
         {
-            this.stopTrackingEntity(entity);
+            this.stopTrackingEntity(entity, isPen);
             cache.put(reference, new ArrayList<>());
         }
     }
 
 
-    public void stopTrackingEntity(UUID entityUUID, World world)
+    public void stopTrackingEntity(UUID entityUUID, World world, boolean isPen)
     {
         if (entityUUID == null)
         {
@@ -107,7 +116,7 @@ public class AnimalPenTasks implements Listener
         }
 
         List<Display> leftOverEntities =
-            cache.remove(new EntityReference(entityUUID, world.getUID()));
+            cache.remove(new EntityReference(entityUUID, world.getUID(), isPen));
 
         if (leftOverEntities != null)
         {
@@ -116,9 +125,9 @@ public class AnimalPenTasks implements Listener
     }
 
 
-    public void stopTrackingEntity(Entity entity)
+    public void stopTrackingEntity(Entity entity, boolean isPen)
     {
-        stopTrackingEntity(entity.getUniqueId(), entity.getWorld());
+        stopTrackingEntity(entity.getUniqueId(), entity.getWorld(), isPen);
     }
 
 
@@ -139,7 +148,8 @@ public class AnimalPenTasks implements Listener
 
                     if (entity != null)
                     {
-                        AnimalData animalData = AnimalPenManager.getAnimalData(entity);
+                        AnimalData animalData = entityReference.isPen() ?
+                            AnimalPenManager.getAnimalData(entity) : AquariumManager.getAnimalData(entity);
 
                         if (animalData != null)
                         {
@@ -149,7 +159,7 @@ public class AnimalPenTasks implements Listener
                             animalData.getCooldowns().replaceAll((key, value) -> {
                                 int newValue = Math.max(0, value - 20);
 
-                                if (newValue == 0 && value > 0)
+                                if (newValue == 0 && value > 0 && entityReference.isPen())
                                 {
                                     AnimalPenManager.processCooldownFinish(entity, key, animalData);
                                 }
@@ -158,11 +168,18 @@ public class AnimalPenTasks implements Listener
                             });
 
                             // Update data
-                            AnimalPenManager.setAnimalPenData(entity, animalData);
+                            if (entityReference.isPen())
+                            {
+                                AnimalPenManager.setAnimalPenData(entity, animalData);
+                            }
+                            else
+                            {
+                                AquariumManager.setAquariumData(entity, animalData);
+                            }
 
                             // Draw text
                             List<Pair<Material, Component>> generatedTextMessages =
-                                AnimalPenManager.generateTextMessages(entity, animalData, tick.get());
+                                GenericManager.generateTextMessages(entity, animalData, tick.get());
 
                             int neededCount = generatedTextMessages.size() * 2;
 
@@ -265,7 +282,7 @@ public class AnimalPenTasks implements Listener
     }
 
 
-    public record EntityReference(UUID entityId, UUID worldId)
+    public record EntityReference(UUID entityId, UUID worldId, boolean isPen)
     {
     }
 

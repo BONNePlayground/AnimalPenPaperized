@@ -12,8 +12,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 import java.time.format.DateTimeFormatter;
@@ -28,8 +27,6 @@ import static java.time.temporal.ChronoField.SECOND_OF_MINUTE;
 
 public class Utils
 {
-    public final static NamespacedKey UNIQUE_DATA_KEY = new NamespacedKey("animal_pen_plugin", "unique_key");
-
     public final static NamespacedKey ANIMAL_SIZE_MODIFIER = new NamespacedKey("animal_pen_plugin", "animal_size");
 
     public static DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().
@@ -82,6 +79,61 @@ public class Utils
         if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isIncreaseStatistics())
         {
             player.incrementStatistic(Statistic.USE_ITEM, itemStack.getType(), amount);
+        }
+    }
+
+
+    public static Tag<Material> getTag(NamespacedKey tagKey)
+    {
+        return Bukkit.getTag(Tag.REGISTRY_ITEMS, tagKey, Material.class);
+    }
+
+
+    public static Material getWoolMaterial(DyeColor color)
+    {
+        try
+        {
+            String woolName = color.name() + "_WOOL";
+            return Material.valueOf(woolName);
+        }
+        catch (Exception e)
+        {
+            return Material.WHITE_WOOL;
+        }
+    }
+
+
+    public static Material getFrogLight(Frog frog)
+    {
+        if (frog.getVariant() == Frog.Variant.WARM)
+        {
+            return Material.PEARLESCENT_FROGLIGHT;
+        }
+        else if (frog.getVariant() == Frog.Variant.COLD)
+        {
+            return Material.VERDANT_FROGLIGHT;
+        }
+        else if (frog.getVariant() == Frog.Variant.TEMPERATE)
+        {
+            return Material.OCHRE_FROGLIGHT;
+        }
+        else
+        {
+            return Material.PEARLESCENT_FROGLIGHT;
+        }
+    }
+
+
+    public static DyeColor getDyeColor(Material material)
+    {
+        try
+        {
+            String color = material.name().replace("_DYE", "");
+            return DyeColor.valueOf(color);
+        }
+        catch (Exception e)
+        {
+            return DyeColor.WHITE;
         }
     }
 

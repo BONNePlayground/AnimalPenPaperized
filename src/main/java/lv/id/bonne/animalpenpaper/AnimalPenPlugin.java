@@ -9,6 +9,8 @@ import lv.id.bonne.animalpenpaper.commands.AnimalPenCommands;
 import lv.id.bonne.animalpenpaper.config.ConfigurationManager;
 import lv.id.bonne.animalpenpaper.listeners.AnimalCageListener;
 import lv.id.bonne.animalpenpaper.listeners.AnimalPenListener;
+import lv.id.bonne.animalpenpaper.listeners.AquariumListener;
+import lv.id.bonne.animalpenpaper.listeners.WaterAnimalContainerListener;
 import lv.id.bonne.animalpenpaper.managers.AnimalPenTasks;
 
 
@@ -31,6 +33,10 @@ public class AnimalPenPlugin extends JavaPlugin
 
         this.getServer().getPluginManager().registerEvents(new AnimalCageListener(), this);
         this.getServer().getPluginManager().registerEvents(new AnimalPenListener(), this);
+
+        this.getServer().getPluginManager().registerEvents(new WaterAnimalContainerListener(), this);
+        this.getServer().getPluginManager().registerEvents(new AquariumListener(), this);
+
         this.getServer().getPluginManager().registerEvents(new AnimalPenTasks(), this);
 
         this.task = new AnimalPenTasks();

@@ -15,20 +15,20 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-
 import java.util.Iterator;
 
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
-import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
+import lv.id.bonne.animalpenpaper.managers.AquariumManager;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
 import net.kyori.adventure.text.Component;
+import net.minecraft.world.entity.OwnableEntity;
 
 
 /**
  * This listener manages animal cage interactions.
  */
-public class AnimalCageListener implements Listener
+public class WaterAnimalContainerListener implements Listener
 {
     /**
      * This listener checks if player can catch clicked entity with animal cage.
@@ -46,47 +46,46 @@ public class AnimalCageListener implements Listener
         Entity entity = event.getRightClicked();
         ItemStack item = player.getInventory().getItem(event.getHand());
 
-        if (!AnimalPenManager.isAnimalCage(item))
+        if (!AquariumManager.isWaterContainer(item))
         {
             return;
         }
 
         event.setCancelled(true);
 
-        if (!(entity instanceof Animals animal))
+        if (!(entity instanceof WaterMob animal))
         {
-            player.sendMessage(Component.text("This is not a valid animal.").style(StyleUtil.RED_COLOR));
+            player.sendMessage(Component.text("This is not a valid water mob.").style(StyleUtil.RED_COLOR));
             return;
         }
 
-        if (animal.isDead() || !animal.isAdult() || !animal.hasAI())
+        if (animal.isDead() || animal instanceof Ageable ageable && !ageable.isAdult() || !animal.hasAI())
         {
-            player.sendMessage(Component.text("Cannot capture dead or baby animals.").style(StyleUtil.RED_COLOR));
+            player.sendMessage(Component.text("Cannot capture dead or baby mobs.").style(StyleUtil.RED_COLOR));
             return;
         }
 
-        if (entity instanceof Tameable tameable && tameable.isTamed() ||
-            entity instanceof AbstractHorse horse && horse.isTamed())
+        if (entity instanceof OwnableEntity ownableEntity && ownableEntity.getOwner() != null)
         {
-            player.sendMessage(Component.text("Cannot capture tamed animals.").style(StyleUtil.RED_COLOR));
+            player.sendMessage(Component.text("Cannot capture owned mobs.").style(StyleUtil.RED_COLOR));
             return;
         }
 
         // Check blocked types
         if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isBlocked(animal.getType()))
         {
-            player.sendMessage(Component.text("This animal is blocked from being captured.").
+            player.sendMessage(Component.text("This mob is blocked from being captured.").
                 style(StyleUtil.RED_COLOR));
             return;
         }
 
         EntityType entityType = animal.getType();
-        AnimalData storedData = AnimalPenManager.getAnimalData(item);
+        AnimalData storedData = AquariumManager.getAnimalData(item);
 
         // Check if item already contains another type
         if (storedData != null && storedData.entityType() != entityType)
         {
-            player.sendMessage(Component.text("This cage contains a different animal.").style(StyleUtil.RED_COLOR));
+            player.sendMessage(Component.text("This container contains a different mob.").style(StyleUtil.RED_COLOR));
             return;
         }
         else
@@ -98,11 +97,11 @@ public class AnimalCageListener implements Listener
 
         if (maxAmount > 0 && storedData.entityCount() + 1 > maxAmount)
         {
-            player.sendMessage(Component.text("Cage is full.").style(StyleUtil.RED_COLOR));
+            player.sendMessage(Component.text("Container is full.").style(StyleUtil.RED_COLOR));
             return;
         }
 
-        AnimalPenManager.addAnimal(item, entityType, entity.createSnapshot(), 1);
+        AquariumManager.addAnimal(item, entityType, entity.createSnapshot(), 1);
 
         entity.remove();
         player.swingMainHand();
@@ -130,14 +129,14 @@ public class AnimalCageListener implements Listener
         Player player = event.getPlayer();
         ItemStack item = player.getInventory().getItem(event.getHand());
 
-        if (!AnimalPenManager.isAnimalCage(item))
+        if (!AquariumManager.isWaterContainer(item))
         {
             return;
         }
 
         event.setCancelled(true);
 
-        AnimalData storedData = AnimalPenManager.getAnimalData(item);
+        AnimalData storedData = AquariumManager.getAnimalData(item);
 
         if (storedData == null)
         {
@@ -160,12 +159,12 @@ public class AnimalCageListener implements Listener
             entity = world.spawnEntity(spawnLoc, entityType, CreatureSpawnEvent.SpawnReason.CUSTOM);
         }
 
-        if (!(entity instanceof Animals))
+        if (!(entity instanceof WaterMob))
         {
             return;
         }
 
-        AnimalPenManager.removeAnimal(item, 1);
+        AquariumManager.removeAnimal(item, 1);
 
         player.swingMainHand();
         player.sendMessage(Component.text("Released " + entity.getType().name()).style(StyleUtil.GREEN_COLOR));
@@ -181,7 +180,7 @@ public class AnimalCageListener implements Listener
         Player player = event.getPlayer();
         ItemStack item = player.getInventory().getItem(event.getHand());
 
-        if (!AnimalPenManager.isAnimalCage(item))
+        if (!AquariumManager.isWaterContainer(item))
         {
             return;
         }
@@ -193,15 +192,15 @@ public class AnimalCageListener implements Listener
 
         Block block = event.getClickedBlock();
 
-        if (!AnimalPenManager.isAnimalPen(block))
+        if (!AquariumManager.isAquarium(block))
         {
             return;
         }
 
         event.setCancelled(true);
 
-        AnimalData penData = AnimalPenManager.getAnimalData(block);
-        AnimalData itemData = AnimalPenManager.getAnimalData(item);
+        AnimalData penData = AquariumManager.getAnimalData(block);
+        AnimalData itemData = AquariumManager.getAnimalData(item);
 
         if (itemData == null && penData == null)
         {
@@ -212,7 +211,7 @@ public class AnimalCageListener implements Listener
         if (penData == null)
         {
             // Animal pen data is null.
-            AnimalPenManager.setAnimalPenData(block, itemData);
+            AquariumManager.setAquariumData(block, itemData);
 
             item.setAmount(-1);
             player.getInventory().setItem(event.getHand(), item);
@@ -235,11 +234,11 @@ public class AnimalCageListener implements Listener
             itemData.getCooldowns().putAll(penData.getCooldowns());
             itemData.setScutes(penData.scutes());
 
-            AnimalPenManager.setAnimalCageData(item, itemData);
+            AquariumManager.setWaterContainerData(item, itemData);
 
             penData.reduceEntityCount(itemData.entityCount());
 
-            AnimalPenManager.setAnimalPenData(block, penData);
+            AquariumManager.setAquariumData(block, penData);
 
             return;
         }
@@ -267,12 +266,12 @@ public class AnimalCageListener implements Listener
         if (itemData.entityCount() > 1 &&
             penData.getVariants().size() + itemData.getVariants().size() > maxStoredVariants)
         {
-            player.sendMessage(Component.text("Cannot store all variants into animal pen."));
+            player.sendMessage(Component.text("Cannot store all variants into aquarium."));
             penData.reduceEntityCount(1);
             itemData.setEntityCount(1);
 
             // Save reduced item data
-            AnimalPenManager.setAnimalCageData(item, itemData);
+            AquariumManager.setWaterContainerData(item, itemData);
         }
         else
         {
@@ -289,10 +288,10 @@ public class AnimalCageListener implements Listener
             itemData.getVariants().clear();
 
             // Clear item data
-            AnimalPenManager.setAnimalCageData(item, null);
+            AquariumManager.setWaterContainerData(item, null);
         }
 
-        AnimalPenManager.setAnimalPenData(block, penData);
+        AquariumManager.setAquariumData(block, penData);
     }
 
 
@@ -314,24 +313,24 @@ public class AnimalCageListener implements Listener
 
         Block block = event.getClickedBlock();
 
-        if (!AnimalPenManager.isAnimalPen(block))
+        if (!AquariumManager.isAquarium(block))
         {
             return;
         }
 
         event.setCancelled(true);
 
-        AnimalData penData = AnimalPenManager.getAnimalData(block);
+        AnimalData penData = AquariumManager.getAnimalData(block);
 
         if (penData == null)
         {
             return;
         }
 
-        ItemStack itemStack = AnimalPenManager.createEmptyAnimalCage();
-        AnimalPenManager.setAnimalCageData(itemStack, penData);
+        ItemStack itemStack = AquariumManager.createEmptyWaterContainer();
+        AquariumManager.setWaterContainerData(itemStack, penData);
 
-        AnimalPenManager.clearBlockData(block, true);
+        AquariumManager.clearBlockData(block, true);
 
         event.getPlayer().getInventory().
             setItem(event.getHand() == null ? EquipmentSlot.HAND : event.getHand(), itemStack);
@@ -344,7 +343,7 @@ public class AnimalCageListener implements Listener
         Player player = event.getPlayer();
         ItemStack item = player.getInventory().getItem(event.getHand());
 
-        if (!AnimalPenManager.isAnimalCage(item))
+        if (!AquariumManager.isWaterContainer(item))
         {
             return;
         }
@@ -356,7 +355,7 @@ public class AnimalCageListener implements Listener
     @EventHandler(ignoreCancelled = false, priority = EventPriority.HIGHEST)
     public void onProtectionOfUsage(PlayerInteractEvent event)
     {
-        if (!AnimalPenManager.isAnimalCage(event.getItem()))
+        if (!AquariumManager.isWaterContainer(event.getItem()))
         {
             return;
         }
