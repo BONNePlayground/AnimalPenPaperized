@@ -1,0 +1,111 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "cases": [
+      {
+        "when": "animal_pen:animal_pen",
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:custom_model_data",
+          "index": 1,
+          "cases": [
+            {
+              "when": "animal_pen:animal_pen_acacia",
+              "model": {
+                "type": "minecraft:model",
+                "model": "animal_pen:block/animal_pen_acacia"
+              }
+            },
+            {
+              "when": "animal_pen:animal_pen_bamboo",
+              "model": {
+                "type": "minecraft:model",
+                "model": "animal_pen:block/animal_pen_bamboo"
+              }
+            },
+            {
+              "when": "animal_pen:animal_pen_birch",
+              "model": {
+                "type": "minecraft:model",
+                "model": "animal_pen:block/animal_pen_birch"
+              }
+            },
+            {
+              "when": "animal_pen:animal_pen_cherry",
+              "model": {
+                "type": "minecraft:model",
+                "model": "animal_pen:block/animal_pen_cherry"
+              }
+            },
+            {
+              "when": "animal_pen:animal_pen_crimson",
+              "model": {
+                "type": "minecraft:model",
+                "model": "animal_pen:block/animal_pen_crimson"
+              }
+            },
+            {
+              "when": "animal_pen:animal_pen_dark_oak",
+              "model": {
+                "type": "minecraft:model",
+                "model": "animal_pen:block/animal_pen_dark_oak"
+              }
+            },
+            {
+              "when": "animal_pen:animal_pen_jungle",
+              "model": {
+                "type": "minecraft:model",
+                "model": "animal_pen:block/animal_pen_jungle"
+              }
+            },
+            {
+              "when": "animal_pen:animal_pen_mangrove",
+              "model": {
+                "type": "minecraft:model",
+                "model": "animal_pen:block/animal_pen_mangrove"
+              }
+            },
+            {
+              "when": "animal_pen:animal_pen_oak",
+              "model": {
+                "type": "minecraft:model",
+                "model": "animal_pen:block/animal_pen_oak"
+              }
+            },
+            {
+              "when": "animal_pen:animal_pen_pale_oak",
+              "model": {
+                "type": "minecraft:model",
+                "model": "animal_pen:block/animal_pen_pale_oak"
+              }
+            },
+            {
+              "when": "animal_pen:animal_pen_spruce",
+              "model": {
+                "type": "minecraft:model",
+                "model": "animal_pen:block/animal_pen_spruce"
+              }
+            },
+            {
+              "when": "animal_pen:animal_pen_warped",
+              "model": {
+                "type": "minecraft:model",
+                "model": "animal_pen:block/animal_pen_warped"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "animal_pen:block/animal_pen_oak"
+          }
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:block/smooth_stone_slab"
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "cases": [
+      {
+        "when": "animal_pen:animal_cage",
+        "model": {
+          "type": "minecraft:model",
+          "model": "animal_pen:item/animal_cage"
+        }
+      },
+      {
+        "when": "animal_pen:animal_cage_filled",
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:custom_model_data",
+          "index": 1,
+          "cases": [
+            {
+              "when": "minecraft:bee",
+              "model": {
+                "type": "minecraft:model",
+                "model": "animal_pen:item/animal_cage_filled"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "animal_pen:item/animal_cage_filled"
+          }
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/glass_bottle"
+    }
+  }
+}
