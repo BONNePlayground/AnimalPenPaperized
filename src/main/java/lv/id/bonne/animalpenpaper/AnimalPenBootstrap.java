@@ -20,7 +20,7 @@ public class AnimalPenBootstrap implements PluginBootstrap
             {
                 try
                 {
-                    URI uri = Objects.requireNonNull(getClass().getResource("/animal_pen_datapack")).toURI();
+                    URI uri = Objects.requireNonNull(getClass().getResource("/animal_pen_data_pack")).toURI();
                     event.registrar().discoverPack(uri, "provided");
                 }
                 catch (URISyntaxException | IOException e)
