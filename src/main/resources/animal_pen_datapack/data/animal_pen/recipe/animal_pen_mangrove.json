@@ -1,0 +1,42 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "animal_pens",
+  "pattern": [
+    "   ",
+    "F F",
+    "SSS"
+  ],
+  "key": {
+    "F": "minecraft:mangrove_fence",
+    "S": "minecraft:smooth_stone_slab"
+  },
+  "result": {
+    "id": "minecraft:smooth_stone_slab",
+    "count": 1,
+    "components": {
+      "minecraft:item_name": {
+        "translate": "item.animal_pen.animal_pen_mangrove",
+        "fallback": "Animal Pen"
+      },
+      "minecraft:lore": [
+        "",
+        {
+          "translate": "item.animal_pen.animal_pen_mangrove.lore",
+          "fallback": "Insert Animal Cage to interact with animal.",
+          "color": "#AAAAAA",
+          "italic": false
+        }
+      ],
+      "minecraft:custom_model_data": {
+        "strings": [
+          "animal_pen:animal_pen",
+          "animal_pen:animal_pen_mangrove"
+        ]
+      },
+      "minecraft:block_state": {
+        "type": "bottom"
+      }
+    }
+  }
+}

@@ -27,6 +27,12 @@ public class BlockData
     public UUID countEntity;
 
     /**
+     * The decoration entity for animal pen.
+     */
+    @Nullable
+    public UUID decorationEntity;
+
+    /**
      * The block face how animal pen was placed.
      */
     public BlockFace blockFace;

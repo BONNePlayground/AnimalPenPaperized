@@ -234,7 +234,7 @@ public class AnimalCageListener implements Listener
             itemData.getCooldowns().putAll(penData.getCooldowns());
             itemData.setScutes(penData.scutes());
 
-            AnimalPenManager.setItemData(item, itemData);
+            AnimalPenManager.setAnimalCageData(item, itemData);
 
             penData.reduceEntityCount(itemData.entityCount());
 
@@ -271,7 +271,7 @@ public class AnimalCageListener implements Listener
             itemData.setEntityCount(1);
 
             // Save reduced item data
-            AnimalPenManager.setItemData(item, itemData);
+            AnimalPenManager.setAnimalCageData(item, itemData);
         }
         else
         {
@@ -288,7 +288,7 @@ public class AnimalCageListener implements Listener
             itemData.getVariants().clear();
 
             // Clear item data
-            AnimalPenManager.setItemData(item, null);
+            AnimalPenManager.setAnimalCageData(item, null);
         }
 
         AnimalPenManager.setAnimalPenData(block, penData);
@@ -328,7 +328,7 @@ public class AnimalCageListener implements Listener
         }
 
         ItemStack itemStack = AnimalPenManager.createEmptyAnimalCage();
-        AnimalPenManager.setItemData(itemStack, penData);
+        AnimalPenManager.setAnimalCageData(itemStack, penData);
 
         AnimalPenManager.clearBlockData(block, true);
 

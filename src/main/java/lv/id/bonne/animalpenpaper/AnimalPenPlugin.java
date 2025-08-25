@@ -1,21 +1,15 @@
 package lv.id.bonne.animalpenpaper;
 
 
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.*;
 
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import lv.id.bonne.animalpenpaper.commands.AnimalPenCommands;
 import lv.id.bonne.animalpenpaper.config.ConfigurationManager;
 import lv.id.bonne.animalpenpaper.listeners.AnimalCageListener;
 import lv.id.bonne.animalpenpaper.listeners.AnimalPenListener;
-import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
 import lv.id.bonne.animalpenpaper.managers.AnimalPenTasks;
-import lv.id.bonne.animalpenpaper.managers.AnimalPenVariantManager;
 
 
 public class AnimalPenPlugin extends JavaPlugin
@@ -38,12 +32,9 @@ public class AnimalPenPlugin extends JavaPlugin
         this.getServer().getPluginManager().registerEvents(new AnimalCageListener(), this);
         this.getServer().getPluginManager().registerEvents(new AnimalPenListener(), this);
         this.getServer().getPluginManager().registerEvents(new AnimalPenTasks(), this);
-        this.getServer().getPluginManager().registerEvents(new AnimalPenVariantManager(), this);
 
         this.task = new AnimalPenTasks();
         this.task.runTask();
-
-        this.registerAnimalPenRecipes();
 
         this.getLogger().info("AnimalPen enabled.");
     }
@@ -55,45 +46,6 @@ public class AnimalPenPlugin extends JavaPlugin
         this.task.bukkitTask.cancel();
         this.getServer().removeRecipe(new NamespacedKey(this, "animal_cage"));
         this.getLogger().info("AnimalPen disabled.");
-    }
-
-
-    /**
-     * Register custom recipes for creating animal pens
-     */
-    private void registerAnimalPenRecipes()
-    {
-        ShapedRecipe animalCageRecipe = new ShapedRecipe(
-            new NamespacedKey(this, "animal_cage"),
-            AnimalPenManager.createEmptyAnimalCage()
-        );
-
-        animalCageRecipe.shape(
-            "BBB",
-            "BGB",
-            "BBB"
-        );
-
-        animalCageRecipe.setIngredient('G', Material.GLASS);
-        animalCageRecipe.setIngredient('B', Material.IRON_BARS);
-
-        this.getServer().addRecipe(animalCageRecipe);
-
-        ShapedRecipe animalPenRecipe = new ShapedRecipe(
-            new NamespacedKey(this, "animal_pen_oak"),
-            AnimalPenManager.createAnimalPen()
-        );
-
-        animalPenRecipe.shape(
-            "   ",
-            "F F",
-            "SSS"
-        );
-
-        animalPenRecipe.setIngredient('F', Material.OAK_FENCE);
-        animalPenRecipe.setIngredient('S', Material.SMOOTH_STONE_SLAB);
-
-        this.getServer().addRecipe(animalPenRecipe);
     }
 
 

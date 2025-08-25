@@ -7,7 +7,6 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.damage.CraftDamageSource;
 import org.bukkit.craftbukkit.entity.*;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
@@ -20,18 +19,17 @@ import org.bukkit.inventory.meta.AxolotlBucketMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SuspiciousStewMeta;
 import org.bukkit.inventory.meta.TropicalFishBucketMeta;
+import org.bukkit.inventory.meta.components.CustomModelDataComponent;
 import org.bukkit.loot.LootContext;
 import org.bukkit.loot.LootTable;
 import org.bukkit.loot.LootTables;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.util.Vector;
+import org.bukkit.util.Transformation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.util.*;
 
 import io.papermc.paper.potion.SuspiciousEffectEntry;
@@ -41,13 +39,11 @@ import lv.id.bonne.animalpenpaper.data.AnimalDataType;
 import lv.id.bonne.animalpenpaper.data.BlockData;
 import lv.id.bonne.animalpenpaper.data.BlockDataType;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
+import lv.id.bonne.animalpenpaper.util.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.minecraft.advancements.CriteriaTriggers;
-
-import static java.time.temporal.ChronoField.MINUTE_OF_HOUR;
-import static java.time.temporal.ChronoField.SECOND_OF_MINUTE;
 
 
 /**
@@ -64,12 +60,15 @@ public class AnimalPenManager
 
         ItemMeta meta = item.getItemMeta();
 
-        if (meta == null || !meta.hasCustomModelData())
+        if (meta == null || !meta.hasCustomModelDataComponent())
         {
             return false;
         }
 
-        return meta.getCustomModelData() == ANIMAL_CAGE_MODEL;
+        List<String> dataComponents = meta.getCustomModelDataComponent().getStrings();
+
+        return dataComponents.contains(ANIMAL_CAGE_MODEL) ||
+            dataComponents.contains(ANIMAL_CAGE_FILLED_MODEL);
     }
 
 
@@ -92,14 +91,7 @@ public class AnimalPenManager
             animalData.addVariant(entitySnapshot);
         }
 
-        dataContainer.set(AnimalPenManager.ANIMAL_DATA_KEY, AnimalDataType.INSTANCE, animalData);
-
-        itemMeta.lore(List.of(Component.empty(),
-            Component.text("Animal: ").style(StyleUtil.GRAY)
-                .append(Component.translatable(animalData.entityType().translationKey())),
-            Component.text("Count: ").style(StyleUtil.GRAY).append(Component.text(animalData.entityCount())),
-            Component.empty(),
-            Component.text("Shift Right-click on block to release it").style(StyleUtil.GRAY)));
+        AnimalPenManager.updateAnimalCageItemMeta(animalData, itemMeta);
 
         handItem.setItemMeta(itemMeta);
 
@@ -121,23 +113,7 @@ public class AnimalPenManager
 
         animalData.reduceEntityCount(amount);
 
-        if (animalData.entityCount() <= 0)
-        {
-            dataContainer.remove(AnimalPenManager.ANIMAL_DATA_KEY);
-            itemMeta.lore(List.of(Component.empty(),
-                Component.text("Right-click on animal to catch it").style(StyleUtil.GRAY)));
-        }
-        else
-        {
-            dataContainer.set(AnimalPenManager.ANIMAL_DATA_KEY, AnimalDataType.INSTANCE, animalData);
-
-            itemMeta.lore(List.of(Component.empty(),
-                Component.text("Animal: ").style(StyleUtil.GRAY)
-                    .append(Component.translatable(animalData.entityType().translationKey())),
-                Component.text("Count: ").style(StyleUtil.GRAY).append(Component.text(animalData.entityCount())),
-                Component.empty(),
-                Component.text("Shift Right-click on block to release it").style(StyleUtil.GRAY)));
-        }
+        AnimalPenManager.updateAnimalCageItemMeta(animalData, itemMeta);
 
         item.setItemMeta(itemMeta);
 
@@ -159,29 +135,10 @@ public class AnimalPenManager
     }
 
 
-    public static void setItemData(ItemStack item, @Nullable AnimalData animalData)
+    public static void setAnimalCageData(ItemStack item, @Nullable AnimalData animalData)
     {
         ItemMeta itemMeta = item.getItemMeta();
-
-        if (animalData == null)
-        {
-            itemMeta.getPersistentDataContainer().remove(AnimalPenManager.ANIMAL_DATA_KEY);
-            itemMeta.lore(List.of(Component.empty(),
-                Component.text("Right-click on animal to catch it").style(StyleUtil.GRAY)));
-        }
-        else
-        {
-            itemMeta.getPersistentDataContainer()
-                .set(AnimalPenManager.ANIMAL_DATA_KEY, AnimalDataType.INSTANCE, animalData);
-
-            itemMeta.lore(List.of(Component.empty(),
-                Component.text("Animal: ").style(StyleUtil.GRAY)
-                    .append(Component.translatable(animalData.entityType().translationKey())),
-                Component.text("Count: ").style(StyleUtil.GRAY).append(Component.text(animalData.entityCount())),
-                Component.empty(),
-                Component.text("Shift Right-click on block to release it").style(StyleUtil.GRAY)));
-        }
-
+        AnimalPenManager.updateAnimalCageItemMeta(animalData, itemMeta);
         item.setItemMeta(itemMeta);
     }
 
@@ -195,11 +152,8 @@ public class AnimalPenManager
         ItemMeta meta = bottle.getItemMeta();
         if (meta == null) return bottle;
 
-        meta.setCustomModelData(ANIMAL_CAGE_MODEL);
         meta.displayName(Component.text("Animal Cage").style(StyleUtil.WHITE));
-
-        meta.lore(List.of(Component.empty(),
-            Component.text("Right-click on animal to catch it").style(StyleUtil.GRAY)));
+        AnimalPenManager.updateAnimalCageItemMeta(null, meta);
 
         // Anti Stacking
         meta.setMaxStackSize(1);
@@ -207,6 +161,43 @@ public class AnimalPenManager
         bottle.setItemMeta(meta);
 
         return bottle;
+    }
+
+
+    private static void updateAnimalCageItemMeta(@Nullable AnimalData animalData, ItemMeta itemMeta)
+    {
+        if (animalData == null || animalData.entityCount() <= 0)
+        {
+            itemMeta.getPersistentDataContainer().remove(AnimalPenManager.ANIMAL_DATA_KEY);
+            itemMeta.lore(List.of(Component.empty(),
+                Component.text("Right-click on animal to catch it").style(StyleUtil.GRAY)));
+
+            CustomModelDataComponent component = itemMeta.getCustomModelDataComponent();
+            component.setStrings(List.of(ANIMAL_CAGE_MODEL));
+            itemMeta.setCustomModelDataComponent(component);
+        }
+        else
+        {
+            itemMeta.getPersistentDataContainer().
+                set(AnimalPenManager.ANIMAL_DATA_KEY, AnimalDataType.INSTANCE, animalData);
+
+            itemMeta.lore(List.of(Component.empty(),
+                Component.text("Animal: ").style(StyleUtil.GRAY).
+                    append(Component.translatable(animalData.entityType().translationKey())),
+                Component.text("Count: ").style(StyleUtil.GRAY).
+                    append(Component.text(animalData.entityCount())),
+                Component.empty(),
+                Component.text("Shift Right-click on block to release it").style(StyleUtil.GRAY)));
+
+            CustomModelDataComponent component = itemMeta.getCustomModelDataComponent();
+
+            if (!component.getStrings().contains(AnimalPenManager.ANIMAL_CAGE_FILLED_MODEL))
+            {
+                component.setStrings(List.of(AnimalPenManager.ANIMAL_CAGE_FILLED_MODEL,
+                    animalData.entityType().key().asString()));
+                itemMeta.setCustomModelDataComponent(component);
+            }
+        }
     }
 
 
@@ -227,12 +218,12 @@ public class AnimalPenManager
 
         ItemMeta meta = item.getItemMeta();
 
-        if (meta == null || !meta.hasCustomModelData())
+        if (meta == null || !meta.hasCustomModelDataComponent())
         {
             return false;
         }
 
-        return meta.getCustomModelData() == ANIMAL_PEN_MODEL;
+        return meta.getCustomModelDataComponent().getStrings().contains(ANIMAL_PEN_MODEL);
     }
 
 
@@ -257,6 +248,66 @@ public class AnimalPenManager
     {
         return entity.getPersistentDataContainer().has(ANIMAL_DATA_KEY,
             AnimalDataType.INSTANCE);
+    }
+
+
+    public static void completePenCreation(Block block, BlockData blockData, @NotNull ItemStack itemInHand)
+    {
+        NamespacedKey penKey = new NamespacedKey(AnimalPenPlugin.getInstance(),
+            block.getX() + "_" + block.getY() + "_" + block.getZ() + "_animal_pen");
+
+        // Create decoration entity
+        Entity decorationEntity = block.getWorld().spawnEntity(
+            block.getLocation().add(0.5, 0.75, 0.5),
+            EntityType.ITEM_DISPLAY,
+            CreatureSpawnEvent.SpawnReason.CUSTOM,
+            newEntity ->
+            {
+                newEntity.setPersistent(true);
+                newEntity.setRotation(Utils.blockFaceToYaw(blockData.blockFace), 0);
+
+                if (newEntity instanceof ItemDisplay display)
+                {
+                    display.setVisibleByDefault(true);
+
+                    ItemStack itemStack = new ItemStack(itemInHand);
+                    itemStack.setAmount(1);
+                    display.setItemStack(itemStack);
+
+                    Transformation transform = display.getTransformation();
+                    transform.getScale().set(0.99f, 0.99f, 0.99f);
+                    display.setTransformation(transform);
+                }
+
+                newEntity.getPersistentDataContainer().set(penKey, PersistentDataType.BOOLEAN, true);
+            });
+
+        blockData.decorationEntity = decorationEntity.getUniqueId();
+
+        // Crate counter entity.
+        Entity countEntity = block.getWorld().spawnEntity(
+            block.getLocation().add(Utils.center(blockData.blockFace)),
+            EntityType.TEXT_DISPLAY,
+            CreatureSpawnEvent.SpawnReason.CUSTOM,
+            (newEntity) ->
+            {
+                newEntity.setPersistent(true);
+                newEntity.setRotation(Utils.blockFaceToYaw(blockData.blockFace), 0);
+
+                if (newEntity instanceof TextDisplay display)
+                {
+                    display.setVisibleByDefault(true);
+                    display.setSeeThrough(false);
+                    display.text(Component.text(0));
+                }
+
+                newEntity.getPersistentDataContainer().set(penKey, PersistentDataType.BOOLEAN, true);
+            });
+
+        blockData.countEntity = countEntity.getUniqueId();
+
+        // Save data.
+        block.getWorld().getPersistentDataContainer().set(penKey, BlockDataType.INSTANCE, blockData);
     }
 
 
@@ -297,6 +348,17 @@ public class AnimalPenManager
                 blockData.countEntity = nearbyEntities.iterator().next().getUniqueId();
             }
 
+            nearbyEntities = block.getWorld().
+                getNearbyEntities(block.getBoundingBox().expand(1),
+                    findEntity -> findEntity.getType() == EntityType.ITEM_DISPLAY &&
+                        findEntity.getFacing() == entity.getFacing() &&
+                        findEntity.getPersistentDataContainer().has(penKey));
+
+            if (!nearbyEntities.isEmpty())
+            {
+                blockData.decorationEntity = nearbyEntities.iterator().next().getUniqueId();
+            }
+
             block.getWorld().getPersistentDataContainer().set(penKey, BlockDataType.INSTANCE, blockData);
         }
 
@@ -319,16 +381,16 @@ public class AnimalPenManager
 
                     if (animalData != null)
                     {
-                        AttributeModifier modifier = attribute.getModifier(ANIMAL_SIZE_MODIFIER);
+                        AttributeModifier modifier = attribute.getModifier(Utils.ANIMAL_SIZE_MODIFIER);
                         float multiplier =
                             AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getGrowthMultiplier() *
                                 animalData.entityCount();
 
                         if (modifier != null && modifier.getAmount() != multiplier)
                         {
-                            attribute.getModifier(ANIMAL_SIZE_MODIFIER);
+                            attribute.getModifier(Utils.ANIMAL_SIZE_MODIFIER);
 
-                            attribute.addModifier(new AttributeModifier(ANIMAL_SIZE_MODIFIER,
+                            attribute.addModifier(new AttributeModifier(Utils.ANIMAL_SIZE_MODIFIER,
                                 multiplier,
                                 AttributeModifier.Operation.ADD_NUMBER
                             ));
@@ -409,7 +471,7 @@ public class AnimalPenManager
                 livingEntity.setCollidable(false);
                 livingEntity.setAI(false);
                 livingEntity.setRemoveWhenFarAway(false);
-                livingEntity.setRotation(AnimalPenManager.blockFaceToYaw(blockData.blockFace), 0);
+                livingEntity.setRotation(Utils.blockFaceToYaw(blockData.blockFace), 0);
 
                 AttributeInstance attribute = livingEntity.getAttribute(Attribute.SCALE);
 
@@ -419,7 +481,7 @@ public class AnimalPenManager
 
                     if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isGrowAnimals())
                     {
-                        attribute.addModifier(new AttributeModifier(ANIMAL_SIZE_MODIFIER,
+                        attribute.addModifier(new AttributeModifier(Utils.ANIMAL_SIZE_MODIFIER,
                             AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getGrowthMultiplier() *
                                 newData.entityCount(),
                             AttributeModifier.Operation.ADD_NUMBER
@@ -446,9 +508,9 @@ public class AnimalPenManager
 
                 if (attribute != null)
                 {
-                    attribute.removeModifier(ANIMAL_SIZE_MODIFIER);
+                    attribute.removeModifier(Utils.ANIMAL_SIZE_MODIFIER);
 
-                    attribute.addModifier(new AttributeModifier(ANIMAL_SIZE_MODIFIER,
+                    attribute.addModifier(new AttributeModifier(Utils.ANIMAL_SIZE_MODIFIER,
                         AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getGrowthMultiplier() * newData.entityCount(),
                         AttributeModifier.Operation.ADD_NUMBER
                     ));
@@ -498,9 +560,9 @@ public class AnimalPenManager
 
                 if (attribute != null)
                 {
-                    attribute.removeModifier(ANIMAL_SIZE_MODIFIER);
+                    attribute.removeModifier(Utils.ANIMAL_SIZE_MODIFIER);
 
-                    attribute.addModifier(new AttributeModifier(ANIMAL_SIZE_MODIFIER,
+                    attribute.addModifier(new AttributeModifier(Utils.ANIMAL_SIZE_MODIFIER,
                         AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getGrowthMultiplier() * newData.entityCount(),
                         AttributeModifier.Operation.ADD_NUMBER
                     ));
@@ -521,7 +583,7 @@ public class AnimalPenManager
     }
 
 
-    public static void clearBlockData(Block block, boolean withSave)
+    public static void clearBlockData(Block block, boolean keepBlock)
     {
         NamespacedKey penKey = new NamespacedKey(AnimalPenPlugin.getInstance(),
             block.getX() + "_" + block.getY() + "_" + block.getZ() + "_animal_pen");
@@ -538,7 +600,7 @@ public class AnimalPenManager
 
         blockData.entity = null;
 
-        if (withSave)
+        if (keepBlock)
         {
             AnimalPenManager.updateCountTextEntity(block, blockData, 0, penKey);
 
@@ -549,9 +611,33 @@ public class AnimalPenManager
         else
         {
             AnimalPenManager.removeEntity(block.getWorld(), blockData.countEntity);
+            AnimalPenManager.removeEntity(block.getWorld(), blockData.decorationEntity);
 
             block.getWorld().getPersistentDataContainer().remove(penKey);
         }
+    }
+
+
+    public static ItemStack getAnimalPenItem(Block block)
+    {
+        NamespacedKey penKey = new NamespacedKey(AnimalPenPlugin.getInstance(),
+            block.getX() + "_" + block.getY() + "_" + block.getZ() + "_animal_pen");
+
+        BlockData blockData = block.getWorld().getPersistentDataContainer().get(penKey, BlockDataType.INSTANCE);
+
+        if (blockData == null || blockData.decorationEntity == null)
+        {
+            return AnimalPenManager.createAnimalPen();
+        }
+
+        Entity entity = block.getWorld().getEntity(blockData.decorationEntity);
+
+        if (!(entity instanceof ItemDisplay display))
+        {
+            return AnimalPenManager.createAnimalPen();
+        }
+
+        return display.getItemStack();
     }
 
 
@@ -578,7 +664,10 @@ public class AnimalPenManager
         ItemMeta meta = smoothStoneSlab.getItemMeta();
         if (meta == null) return smoothStoneSlab;
 
-        meta.setCustomModelData(ANIMAL_PEN_MODEL);
+        CustomModelDataComponent customData = meta.getCustomModelDataComponent();
+        customData.setStrings(List.of(ANIMAL_PEN_MODEL, "animal_pen:animal_pen_oak"));
+        meta.setCustomModelDataComponent(customData);
+
         meta.displayName(Component.text("Animal Pen").style(StyleUtil.WHITE));
 
         meta.lore(List.of(Component.empty(),
@@ -597,13 +686,13 @@ public class AnimalPenManager
         if (blockData.countEntity == null || block.getWorld().getEntity(blockData.countEntity) == null)
         {
             entity = block.getWorld().spawnEntity(
-                block.getLocation().add(AnimalPenManager.center(blockData.blockFace)),
+                block.getLocation().add(Utils.center(blockData.blockFace)),
                 EntityType.TEXT_DISPLAY,
                 CreatureSpawnEvent.SpawnReason.CUSTOM,
                 (newEntity) ->
                 {
                     newEntity.setPersistent(true);
-                    newEntity.setRotation(AnimalPenManager.blockFaceToYaw(blockData.blockFace), 0);
+                    newEntity.setRotation(Utils.blockFaceToYaw(blockData.blockFace), 0);
 
                     if (newEntity instanceof TextDisplay display)
                     {
@@ -665,7 +754,7 @@ public class AnimalPenManager
                     component = Component.text("Cooldown: ").append(
                         Component.text(LocalTime.of(0, 0, 0).
                             plusSeconds(animalData.getCooldown(Material.APPLE) / 20).
-                            format(AnimalPenManager.DATE_FORMATTER)));
+                            format(Utils.DATE_FORMATTER)));
                 }
 
                 if (foodItems.size() == 1)
@@ -959,7 +1048,7 @@ public class AnimalPenManager
             component = Component.text("Cooldown: ").append(
                 Component.text(LocalTime.of(0, 0, 0).
                     plusSeconds(animalData.getCooldown(material) / 20).
-                    format(AnimalPenManager.DATE_FORMATTER)));
+                    format(Utils.DATE_FORMATTER)));
             icon = result;
         }
 
@@ -1016,7 +1105,7 @@ public class AnimalPenManager
 
         stackSize = (int) Math.min((maxCount - data.entityCount()) * 2, stackSize);
 
-        AnimalPenManager.triggerItemUse(entity, player, itemStack, stackSize % 2 == 1 ? stackSize - 1 : stackSize);
+        Utils.triggerItemUse(entity, player, itemStack, stackSize % 2 == 1 ? stackSize - 1 : stackSize);
 
         if (player.getGameMode() != GameMode.CREATIVE)
         {
@@ -1129,14 +1218,14 @@ public class AnimalPenManager
             return;
         }
 
-        AnimalPenManager.triggerItemUse(entity, player, itemStack, 1);
+        Utils.triggerItemUse(entity, player, itemStack, 1);
 
         if (player.getGameMode() != GameMode.CREATIVE)
         {
             itemStack.damage(16, player);
         }
 
-        AnimalPenManager.dropItems(entity.getWorld(),
+        Utils.dropItems(entity.getWorld(),
             entity.getLocation().add(0, 1, 0),
             Material.ARMADILLO_SCUTE,
             1);
@@ -1241,7 +1330,7 @@ public class AnimalPenManager
 
         data.reduceEntityCount(1);
 
-        AnimalPenManager.triggerItemUse(entity, player, itemStack, 1);
+        Utils.triggerItemUse(entity, player, itemStack, 1);
 
         if (player.getGameMode() != GameMode.CREATIVE)
         {
@@ -1309,14 +1398,14 @@ public class AnimalPenManager
             return;
         }
 
-        AnimalPenManager.triggerItemUse(entity, player, itemStack, 1);
+        Utils.triggerItemUse(entity, player, itemStack, 1);
 
         if (player.getGameMode() != GameMode.CREATIVE)
         {
             itemStack.damage(1, player);
         }
 
-        AnimalPenManager.dropItems(entity.getWorld(),
+        Utils.dropItems(entity.getWorld(),
             entity.getLocation().add(0, 1, 0),
             Material.HONEYCOMB,
             3);
@@ -1360,7 +1449,7 @@ public class AnimalPenManager
             return;
         }
 
-        AnimalPenManager.triggerItemUse(entity, player, itemStack, 1);
+        Utils.triggerItemUse(entity, player, itemStack, 1);
 
         if (player.getGameMode() != GameMode.CREATIVE)
         {
@@ -1388,7 +1477,7 @@ public class AnimalPenManager
             woolCount += random.nextInt(3);
         }
 
-        AnimalPenManager.dropItems(entity.getWorld(),
+        Utils.dropItems(entity.getWorld(),
             entity.getLocation().add(0, 1, 0),
             woolMaterial,
             woolCount);
@@ -1446,7 +1535,7 @@ public class AnimalPenManager
             return;
         }
 
-        AnimalPenManager.triggerItemUse(entity, player, itemStack, 1);
+        Utils.triggerItemUse(entity, player, itemStack, 1);
 
         if (player.getGameMode() != GameMode.CREATIVE)
         {
@@ -1494,7 +1583,7 @@ public class AnimalPenManager
             return;
         }
 
-        AnimalPenManager.triggerItemUse(entity, player, itemStack, 1);
+        Utils.triggerItemUse(entity, player, itemStack, 1);
 
         if (player.getGameMode() != GameMode.CREATIVE)
         {
@@ -1579,7 +1668,7 @@ public class AnimalPenManager
 
         int itemCount = (int) Math.min(data.entityCount(), dropLimits);
 
-        AnimalPenManager.dropItems(entity.getWorld(),
+        Utils.dropItems(entity.getWorld(),
             entity.getLocation().add(0, 1, 0),
             material,
             itemCount);
@@ -1623,7 +1712,7 @@ public class AnimalPenManager
             return;
         }
 
-        AnimalPenManager.triggerItemUse(entity, player, itemStack, 1);
+        Utils.triggerItemUse(entity, player, itemStack, 1);
 
         if (player.getGameMode() != GameMode.CREATIVE)
         {
@@ -1689,7 +1778,7 @@ public class AnimalPenManager
             itemStack.subtract(froglightCount);
         }
 
-        AnimalPenManager.dropItems(entity.getWorld(),
+        Utils.dropItems(entity.getWorld(),
             entity.getLocation().add(0, 1, 0),
             material,
             froglightCount);
@@ -1748,7 +1837,7 @@ public class AnimalPenManager
             return;
         }
 
-        AnimalPenManager.triggerItemUse(entity, player, itemStack, 1);
+        Utils.triggerItemUse(entity, player, itemStack, 1);
 
         if (player.getGameMode() != GameMode.CREATIVE)
         {
@@ -1911,7 +2000,7 @@ public class AnimalPenManager
 
         mushroomCow.addEffectToNextStew(suspiciousEffectEntry, false);
 
-        AnimalPenManager.triggerItemUse(entity, player, itemStack, 1);
+        Utils.triggerItemUse(entity, player, itemStack, 1);
 
         if (player.getGameMode() != GameMode.CREATIVE)
         {
@@ -1938,7 +2027,7 @@ public class AnimalPenManager
         int scutes = animalData.scutes();
         animalData.setScutes(0);
 
-        AnimalPenManager.dropItems(entity.getWorld(),
+        Utils.dropItems(entity.getWorld(),
             entity.getLocation().add(0, 1, 0),
             Material.TURTLE_SCUTE,
             scutes);
@@ -2063,47 +2152,6 @@ public class AnimalPenManager
 // ---------------------------------------------------------------------
 
 
-    /**
-     * This method drops item stacks of given material in given amount naturally at the given location.
-     */
-    private static void dropItems(World world, Location location, Material material, int amount)
-    {
-        while (amount > 0)
-        {
-            ItemStack dropItem = new ItemStack(material);
-
-            if (amount > dropItem.getMaxStackSize())
-            {
-                dropItem.setAmount(dropItem.getMaxStackSize());
-                amount -= dropItem.getMaxStackSize();
-            }
-            else
-            {
-                dropItem.setAmount(amount);
-                amount = 0;
-            }
-
-            world.dropItemNaturally(location, dropItem);
-        }
-    }
-
-
-    private static void triggerItemUse(Entity entity, Player player, ItemStack itemStack, int amount)
-    {
-        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isTriggerAdvancements())
-        {
-            CriteriaTriggers.PLAYER_INTERACTED_WITH_ENTITY.trigger(((CraftPlayer) player).getHandle(),
-                ((CraftItemStack) itemStack).handle,
-                ((CraftEntity) entity).getHandle());
-        }
-
-        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isIncreaseStatistics())
-        {
-            player.incrementStatistic(Statistic.USE_ITEM, itemStack.getType(), amount);
-        }
-    }
-
-
     private static Material getWoolMaterial(DyeColor color)
     {
         try
@@ -2153,49 +2201,13 @@ public class AnimalPenManager
     }
 
 
-    public static float blockFaceToYaw(BlockFace blockFace)
-    {
-        return switch (blockFace)
-        {
-            case NORTH -> 180f;
-            case SOUTH -> 0f;
-            case EAST -> 270f;
-            case WEST -> 90f;
-            default -> 180f;
-        };
-    }
-
-
-    private static Vector center(BlockFace blockFace)
-    {
-        return switch (blockFace)
-        {
-            case NORTH -> NORTH_CENTER;
-            case SOUTH -> SOUTH_CENTER;
-            case EAST -> EAST_CENTER;
-            case WEST -> WEST_CENTER;
-            default -> NORTH_CENTER;
-        };
-    }
-
-
     public final static NamespacedKey ANIMAL_DATA_KEY = new NamespacedKey("animal_pen_plugin", "animal_data");
 
-    private static final Vector NORTH_CENTER = new Vector(0.5, 0.125, 0);
+    private final static String ANIMAL_CAGE_MODEL = "animal_pen:animal_cage";
 
-    private static final Vector SOUTH_CENTER = new Vector(0.5, 0.125, 1);
+    private final static String ANIMAL_CAGE_FILLED_MODEL = "animal_pen:animal_cage_filled";
 
-    private static final Vector EAST_CENTER = new Vector(1, 0.125, 0.5);
-
-    private static final Vector WEST_CENTER = new Vector(0, 0.125, 0.5);
-
-    private final static int ANIMAL_CAGE_MODEL = 1000;
-
-    private final static int ANIMAL_PEN_MODEL = 1001;
-
-    private final static NamespacedKey UNIQUE_DATA_KEY = new NamespacedKey("animal_pen_plugin", "unique_key");
-
-    private final static NamespacedKey ANIMAL_SIZE_MODIFIER = new NamespacedKey("animal_pen_plugin", "animal_size");
+    private final static String ANIMAL_PEN_MODEL = "animal_pen:animal_pen";
 
     private static final Map<Material, SuspiciousEffectEntry> FLOWER_EFFECTS = Map.ofEntries(
         Map.entry(Material.ALLIUM, SuspiciousEffectEntry.create(PotionEffectType.FIRE_RESISTANCE, 80)),
@@ -2213,12 +2225,4 @@ public class AnimalPenManager
         Map.entry(Material.WHITE_TULIP, SuspiciousEffectEntry.create(PotionEffectType.WEAKNESS, 180)),
         Map.entry(Material.WITHER_ROSE, SuspiciousEffectEntry.create(PotionEffectType.WITHER, 160))
     );
-
-
-    public static DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().
-        appendValue(MINUTE_OF_HOUR, 2).
-        optionalStart().
-        appendLiteral(':').
-        appendValue(SECOND_OF_MINUTE, 2).
-        toFormatter();
 }

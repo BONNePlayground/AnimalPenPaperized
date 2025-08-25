@@ -83,7 +83,5 @@ public class BlockDataType implements PersistentDataType<String, BlockData>
 
     public static final BlockDataType INSTANCE = new BlockDataType();
 
-    private static final Gson GSON = new GsonBuilder()
-        .setPrettyPrinting()
-        .create();
+    private static final Gson GSON = new GsonBuilder().create();
 }
