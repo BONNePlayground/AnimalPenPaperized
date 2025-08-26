@@ -5,10 +5,8 @@ import com.google.gson.annotations.JsonAdapter;
 import org.bukkit.Material;
 import org.bukkit.entity.EntitySnapshot;
 import org.bukkit.entity.EntityType;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.jetbrains.annotations.Nullable;
+import java.util.*;
 
 import lv.id.bonne.animalpenpaper.config.adapters.EntitySnapshotTypeAdapter;
 
@@ -209,6 +207,40 @@ public class AnimalData
     }
 
 
+    /**
+     * Some entities changes when material is applied on them. Snapshot does not know it.
+     * (like dye a sheep)
+     * @param material The applied material.
+     */
+    public void setAppliedMaterial(@Nullable Material material)
+    {
+        this.appliedMaterial = material;
+    }
+
+
+    /**
+     * Some entities changes when something is done to them. Snapshot does not know it.
+     * (like sear a sheep)
+     * @param flag The applied flag.
+     */
+    public void setAppliedFlag(@Nullable Boolean flag)
+    {
+        this.appliedFlag = flag;
+    }
+
+
+    public Optional<Boolean> getAppliedFlag()
+    {
+        return Optional.ofNullable(this.appliedFlag);
+    }
+
+
+    public Optional<Material> getAppliedMaterial()
+    {
+        return Optional.ofNullable(this.appliedMaterial);
+    }
+
+
 // ---------------------------------------------------------------------
 // Section: Variables
 // ---------------------------------------------------------------------
@@ -249,4 +281,16 @@ public class AnimalData
      * The amount of scutes to be dropped.
      */
     private int scuteCount;
+
+    /**
+     * The material that is applied on entity
+     */
+    @Nullable
+    private Material appliedMaterial;
+
+    /**
+     * The flag that is applied on entity.
+     */
+    @Nullable
+    private Boolean appliedFlag;
 }

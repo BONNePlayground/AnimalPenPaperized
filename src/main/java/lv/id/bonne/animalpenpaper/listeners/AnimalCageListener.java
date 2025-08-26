@@ -18,10 +18,12 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.Iterator;
 
+import io.papermc.paper.potion.SuspiciousEffectEntry;
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
 import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
+import lv.id.bonne.animalpenpaper.util.Utils;
 import net.kyori.adventure.text.Component;
 
 
@@ -160,6 +162,41 @@ public class AnimalCageListener implements Listener
             entity = world.spawnEntity(spawnLoc, entityType, CreatureSpawnEvent.SpawnReason.CUSTOM);
         }
 
+        boolean updateSnapshot = storedData.getAppliedFlag().isPresent() ||
+            storedData.getAppliedMaterial().isPresent();
+
+        if (entity instanceof Sheep sheep)
+        {
+            storedData.getAppliedFlag().ifPresent(shared -> {
+                sheep.setSheared(shared);
+                storedData.setAppliedFlag(null);
+            });
+
+            storedData.getAppliedMaterial().ifPresent(dye -> {
+                sheep.setColor(Utils.getDyeColor(dye));
+                storedData.setAppliedMaterial(null);
+            });
+        }
+        else if (entity instanceof MushroomCow cow)
+        {
+            storedData.getAppliedMaterial().ifPresent(dye -> {
+                SuspiciousEffectEntry suspiciousEffectEntry = Utils.FLOWER_EFFECTS.get(dye);
+
+                if (suspiciousEffectEntry != null)
+                {
+                    cow.addEffectToNextStew(suspiciousEffectEntry, true);
+                }
+
+                storedData.setAppliedMaterial(null);
+            });
+        }
+
+        if (updateSnapshot || storedData.entitySnapshot() == null)
+        {
+            // Update snapshot based on created entity.
+            storedData.setEntitySnapshot(entity.createSnapshot());
+        }
+
         if (!(entity instanceof Animals))
         {
             return;
@@ -233,7 +270,12 @@ public class AnimalCageListener implements Listener
             // Clone half of data to new item
             itemData = new AnimalData(penData.entityType(), penData.entitySnapshot(), penData.entityCount() / 2);
             itemData.getCooldowns().putAll(penData.getCooldowns());
-            itemData.setScutes(penData.scutes());
+            itemData.setScutes(penData.scutes() / 2);
+            penData.setScutes(penData.scutes() - itemData.scutes());
+
+            // save applied data
+            penData.getAppliedMaterial().ifPresent(itemData::setAppliedMaterial);
+            penData.getAppliedFlag().ifPresent(itemData::setAppliedFlag);
 
             AnimalPenManager.setAnimalCageData(item, itemData);
 

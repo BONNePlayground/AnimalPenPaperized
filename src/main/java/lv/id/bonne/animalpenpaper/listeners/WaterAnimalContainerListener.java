@@ -159,6 +159,12 @@ public class WaterAnimalContainerListener implements Listener
             entity = world.spawnEntity(spawnLoc, entityType, CreatureSpawnEvent.SpawnReason.CUSTOM);
         }
 
+        if (storedData.entitySnapshot() == null)
+        {
+            // Update snapshot based on created entity.
+            storedData.setEntitySnapshot(entity.createSnapshot());
+        }
+
         if (!(entity instanceof WaterMob))
         {
             return;
@@ -232,7 +238,6 @@ public class WaterAnimalContainerListener implements Listener
             // Clone half of data to new item
             itemData = new AnimalData(penData.entityType(), penData.entitySnapshot(), penData.entityCount() / 2);
             itemData.getCooldowns().putAll(penData.getCooldowns());
-            itemData.setScutes(penData.scutes());
 
             AquariumManager.setWaterContainerData(item, itemData);
 

@@ -457,6 +457,23 @@ public class AnimalPenManager
                     CreatureSpawnEvent.SpawnReason.CUSTOM);
             }
 
+            if (entity instanceof Sheep sheep)
+            {
+                newData.getAppliedFlag().ifPresent(sheep::setSheared);
+                newData.getAppliedMaterial().ifPresent(dye -> sheep.setColor(Utils.getDyeColor(dye)));
+            }
+            else if (entity instanceof MushroomCow cow)
+            {
+                newData.getAppliedMaterial().ifPresent(dye -> {
+                    SuspiciousEffectEntry suspiciousEffectEntry = Utils.FLOWER_EFFECTS.get(dye);
+
+                    if (suspiciousEffectEntry != null)
+                    {
+                        cow.addEffectToNextStew(suspiciousEffectEntry, true);
+                    }
+                });
+            }
+
             entity.setGravity(false);
             entity.setNoPhysics(true);
             entity.setPersistent(true);
@@ -1054,6 +1071,9 @@ public class AnimalPenManager
                 Material.SHEARS,
                 data.entityCount()));
 
+        // Remember shear value for snapshot
+        data.setAppliedFlag(true);
+
         // Save data
         AnimalPenManager.setAnimalPenData(entity, data);
     }
@@ -1278,6 +1298,9 @@ public class AnimalPenManager
 
         Utils.triggerItemUse(entity, player, itemStack, 1);
 
+        // Store dye color for snapshot
+        data.setAppliedMaterial(itemStack.getType());
+
         if (player.getGameMode() != GameMode.CREATIVE)
         {
             itemStack.subtract();
@@ -1433,6 +1456,9 @@ public class AnimalPenManager
                 Material.BOWL,
                 data.entityCount()));
 
+        // Remove saved material
+        data.setAppliedMaterial(null);
+
         // Save data
         AnimalPenManager.setAnimalPenData(entity, data);
     }
@@ -1555,7 +1581,7 @@ public class AnimalPenManager
             return;
         }
 
-        SuspiciousEffectEntry suspiciousEffectEntry = FLOWER_EFFECTS.get(itemStack.getType());
+        SuspiciousEffectEntry suspiciousEffectEntry = Utils.FLOWER_EFFECTS.get(itemStack.getType());
 
         if (suspiciousEffectEntry == null)
         {
@@ -1565,6 +1591,9 @@ public class AnimalPenManager
         mushroomCow.addEffectToNextStew(suspiciousEffectEntry, false);
 
         Utils.triggerItemUse(entity, player, itemStack, 1);
+
+        // Store flower for entity snapshot
+        data.setAppliedMaterial(itemStack.getType());
 
         if (player.getGameMode() != GameMode.CREATIVE)
         {
@@ -1577,6 +1606,9 @@ public class AnimalPenManager
             Sound.ENTITY_MOOSHROOM_EAT,
             new Random().nextFloat(0.8f, 1.2f),
             1);
+
+        // Save data
+        AnimalPenManager.setAnimalPenData(entity, data);
     }
 
 
@@ -1707,6 +1739,9 @@ public class AnimalPenManager
             key == Material.SHEARS)
         {
             ((Sheep) entity).setSheared(false);
+
+            // Remember shear value for snapshot
+            animalData.setAppliedFlag(false);
         }
     }
 
@@ -1723,21 +1758,4 @@ public class AnimalPenManager
     private final static String ANIMAL_CAGE_FILLED_MODEL = "animal_pen:animal_cage_filled";
 
     private final static String ANIMAL_PEN_MODEL = "animal_pen:animal_pen";
-
-    private static final Map<Material, SuspiciousEffectEntry> FLOWER_EFFECTS = Map.ofEntries(
-        Map.entry(Material.ALLIUM, SuspiciousEffectEntry.create(PotionEffectType.FIRE_RESISTANCE, 80)),
-        Map.entry(Material.AZURE_BLUET, SuspiciousEffectEntry.create(PotionEffectType.BLINDNESS, 160)),
-        Map.entry(Material.BLUE_ORCHID, SuspiciousEffectEntry.create(PotionEffectType.SATURATION, 7)),
-        Map.entry(Material.DANDELION, SuspiciousEffectEntry.create(PotionEffectType.SATURATION, 7)),
-        Map.entry(Material.CORNFLOWER, SuspiciousEffectEntry.create(PotionEffectType.JUMP_BOOST, 120)),
-        Map.entry(Material.LILY_OF_THE_VALLEY, SuspiciousEffectEntry.create(PotionEffectType.POISON, 240)),
-        Map.entry(Material.OXEYE_DAISY, SuspiciousEffectEntry.create(PotionEffectType.REGENERATION, 160)),
-        Map.entry(Material.POPPY, SuspiciousEffectEntry.create(PotionEffectType.NIGHT_VISION, 100)),
-        Map.entry(Material.TORCHFLOWER, SuspiciousEffectEntry.create(PotionEffectType.NIGHT_VISION, 100)),
-        Map.entry(Material.RED_TULIP, SuspiciousEffectEntry.create(PotionEffectType.WEAKNESS, 180)),
-        Map.entry(Material.ORANGE_TULIP, SuspiciousEffectEntry.create(PotionEffectType.WEAKNESS, 180)),
-        Map.entry(Material.PINK_TULIP, SuspiciousEffectEntry.create(PotionEffectType.WEAKNESS, 180)),
-        Map.entry(Material.WHITE_TULIP, SuspiciousEffectEntry.create(PotionEffectType.WEAKNESS, 180)),
-        Map.entry(Material.WITHER_ROSE, SuspiciousEffectEntry.create(PotionEffectType.WITHER, 160))
-    );
 }
