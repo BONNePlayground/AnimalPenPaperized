@@ -19,10 +19,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.EntityTransformEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
@@ -377,6 +374,16 @@ public class AquariumListener implements Listener
         if (AquariumManager.isAquarium(event.getBlock().getRelative(BlockFace.DOWN)))
         {
             // Aquarium cannot spread water
+            event.setCancelled(true);
+        }
+    }
+
+
+    @EventHandler
+    public void onEntityTarget(EntityTargetLivingEntityEvent event)
+    {
+        if (event.getTarget() != null && AquariumManager.isAquarium(event.getTarget()))
+        {
             event.setCancelled(true);
         }
     }

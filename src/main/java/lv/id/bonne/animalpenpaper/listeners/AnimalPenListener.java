@@ -384,4 +384,13 @@ public class AnimalPenListener implements Listener
             event.setCancelled(true);
         }
     }
+
+    @EventHandler
+    public void onEntityTarget(EntityTargetLivingEntityEvent event)
+    {
+        if (event.getTarget() != null && AnimalPenManager.isAnimalPen(event.getTarget()))
+        {
+            event.setCancelled(true);
+        }
+    }
 }
