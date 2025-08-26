@@ -4,8 +4,4 @@ main: lv.id.bonne.animalpenpaper.AnimalPenPlugin
 description: Animal Pen Plugin
 api-version: '1.21.8'
 bootstrapper: lv.id.bonne.animalpenpaper.AnimalPenBootstrap
-
-# ProtocolLib
-ProtocolLib:
-  load: BEFORE
-  required: true
+load: STARTUP
