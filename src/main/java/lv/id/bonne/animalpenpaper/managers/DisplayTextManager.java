@@ -32,7 +32,7 @@ import lv.id.bonne.animalpenpaper.data.AnimalData;
 import net.kyori.adventure.text.Component;
 
 
-public class AnimalPenTasks implements Listener
+public class DisplayTextManager implements Listener
 {
     @EventHandler
     public void onEntityLoading(EntitiesLoadEvent event)
@@ -179,7 +179,7 @@ public class AnimalPenTasks implements Listener
 
                             // Draw text
                             List<Pair<Material, Component>> generatedTextMessages =
-                                GenericManager.generateTextMessages(entity, animalData, tick.get());
+                                Helper.generateTextMessages(entity, animalData, tick.get());
 
                             int neededCount = generatedTextMessages.size() * 2;
 

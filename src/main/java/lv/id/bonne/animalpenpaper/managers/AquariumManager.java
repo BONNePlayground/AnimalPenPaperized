@@ -10,7 +10,6 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.Slab;
 import org.bukkit.craftbukkit.damage.CraftDamageSource;
 import org.bukkit.craftbukkit.entity.CraftEntity;
-import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.damage.DamageSource;
@@ -39,7 +38,6 @@ import lv.id.bonne.animalpenpaper.util.StyleUtil;
 import lv.id.bonne.animalpenpaper.util.Utils;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.world.level.block.Blocks;
 
 
 /**
@@ -532,7 +530,7 @@ public class AquariumManager
             AnimalDataType.INSTANCE,
             newData);
 
-        GenericManager.updateCountTextEntity(block, blockData, newData.entityCount(), penKey);
+        Helper.updateCountTextEntity(block, blockData, newData.entityCount(), penKey);
     }
 
 
@@ -588,7 +586,7 @@ public class AquariumManager
             BlockDataType.INSTANCE,
             new BlockData());
 
-        GenericManager.updateCountTextEntity(block, blockData, newData.entityCount(), penKey);
+        Helper.updateCountTextEntity(block, blockData, newData.entityCount(), penKey);
     }
 
 
@@ -605,7 +603,7 @@ public class AquariumManager
         }
 
         AnimalPenPlugin.getInstance().task.stopTrackingEntity(blockData.entity, block.getWorld(), false);
-        GenericManager.removeEntity(block.getWorld(), blockData.entity);
+        Helper.removeEntity(block.getWorld(), blockData.entity);
 
         if (block.getBlockData() instanceof Slab slab)
         {
@@ -618,7 +616,7 @@ public class AquariumManager
 
         if (keepBlock)
         {
-            GenericManager.updateCountTextEntity(block, blockData, 0, penKey);
+            Helper.updateCountTextEntity(block, blockData, 0, penKey);
 
             block.getWorld().getPersistentDataContainer().set(penKey,
                 BlockDataType.INSTANCE,
@@ -626,8 +624,8 @@ public class AquariumManager
         }
         else
         {
-            GenericManager.removeEntity(block.getWorld(), blockData.countEntity);
-            GenericManager.removeEntity(block.getWorld(), blockData.decorationEntity);
+            Helper.removeEntity(block.getWorld(), blockData.countEntity);
+            Helper.removeEntity(block.getWorld(), blockData.decorationEntity);
 
             block.getWorld().getPersistentDataContainer().remove(penKey);
         }

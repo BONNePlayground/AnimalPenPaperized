@@ -31,7 +31,7 @@ import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 
 
-public class GenericManager
+public class Helper
 {
     public static void removeEntity(World world, @Nullable UUID uuid)
     {

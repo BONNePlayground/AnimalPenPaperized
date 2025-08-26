@@ -11,7 +11,7 @@ import lv.id.bonne.animalpenpaper.listeners.AnimalCageListener;
 import lv.id.bonne.animalpenpaper.listeners.AnimalPenListener;
 import lv.id.bonne.animalpenpaper.listeners.AquariumListener;
 import lv.id.bonne.animalpenpaper.listeners.WaterAnimalContainerListener;
-import lv.id.bonne.animalpenpaper.managers.AnimalPenTasks;
+import lv.id.bonne.animalpenpaper.managers.DisplayTextManager;
 
 
 public class AnimalPenPlugin extends JavaPlugin
@@ -37,9 +37,9 @@ public class AnimalPenPlugin extends JavaPlugin
         this.getServer().getPluginManager().registerEvents(new WaterAnimalContainerListener(), this);
         this.getServer().getPluginManager().registerEvents(new AquariumListener(), this);
 
-        this.getServer().getPluginManager().registerEvents(new AnimalPenTasks(), this);
+        this.getServer().getPluginManager().registerEvents(new DisplayTextManager(), this);
 
-        this.task = new AnimalPenTasks();
+        this.task = new DisplayTextManager();
         this.task.runTask();
 
         this.getLogger().info("AnimalPen enabled.");
@@ -63,7 +63,7 @@ public class AnimalPenPlugin extends JavaPlugin
 
     private static AnimalPenPlugin instance;
 
-    public AnimalPenTasks task;
+    public DisplayTextManager task;
 
     public static final ConfigurationManager CONFIG_MANAGER = new ConfigurationManager();
 }

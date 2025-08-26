@@ -23,7 +23,6 @@ import org.bukkit.loot.LootTable;
 import org.bukkit.loot.LootTables;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Transformation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -542,7 +541,7 @@ public class AnimalPenManager
             AnimalDataType.INSTANCE,
             newData);
 
-        GenericManager.updateCountTextEntity(block, blockData, newData.entityCount(), penKey);
+        Helper.updateCountTextEntity(block, blockData, newData.entityCount(), penKey);
     }
 
 
@@ -591,7 +590,7 @@ public class AnimalPenManager
             BlockDataType.INSTANCE,
             new BlockData());
 
-        GenericManager.updateCountTextEntity(block, blockData, newData.entityCount(), penKey);
+        Helper.updateCountTextEntity(block, blockData, newData.entityCount(), penKey);
     }
 
 
@@ -608,13 +607,13 @@ public class AnimalPenManager
         }
 
         AnimalPenPlugin.getInstance().task.stopTrackingEntity(blockData.entity, block.getWorld(), true);
-        GenericManager.removeEntity(block.getWorld(), blockData.entity);
+        Helper.removeEntity(block.getWorld(), blockData.entity);
 
         blockData.entity = null;
 
         if (keepBlock)
         {
-            GenericManager.updateCountTextEntity(block, blockData, 0, penKey);
+            Helper.updateCountTextEntity(block, blockData, 0, penKey);
 
             block.getWorld().getPersistentDataContainer().set(penKey,
                 BlockDataType.INSTANCE,
@@ -622,8 +621,8 @@ public class AnimalPenManager
         }
         else
         {
-            GenericManager.removeEntity(block.getWorld(), blockData.countEntity);
-            GenericManager.removeEntity(block.getWorld(), blockData.decorationEntity);
+            Helper.removeEntity(block.getWorld(), blockData.countEntity);
+            Helper.removeEntity(block.getWorld(), blockData.decorationEntity);
 
             block.getWorld().getPersistentDataContainer().remove(penKey);
         }
