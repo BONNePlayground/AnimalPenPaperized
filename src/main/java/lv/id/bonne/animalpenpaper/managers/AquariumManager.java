@@ -391,6 +391,9 @@ public class AquariumManager
                     }
                 }
             }
+
+            // Trigger pose update
+            livingEntity.setPose(livingEntity.getPose());
         }
     }
 

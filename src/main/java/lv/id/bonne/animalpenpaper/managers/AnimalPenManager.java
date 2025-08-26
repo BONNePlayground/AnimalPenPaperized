@@ -392,6 +392,9 @@ public class AnimalPenManager
                     }
                 }
             }
+
+            // Trigger pose update
+            livingEntity.setPose(livingEntity.getPose());
         }
     }
 
