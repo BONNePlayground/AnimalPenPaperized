@@ -16,28 +16,16 @@ import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.util.Map;
 
 import io.papermc.paper.potion.SuspiciousEffectEntry;
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import net.minecraft.advancements.CriteriaTriggers;
 
-import static java.time.temporal.ChronoField.MINUTE_OF_HOUR;
-import static java.time.temporal.ChronoField.SECOND_OF_MINUTE;
-
 
 public class Utils
 {
     public final static NamespacedKey ANIMAL_SIZE_MODIFIER = new NamespacedKey("animal_pen_plugin", "animal_size");
-
-    public static DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().
-        appendValue(MINUTE_OF_HOUR, 2).
-        optionalStart().
-        appendLiteral(':').
-        appendValue(SECOND_OF_MINUTE, 2).
-        toFormatter();
 
 
 // ---------------------------------------------------------------------

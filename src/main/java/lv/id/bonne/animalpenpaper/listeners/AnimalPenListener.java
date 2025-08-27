@@ -20,14 +20,21 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
+import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.List;
+
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.CustomModelData;
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
 import lv.id.bonne.animalpenpaper.data.BlockData;
 import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
+import lv.id.bonne.animalpenpaper.util.StyleUtil;
 import lv.id.bonne.animalpenpaper.util.Utils;
 
 
@@ -391,6 +398,47 @@ public class AnimalPenListener implements Listener
         if (event.getTarget() != null && AnimalPenManager.isAnimalPen(event.getTarget()))
         {
             event.setCancelled(true);
+        }
+    }
+
+
+    @EventHandler
+    public void onItemCraft(CraftItemEvent event)
+    {
+        ItemStack result = event.getRecipe().getResult();
+
+        if (!result.hasData(DataComponentTypes.CUSTOM_MODEL_DATA))
+        {
+            return;
+        }
+
+        CustomModelData data = result.getData(DataComponentTypes.CUSTOM_MODEL_DATA);
+
+        if (data.strings().contains(AnimalPenManager.ANIMAL_PEN_MODEL))
+        {
+            ItemMeta itemMeta = result.getItemMeta();
+
+            if (data.strings().size() >= 2 && data.strings().get(1).startsWith("animal_pen:"))
+            {
+                itemMeta.displayName(AnimalPenPlugin.translations().
+                    getTranslatable("item.animal_pen." + data.strings().get(1).split(":")[1]).
+                    style(StyleUtil.WHITE));
+            }
+            else
+            {
+                itemMeta.displayName(AnimalPenPlugin.translations().
+                    getTranslatable("item.animal_pen.animal_pen_oak").
+                    style(StyleUtil.WHITE));
+            }
+
+            itemMeta.lore(List.of(
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.animal_pen.tip.line1"),
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.animal_pen.tip.line2"),
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.animal_pen.tip.line3")
+            ));
+
+            result.setItemMeta(itemMeta);
+            event.setCurrentItem(result);
         }
     }
 }

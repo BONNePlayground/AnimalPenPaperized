@@ -17,6 +17,8 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Nullable;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -27,8 +29,9 @@ import lv.id.bonne.animalpenpaper.data.BlockData;
 import lv.id.bonne.animalpenpaper.data.BlockDataType;
 import lv.id.bonne.animalpenpaper.util.Utils;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.Style;
-import net.kyori.adventure.text.format.TextColor;
+
+import static java.time.temporal.ChronoField.MINUTE_OF_HOUR;
+import static java.time.temporal.ChronoField.SECOND_OF_MINUTE;
 
 
 public class Helper
@@ -113,15 +116,14 @@ public class Helper
 
                 if (!animalData.hasCooldown(Material.APPLE))
                 {
-                    component = Component.text("Ready!           ").
-                        style(Style.style().color(TextColor.color(5635925)).build());
+                    component = AnimalPenPlugin.translations().getTranslatable("display.animal_pen.ready");
                 }
                 else
                 {
-                    component = Component.text("Cooldown: ").append(
+                    component = AnimalPenPlugin.translations().getTranslatable("display.animal_pen.cooldown",
                         Component.text(LocalTime.of(0, 0, 0).
                             plusSeconds(animalData.getCooldown(Material.APPLE) / 20).
-                            format(Utils.DATE_FORMATTER)));
+                            format(DATE_FORMATTER)));
                 }
 
                 if (foodItems.size() == 1)
@@ -395,7 +397,7 @@ public class Helper
             entityType,
             material,
             animalData.entityCount()) == 0 ||
-            result.isEmpty())
+            result.isAir())
         {
             return null;
         }
@@ -406,19 +408,27 @@ public class Helper
 
         if (!animalData.hasCooldown(material))
         {
-            component = Component.text("Ready!           ").
-                style(Style.style().color(TextColor.color(5635925)).build());
+            component = AnimalPenPlugin.translations().getTranslatable("display.animal_pen.ready");
             icon = material;
         }
         else
         {
-            component = Component.text("Cooldown: ").append(
+            component = AnimalPenPlugin.translations().getTranslatable("display.animal_pen.cooldown",
                 Component.text(LocalTime.of(0, 0, 0).
                     plusSeconds(animalData.getCooldown(material) / 20).
-                    format(Utils.DATE_FORMATTER)));
+                    format(DATE_FORMATTER)));
             icon = result;
+
         }
 
         return Pair.of(icon, component);
     }
+
+
+    public static DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().
+        appendValue(MINUTE_OF_HOUR, 2).
+        optionalStart().
+        appendLiteral(':').
+        appendValue(SECOND_OF_MINUTE, 2).
+        toFormatter();
 }

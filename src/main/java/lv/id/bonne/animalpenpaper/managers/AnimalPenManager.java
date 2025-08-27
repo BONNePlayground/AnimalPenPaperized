@@ -146,7 +146,10 @@ public class AnimalPenManager
         ItemMeta meta = bottle.getItemMeta();
         if (meta == null) return bottle;
 
-        meta.displayName(Component.text("Animal Cage").style(StyleUtil.WHITE));
+        meta.displayName(AnimalPenPlugin.translations().
+            getTranslatable("item.animal_pen.animal_cage.name").
+            style(StyleUtil.WHITE));
+
         AnimalPenManager.updateAnimalCageItemMeta(null, meta);
 
         // Anti Stacking
@@ -163,8 +166,12 @@ public class AnimalPenManager
         if (animalData == null || animalData.entityCount() <= 0)
         {
             itemMeta.getPersistentDataContainer().remove(AnimalPenManager.ANIMAL_DATA_KEY);
-            itemMeta.lore(List.of(Component.empty(),
-                Component.text("Right-click on animal to catch it").style(StyleUtil.GRAY)));
+
+            itemMeta.lore(List.of(
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.animal_cage.catch_tip.line1"),
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.animal_cage.catch_tip.line2"),
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.animal_cage.catch_tip.line3")
+            ));
 
             CustomModelDataComponent component = itemMeta.getCustomModelDataComponent();
             component.setStrings(List.of(ANIMAL_CAGE_MODEL));
@@ -175,13 +182,18 @@ public class AnimalPenManager
             itemMeta.getPersistentDataContainer().
                 set(AnimalPenManager.ANIMAL_DATA_KEY, AnimalDataType.INSTANCE, animalData);
 
-            itemMeta.lore(List.of(Component.empty(),
-                Component.text("Animal: ").style(StyleUtil.GRAY).
-                    append(Component.translatable(animalData.entityType().translationKey())),
-                Component.text("Count: ").style(StyleUtil.GRAY).
-                    append(Component.text(animalData.entityCount())),
-                Component.empty(),
-                Component.text("Shift Right-click on block to release it").style(StyleUtil.GRAY)));
+            itemMeta.lore(List.of(
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.animal_cage.description.top"),
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.animal_cage.description.entity",
+                    Component.translatable(animalData.entityType().translationKey()).style(StyleUtil.YELLOW)),
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.animal_cage.description.amount",
+                    Component.text(animalData.entityCount()).style(StyleUtil.YELLOW)),
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.animal_cage.catch_tip.line1"),
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.animal_cage.catch_tip.line2"),
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.animal_cage.catch_tip.line3"),
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.animal_cage.release_tip.line1"),
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.animal_cage.release_tip.line2")
+            ));
 
             CustomModelDataComponent component = itemMeta.getCustomModelDataComponent();
 
@@ -668,10 +680,15 @@ public class AnimalPenManager
         customData.setStrings(List.of(ANIMAL_PEN_MODEL, "animal_pen:animal_pen_oak"));
         meta.setCustomModelDataComponent(customData);
 
-        meta.displayName(Component.text("Animal Pen").style(StyleUtil.WHITE));
+        meta.displayName(AnimalPenPlugin.translations().
+            getTranslatable("item.animal_pen.animal_pen_oak").
+            style(StyleUtil.WHITE));
 
-        meta.lore(List.of(Component.empty(),
-            Component.text("Insert Animal Cage to interact with animal.").style(StyleUtil.GRAY)));
+        meta.lore(List.of(
+            AnimalPenPlugin.translations().getTranslatable("item.animal_pen.animal_pen.tip.line1"),
+            AnimalPenPlugin.translations().getTranslatable("item.animal_pen.animal_pen.tip.line2"),
+            AnimalPenPlugin.translations().getTranslatable("item.animal_pen.animal_pen.tip.line3")
+        ));
 
         smoothStoneSlab.setItemMeta(meta);
 
@@ -1755,9 +1772,9 @@ public class AnimalPenManager
 
     public final static NamespacedKey ANIMAL_DATA_KEY = new NamespacedKey("animal_pen", "animal_pen_data");
 
-    private final static String ANIMAL_CAGE_MODEL = "animal_pen:animal_cage";
+    public final static String ANIMAL_CAGE_MODEL = "animal_pen:animal_cage";
 
     private final static String ANIMAL_CAGE_FILLED_MODEL = "animal_pen:animal_cage_filled";
 
-    private final static String ANIMAL_PEN_MODEL = "animal_pen:animal_pen";
+    public final static String ANIMAL_PEN_MODEL = "animal_pen:animal_pen";
 }

@@ -22,17 +22,7 @@ public class StyleUtil
         color(TextColor.color(0xffffff)).build();
 
     @NotNull
-    public static final Style GRAY = Style.style().
+    public static final Style YELLOW = Style.style().
         decoration(TextDecoration.ITALIC, false).
-        color(TextColor.color(11184810)).build();
-
-    @NotNull
-    public static final Style GREEN_COLOR = Style.style().
-        decoration(TextDecoration.ITALIC, false).
-        color(TextColor.color(5635925)).build();
-
-    @NotNull
-    public static final Style RED_COLOR = Style.style().
-        decoration(TextDecoration.ITALIC, false).
-        color(TextColor.color(16733525)).build();
+        color(TextColor.color(0xFFD32F)).build();
 }

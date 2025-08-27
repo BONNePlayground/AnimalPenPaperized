@@ -12,21 +12,21 @@ public class TranslationManager
 {
     public TranslationManager()
     {
-        this.loadMessages();
+        this.loadMessages(false);
     }
 
 
     /**
      * Loads the messages.yml file
      */
-    private void loadMessages()
+    private void loadMessages(boolean reset)
     {
         // Create messages.yml if it doesn't exist
         File messagesFile = new File(AnimalPenPlugin.getInstance().getDataFolder(), "messages.yml");
 
-        if (!messagesFile.exists())
+        if (!messagesFile.exists() || reset)
         {
-            AnimalPenPlugin.getInstance().saveResource("messages.yml", false);
+            AnimalPenPlugin.getInstance().saveResource("messages.yml", reset);
         }
 
         this.messagesConfig = YamlConfiguration.loadConfiguration(messagesFile);
@@ -39,7 +39,16 @@ public class TranslationManager
      */
     public void reload()
     {
-        this.loadMessages();
+        this.loadMessages(false);
+    }
+
+
+    /**
+     * Resets the messages configuration
+     */
+    public void reset()
+    {
+        this.loadMessages(true);
     }
 
 

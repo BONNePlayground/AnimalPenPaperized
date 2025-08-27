@@ -16,18 +16,11 @@
     "count": 1,
     "components": {
       "minecraft:item_name": {
-        "translate": "item.animal_pen.aquarium",
-        "fallback": "Animal Pen"
+        "translate": "item.animal_pen.aquarium.name",
+        "fallback": "Aquarium",
+        "italic": false,
+        "color": "#FFFFFF"
       },
-      "minecraft:lore": [
-        "",
-        {
-          "translate": "item.animal_pen.aquarium.lore",
-          "fallback": "Insert Water Animal Container to interact with animal.",
-          "color": "#AAAAAA",
-          "italic": false
-        }
-      ],
       "minecraft:custom_model_data": {
         "strings": [
           "animal_pen:aquarium"

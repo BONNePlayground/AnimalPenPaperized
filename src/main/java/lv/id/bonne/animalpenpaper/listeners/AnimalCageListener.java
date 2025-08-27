@@ -5,26 +5,32 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Iterator;
+import java.util.List;
 
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.CustomModelData;
 import io.papermc.paper.potion.SuspiciousEffectEntry;
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
 import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
+import lv.id.bonne.animalpenpaper.managers.AquariumManager;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
 import lv.id.bonne.animalpenpaper.util.Utils;
 import net.kyori.adventure.text.Component;
+import net.minecraft.world.entity.OwnableEntity;
 
 
 /**
@@ -57,28 +63,42 @@ public class AnimalCageListener implements Listener
 
         if (!(entity instanceof Animals animal))
         {
-            player.sendMessage(Component.text("This is not a valid animal.").style(StyleUtil.RED_COLOR));
+            player.sendMessage(AnimalPenPlugin.translations().
+                getTranslatable("item.animal_pen.animal_cage.error.not_animal"));
+
             return;
         }
 
-        if (animal.isDead() || !animal.isAdult() || !animal.hasAI())
+        if (animal.isDead() || !animal.hasAI())
         {
-            player.sendMessage(Component.text("Cannot capture dead or baby animals.").style(StyleUtil.RED_COLOR));
+            // Silent death
+            return;
+        }
+
+        if (!animal.isAdult())
+        {
+            player.sendMessage(AnimalPenPlugin.translations().
+                getTranslatable("item.animal_pen.animal_cage.error.baby"));
+
             return;
         }
 
         if (entity instanceof Tameable tameable && tameable.isTamed() ||
-            entity instanceof AbstractHorse horse && horse.isTamed())
+            entity instanceof AbstractHorse horse && horse.isTamed() ||
+            entity instanceof OwnableEntity ownable && ownable.getOwner() != null)
         {
-            player.sendMessage(Component.text("Cannot capture tamed animals.").style(StyleUtil.RED_COLOR));
+            player.sendMessage(AnimalPenPlugin.translations().
+                getTranslatable("item.animal_pen.animal_cage.error.tame"));
+
             return;
         }
 
         // Check blocked types
         if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isBlocked(animal.getType()))
         {
-            player.sendMessage(Component.text("This animal is blocked from being captured.").
-                style(StyleUtil.RED_COLOR));
+            player.sendMessage(AnimalPenPlugin.translations().
+                getTranslatable("item.animal_pen.animal_cage.error.blocked"));
+
             return;
         }
 
@@ -88,7 +108,9 @@ public class AnimalCageListener implements Listener
         // Check if item already contains another type
         if (storedData != null && storedData.entityType() != entityType)
         {
-            player.sendMessage(Component.text("This cage contains a different animal.").style(StyleUtil.RED_COLOR));
+            player.sendMessage(AnimalPenPlugin.translations().
+                getTranslatable("item.animal_pen.animal_cage.error.wrong"));
+
             return;
         }
         else
@@ -100,7 +122,9 @@ public class AnimalCageListener implements Listener
 
         if (maxAmount > 0 && storedData.entityCount() + 1 > maxAmount)
         {
-            player.sendMessage(Component.text("Cage is full.").style(StyleUtil.RED_COLOR));
+            player.sendMessage(AnimalPenPlugin.translations().
+                getTranslatable("item.animal_pen.animal_cage.error.full"));
+
             return;
         }
 
@@ -108,7 +132,10 @@ public class AnimalCageListener implements Listener
 
         entity.remove();
         player.swingMainHand();
-        player.sendMessage(Component.text("Captured " + entity.getType().name()).style(StyleUtil.GREEN_COLOR));
+
+        player.sendMessage(AnimalPenPlugin.translations().
+            getTranslatable("item.animal_pen.animal_cage.captured",
+                Component.translatable(entity.getType().translationKey())));
     }
 
 
@@ -205,7 +232,10 @@ public class AnimalCageListener implements Listener
         AnimalPenManager.removeAnimal(item, 1);
 
         player.swingMainHand();
-        player.sendMessage(Component.text("Released " + entity.getType().name()).style(StyleUtil.GREEN_COLOR));
+
+        player.sendMessage(AnimalPenPlugin.translations().
+            getTranslatable("item.animal_pen.animal_cage.released",
+                Component.translatable(entity.getType().translationKey())));
     }
 
 
@@ -254,7 +284,9 @@ public class AnimalCageListener implements Listener
             item.setAmount(-1);
             player.getInventory().setItem(event.getHand(), item);
             player.swingMainHand();
-            player.sendMessage(Component.text("Inserted into animal pen").style(StyleUtil.GREEN_COLOR));
+
+            player.sendMessage(AnimalPenPlugin.translations().
+                getTranslatable("item.animal_pen.animal_cage.inserted"));
 
             return;
         }
@@ -283,6 +315,9 @@ public class AnimalCageListener implements Listener
 
             AnimalPenManager.setAnimalPenData(block, penData);
 
+            player.sendMessage(AnimalPenPlugin.translations().
+                getTranslatable("item.animal_pen.animal_cage.withdrawn", itemData.entityCount()));
+
             return;
         }
 
@@ -305,16 +340,21 @@ public class AnimalCageListener implements Listener
 
         // Check variants
         final int maxStoredVariants = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getMaxStoredVariants();
+        long amount = itemData.entityCount();
 
         if (itemData.entityCount() > 1 &&
             penData.getVariants().size() + itemData.getVariants().size() > maxStoredVariants)
         {
-            player.sendMessage(Component.text("Cannot store all variants into animal pen."));
+            player.sendMessage(AnimalPenPlugin.translations().
+                getTranslatable("item.animal_pen.animal_cage.error.too_many_variants"));
+
             penData.reduceEntityCount(1);
             itemData.setEntityCount(1);
 
             // Save reduced item data
             AnimalPenManager.setAnimalCageData(item, itemData);
+
+            amount--;
         }
         else
         {
@@ -335,6 +375,10 @@ public class AnimalCageListener implements Listener
         }
 
         AnimalPenManager.setAnimalPenData(block, penData);
+
+        player.sendMessage(AnimalPenPlugin.translations().
+            getTranslatable("item.animal_pen.animal_cage.deposited", amount));
+
     }
 
 
@@ -377,6 +421,9 @@ public class AnimalCageListener implements Listener
 
         event.getPlayer().getInventory().
             setItem(event.getHand() == null ? EquipmentSlot.HAND : event.getHand(), itemStack);
+
+        event.getPlayer().sendMessage(AnimalPenPlugin.translations().
+            getTranslatable("item.animal_pen.animal_cage.taken"));
     }
 
 
@@ -404,5 +451,36 @@ public class AnimalCageListener implements Listener
         }
 
         event.setCancelled(true);
+    }
+
+
+    @EventHandler
+    public void onItemCraft(CraftItemEvent event)
+    {
+        ItemStack result = event.getRecipe().getResult();
+
+        if (!result.hasData(DataComponentTypes.CUSTOM_MODEL_DATA))
+        {
+            return;
+        }
+
+        CustomModelData data = result.getData(DataComponentTypes.CUSTOM_MODEL_DATA);
+
+        if (data.strings().contains(AnimalPenManager.ANIMAL_CAGE_MODEL))
+        {
+            ItemMeta itemMeta = result.getItemMeta();
+            itemMeta.displayName(AnimalPenPlugin.translations().
+                getTranslatable("item.animal_pen.animal_cage.name").
+                style(StyleUtil.WHITE));
+
+            itemMeta.lore(List.of(
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.animal_cage.catch_tip.line1"),
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.animal_cage.catch_tip.line2"),
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.animal_cage.catch_tip.line3")
+            ));
+
+            result.setItemMeta(itemMeta);
+            event.setCurrentItem(result);
+        }
     }
 }

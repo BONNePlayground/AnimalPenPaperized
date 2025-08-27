@@ -62,9 +62,16 @@ public class AnimalPenPlugin extends JavaPlugin
         return AnimalPenPlugin.instance;
     }
 
+
+    public static TranslationManager translations()
+    {
+        return AnimalPenPlugin.instance.translationManager;
+    }
+
+
     public DisplayTextManager task;
 
-    public TranslationManager translationManager;
+    private TranslationManager translationManager;
 
     private static AnimalPenPlugin instance;
 

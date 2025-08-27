@@ -17,17 +17,10 @@
     "components": {
       "minecraft:item_name": {
         "translate": "item.animal_pen.animal_pen_warped",
-        "fallback": "Animal Pen"
+        "fallback": "Animal Pen",
+        "italic": false,
+        "color": "#FFFFFF"
       },
-      "minecraft:lore": [
-        "",
-        {
-          "translate": "item.animal_pen.animal_pen_warped.lore",
-          "fallback": "Insert Animal Cage to interact with animal.",
-          "color": "#AAAAAA",
-          "italic": false
-        }
-      ],
       "minecraft:custom_model_data": {
         "strings": [
           "animal_pen:animal_pen",

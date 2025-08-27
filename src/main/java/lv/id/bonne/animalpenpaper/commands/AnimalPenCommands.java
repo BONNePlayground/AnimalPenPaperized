@@ -21,7 +21,7 @@ public class AnimalPenCommands
             executes(ctx ->
             {
                 AnimalPenPlugin.CONFIG_MANAGER.reloadConfig();
-                AnimalPenPlugin.getInstance().translationManager.reload();
+                AnimalPenPlugin.translations().reload();
 
                 ctx.getSource().getSender().sendMessage("Config and locale files reloaded.");
 
@@ -33,8 +33,9 @@ public class AnimalPenCommands
             {
                 AnimalPenPlugin.CONFIG_MANAGER.generateConfig(ConfigurationManager.Variants.GENERAL);
                 AnimalPenPlugin.CONFIG_MANAGER.generateConfig(ConfigurationManager.Variants.ANIMAL_FOOD);
+                AnimalPenPlugin.translations().reset();
 
-                ctx.getSource().getSender().sendMessage("Config files reset.");
+                ctx.getSource().getSender().sendMessage("Config and locale files reset.");
                 return 1;
             });
 

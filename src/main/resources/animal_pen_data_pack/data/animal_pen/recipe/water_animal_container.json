@@ -15,18 +15,11 @@
     "components": {
       "minecraft:max_stack_size": 1,
       "minecraft:item_name": {
-        "translate": "animal_pen:water_animal_container",
-        "fallback": "Water Animal Container"
+        "translate": "item.animal_pen.water_animal_container.name",
+        "fallback": "Water Mob Container",
+        "italic": false,
+        "color": "#FFFFFF"
       },
-      "minecraft:lore": [
-        "",
-        {
-          "translate": "animal_pen:click_to_catch",
-          "fallback": "Right-click on animal to catch it",
-          "color": "#AAAAAA",
-          "italic": false
-        }
-      ],
       "minecraft:custom_model_data": {
         "strings": [
           "animal_pen:water_animal_container"

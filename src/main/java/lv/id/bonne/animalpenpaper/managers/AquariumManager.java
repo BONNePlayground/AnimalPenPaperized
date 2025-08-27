@@ -146,7 +146,10 @@ public class AquariumManager
         ItemMeta meta = bottle.getItemMeta();
         if (meta == null) return bottle;
 
-        meta.displayName(Component.text("Water Animal Container").style(StyleUtil.WHITE));
+        meta.displayName(AnimalPenPlugin.translations().
+            getTranslatable("item.animal_pen.water_animal_container.name").
+            style(StyleUtil.WHITE));
+
         AquariumManager.updateWaterContainerItemMeta(null, meta);
 
         // Anti Stacking
@@ -163,8 +166,12 @@ public class AquariumManager
         if (animalData == null || animalData.entityCount() <= 0)
         {
             itemMeta.getPersistentDataContainer().remove(AquariumManager.AQUARIUM_DATA_KEY);
-            itemMeta.lore(List.of(Component.empty(),
-                Component.text("Right-click on animal to catch it").style(StyleUtil.GRAY)));
+
+            itemMeta.lore(List.of(
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.water_animal_container.catch_tip.line1"),
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.water_animal_container.catch_tip.line2"),
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.water_animal_container.catch_tip.line3")
+            ));
 
             CustomModelDataComponent component = itemMeta.getCustomModelDataComponent();
             component.setStrings(List.of(WATER_CONTAINER_MODEL));
@@ -175,13 +182,18 @@ public class AquariumManager
             itemMeta.getPersistentDataContainer().
                 set(AquariumManager.AQUARIUM_DATA_KEY, AnimalDataType.INSTANCE, animalData);
 
-            itemMeta.lore(List.of(Component.empty(),
-                Component.text("Animal: ").style(StyleUtil.GRAY).
-                    append(Component.translatable(animalData.entityType().translationKey())),
-                Component.text("Count: ").style(StyleUtil.GRAY).
-                    append(Component.text(animalData.entityCount())),
-                Component.empty(),
-                Component.text("Shift Right-click on block to release it").style(StyleUtil.GRAY)));
+            itemMeta.lore(List.of(
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.water_animal_container.description.top"),
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.water_animal_container.description.entity",
+                    Component.translatable(animalData.entityType().translationKey()).style(StyleUtil.YELLOW)),
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.water_animal_container.description.amount",
+                    Component.text(animalData.entityCount()).style(StyleUtil.YELLOW)),
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.water_animal_container.catch_tip.line1"),
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.water_animal_container.catch_tip.line2"),
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.water_animal_container.catch_tip.line3"),
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.water_animal_container.release_tip.line1"),
+                AnimalPenPlugin.translations().getTranslatable("item.animal_pen.water_animal_container.release_tip.line2")
+            ));
 
             CustomModelDataComponent component = itemMeta.getCustomModelDataComponent();
 
@@ -671,10 +683,14 @@ public class AquariumManager
         customData.setStrings(List.of(AQUARIUM_MODEL));
         meta.setCustomModelDataComponent(customData);
 
-        meta.displayName(Component.text("Aquarium").style(StyleUtil.WHITE));
+        meta.displayName(AnimalPenPlugin.translations().
+            getTranslatable("item.animal_pen.aquarium.name").
+            style(StyleUtil.WHITE));
 
-        meta.lore(List.of(Component.empty(),
-            Component.text("Insert water container to interact with animal.").style(StyleUtil.GRAY)));
+        meta.lore(List.of(
+            AnimalPenPlugin.translations().getTranslatable("item.animal_pen.aquarium.tip.line1"),
+            AnimalPenPlugin.translations().getTranslatable("item.animal_pen.aquarium.tip.line2"),
+            AnimalPenPlugin.translations().getTranslatable("item.animal_pen.aquarium.tip.line3")));
 
         smoothStoneSlab.setItemMeta(meta);
 
@@ -966,9 +982,9 @@ public class AquariumManager
 
     public final static NamespacedKey AQUARIUM_DATA_KEY = new NamespacedKey("animal_pen", "aquarium_data");
 
-    private final static String WATER_CONTAINER_MODEL = "animal_pen:water_animal_container";
+    public final static String WATER_CONTAINER_MODEL = "animal_pen:water_animal_container";
 
     private final static String WATER_CONTAINER_FILLED_MODEL = "animal_pen:water_animal_container_filled";
 
-    private final static String AQUARIUM_MODEL = "animal_pen:aquarium";
+    public final static String AQUARIUM_MODEL = "animal_pen:aquarium";
 }
