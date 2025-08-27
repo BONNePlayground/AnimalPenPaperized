@@ -21,8 +21,9 @@ public class AnimalPenCommands
             executes(ctx ->
             {
                 AnimalPenPlugin.CONFIG_MANAGER.reloadConfig();
+                AnimalPenPlugin.getInstance().translationManager.reload();
 
-                ctx.getSource().getSender().sendMessage("Config files reloaded.");
+                ctx.getSource().getSender().sendMessage("Config and locale files reloaded.");
 
                 return 1;
             });

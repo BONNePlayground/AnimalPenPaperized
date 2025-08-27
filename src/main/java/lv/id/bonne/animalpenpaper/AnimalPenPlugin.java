@@ -12,6 +12,7 @@ import lv.id.bonne.animalpenpaper.listeners.AnimalPenListener;
 import lv.id.bonne.animalpenpaper.listeners.AquariumListener;
 import lv.id.bonne.animalpenpaper.listeners.WaterAnimalContainerListener;
 import lv.id.bonne.animalpenpaper.managers.DisplayTextManager;
+import lv.id.bonne.animalpenpaper.managers.TranslationManager;
 
 
 public class AnimalPenPlugin extends JavaPlugin
@@ -21,6 +22,7 @@ public class AnimalPenPlugin extends JavaPlugin
     {
         super.onLoad();
         AnimalPenPlugin.instance = this;
+        this.translationManager = new TranslationManager();
     }
 
 
@@ -60,10 +62,11 @@ public class AnimalPenPlugin extends JavaPlugin
         return AnimalPenPlugin.instance;
     }
 
+    public DisplayTextManager task;
+
+    public TranslationManager translationManager;
 
     private static AnimalPenPlugin instance;
-
-    public DisplayTextManager task;
 
     public static final ConfigurationManager CONFIG_MANAGER = new ConfigurationManager();
 }
