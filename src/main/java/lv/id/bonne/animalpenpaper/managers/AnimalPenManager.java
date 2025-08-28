@@ -80,7 +80,7 @@ public class AnimalPenManager
 
         animalData.addEntityCount(amount);
 
-        if (animalData.getVariants().size() <= AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getMaxStoredVariants())
+        if (animalData.getVariants().size() <= AnimalPenPlugin.configuration().getMaxStoredVariants())
         {
             animalData.addVariant(entitySnapshot);
         }
@@ -376,12 +376,12 @@ public class AnimalPenManager
             if (attribute != null &&
                 livingEntity instanceof Animals)
             {
-                if (attribute.getBaseValue() != AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getAnimalSize())
+                if (attribute.getBaseValue() != AnimalPenPlugin.configuration().getAnimalSize())
                 {
-                    attribute.setBaseValue(AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getAnimalSize());
+                    attribute.setBaseValue(AnimalPenPlugin.configuration().getAnimalSize());
                 }
 
-                if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isGrowAnimals())
+                if (AnimalPenPlugin.configuration().isGrowAnimals())
                 {
                     AnimalData animalData = AnimalPenManager.getAnimalData(entity);
 
@@ -389,7 +389,7 @@ public class AnimalPenManager
                     {
                         AttributeModifier modifier = attribute.getModifier(Utils.ANIMAL_SIZE_MODIFIER);
                         float multiplier =
-                            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getGrowthMultiplier() *
+                            AnimalPenPlugin.configuration().getGrowthMultiplier() *
                                 animalData.entityCount();
 
                         if (modifier != null && modifier.getAmount() != multiplier)
@@ -503,12 +503,12 @@ public class AnimalPenManager
 
                 if (attribute != null)
                 {
-                    attribute.setBaseValue(AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getAnimalSize());
+                    attribute.setBaseValue(AnimalPenPlugin.configuration().getAnimalSize());
 
-                    if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isGrowAnimals())
+                    if (AnimalPenPlugin.configuration().isGrowAnimals())
                     {
                         attribute.addModifier(new AttributeModifier(Utils.ANIMAL_SIZE_MODIFIER,
-                            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getGrowthMultiplier() *
+                            AnimalPenPlugin.configuration().getGrowthMultiplier() *
                                 newData.entityCount(),
                             AttributeModifier.Operation.ADD_NUMBER
                         ));
@@ -527,7 +527,7 @@ public class AnimalPenManager
         {
             entity = block.getWorld().getEntity(blockData.entity);
 
-            if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isGrowAnimals() &&
+            if (AnimalPenPlugin.configuration().isGrowAnimals() &&
                 entity instanceof LivingEntity livingEntity)
             {
                 AttributeInstance attribute = livingEntity.getAttribute(Attribute.SCALE);
@@ -537,7 +537,7 @@ public class AnimalPenManager
                     attribute.removeModifier(Utils.ANIMAL_SIZE_MODIFIER);
 
                     attribute.addModifier(new AttributeModifier(Utils.ANIMAL_SIZE_MODIFIER,
-                        AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getGrowthMultiplier() * newData.entityCount(),
+                        AnimalPenPlugin.configuration().getGrowthMultiplier() * newData.entityCount(),
                         AttributeModifier.Operation.ADD_NUMBER
                     ));
                 }
@@ -579,7 +579,7 @@ public class AnimalPenManager
                 AnimalDataType.INSTANCE,
                 newData);
 
-            if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isGrowAnimals() &&
+            if (AnimalPenPlugin.configuration().isGrowAnimals() &&
                 entity instanceof LivingEntity livingEntity)
             {
                 AttributeInstance attribute = livingEntity.getAttribute(Attribute.SCALE);
@@ -589,7 +589,7 @@ public class AnimalPenManager
                     attribute.removeModifier(Utils.ANIMAL_SIZE_MODIFIER);
 
                     attribute.addModifier(new AttributeModifier(Utils.ANIMAL_SIZE_MODIFIER,
-                        AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getGrowthMultiplier() * newData.entityCount(),
+                        AnimalPenPlugin.configuration().getGrowthMultiplier() * newData.entityCount(),
                         AttributeModifier.Operation.ADD_NUMBER
                     ));
                 }
@@ -716,7 +716,7 @@ public class AnimalPenManager
             return;
         }
 
-        long maxCount = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getMaximalAnimalCount();
+        long maxCount = AnimalPenPlugin.configuration().getMaximalAnimalCount();
 
         if (maxCount > 0 && data.entityCount() >= maxCount)
         {
@@ -792,7 +792,7 @@ public class AnimalPenManager
         player.swingMainHand();
 
         data.setCooldown(Material.APPLE,
-            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+            AnimalPenPlugin.configuration().getEntityCooldown(
                 entity.getType(),
                 Material.APPLE,
                 stackSize));
@@ -802,7 +802,7 @@ public class AnimalPenManager
             // Handle scutes
             data.setScutes(amount);
 
-            if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isDropScuteAtStart())
+            if (AnimalPenPlugin.configuration().isDropScuteAtStart())
             {
                 // Drop scutes at the start.
                 AnimalPenManager.handleScutes(entity, data);
@@ -818,7 +818,7 @@ public class AnimalPenManager
             return;
         }
 
-        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isTriggerAdvancements())
+        if (AnimalPenPlugin.configuration().isTriggerAdvancements())
         {
             // Trigger event and statistics for breeding.
             for (int i = 0; i < amount; i++)
@@ -830,7 +830,7 @@ public class AnimalPenManager
             }
         }
 
-        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isIncreaseStatistics())
+        if (AnimalPenPlugin.configuration().isIncreaseStatistics())
         {
             player.incrementStatistic(Statistic.ANIMALS_BRED, amount);
         }
@@ -878,7 +878,7 @@ public class AnimalPenManager
         player.swingMainHand();
 
         data.setCooldown(Material.BRUSH,
-            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+            AnimalPenPlugin.configuration().getEntityCooldown(
                 entity.getType(),
                 Material.BRUSH,
                 data.entityCount()));
@@ -947,7 +947,7 @@ public class AnimalPenManager
         player.swingMainHand();
 
         data.setCooldown(Material.WATER_BUCKET,
-            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+            AnimalPenPlugin.configuration().getEntityCooldown(
                 entity.getType(),
                 Material.WATER_BUCKET,
                 data.entityCount()));
@@ -955,7 +955,7 @@ public class AnimalPenManager
         // Save data
         AnimalPenManager.setAnimalPenData(entity, data);
 
-        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isTriggerAdvancements())
+        if (AnimalPenPlugin.configuration().isTriggerAdvancements())
         {
             // Trigger bucket filling
             CriteriaTriggers.FILLED_BUCKET.trigger(((CraftPlayer) player).getHandle(),
@@ -1018,7 +1018,7 @@ public class AnimalPenManager
             1);
 
         data.setCooldown(Material.SHEARS,
-            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+            AnimalPenPlugin.configuration().getEntityCooldown(
                 entity.getType(),
                 Material.SHEARS,
                 data.entityCount()));
@@ -1063,7 +1063,7 @@ public class AnimalPenManager
 
         int woolCount = 1;
 
-        int dropLimits = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getDropLimits(Material.WHITE_WOOL);
+        int dropLimits = AnimalPenPlugin.configuration().getDropLimits(Material.WHITE_WOOL);
 
         if (dropLimits <= 0)
         {
@@ -1085,7 +1085,7 @@ public class AnimalPenManager
         player.swingMainHand();
 
         data.setCooldown(Material.SHEARS,
-            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+            AnimalPenPlugin.configuration().getEntityCooldown(
                 entity.getType(),
                 Material.SHEARS,
                 data.entityCount()));
@@ -1155,7 +1155,7 @@ public class AnimalPenManager
             1);
 
         data.setCooldown(Material.BUCKET,
-            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+            AnimalPenPlugin.configuration().getEntityCooldown(
                 entity.getType(),
                 Material.BUCKET,
                 data.entityCount()));
@@ -1203,7 +1203,7 @@ public class AnimalPenManager
             1);
 
         data.setCooldown(Material.GLASS_BOTTLE,
-            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+            AnimalPenPlugin.configuration().getEntityCooldown(
                 entity.getType(),
                 Material.GLASS_BOTTLE,
                 data.entityCount()));
@@ -1262,7 +1262,7 @@ public class AnimalPenManager
             }
         }
 
-        int dropLimits = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getDropLimits(material);
+        int dropLimits = AnimalPenPlugin.configuration().getDropLimits(material);
 
         if (dropLimits <= 0)
         {
@@ -1284,7 +1284,7 @@ public class AnimalPenManager
             1);
 
         data.setCooldown(Material.BUCKET,
-            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+            AnimalPenPlugin.configuration().getEntityCooldown(
                 entity.getType(),
                 Material.BUCKET,
                 data.entityCount()));
@@ -1336,7 +1336,7 @@ public class AnimalPenManager
             1);
 
         data.setCooldown(Material.WHITE_DYE,
-            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+            AnimalPenPlugin.configuration().getEntityCooldown(
                 entity.getType(),
                 Material.WHITE_DYE,
                 data.entityCount()));
@@ -1369,7 +1369,7 @@ public class AnimalPenManager
         int froglightCount = (int) Math.min(data.entityCount(), itemStack.getAmount());
 
         int dropLimits =
-            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getDropLimits(Material.PEARLESCENT_FROGLIGHT);
+            AnimalPenPlugin.configuration().getDropLimits(Material.PEARLESCENT_FROGLIGHT);
 
         if (dropLimits > 0)
         {
@@ -1397,7 +1397,7 @@ public class AnimalPenManager
             1);
 
         data.setCooldown(Material.MAGMA_BLOCK,
-            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+            AnimalPenPlugin.configuration().getEntityCooldown(
                 entity.getType(),
                 Material.MAGMA_BLOCK,
                 data.entityCount()));
@@ -1470,7 +1470,7 @@ public class AnimalPenManager
             1);
 
         data.setCooldown(Material.BOWL,
-            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+            AnimalPenPlugin.configuration().getEntityCooldown(
                 entity.getType(),
                 Material.BOWL,
                 data.entityCount()));
@@ -1506,7 +1506,7 @@ public class AnimalPenManager
         LootTable lootTable = LootTables.SNIFFER_DIGGING.getLootTable();
         LootContext lootParams = new LootContext.Builder(entity.getLocation()).lootedEntity(entity).build();
 
-        int dropLimits = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getDropLimits(Material.TORCHFLOWER_SEEDS);
+        int dropLimits = AnimalPenPlugin.configuration().getDropLimits(Material.TORCHFLOWER_SEEDS);
 
         if (dropLimits <= 0)
         {
@@ -1563,7 +1563,7 @@ public class AnimalPenManager
             1);
 
         data.setCooldown(Material.BOWL,
-            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+            AnimalPenPlugin.configuration().getEntityCooldown(
                 entity.getType(),
                 Material.BOWL,
                 data.entityCount()));
@@ -1659,7 +1659,7 @@ public class AnimalPenManager
             return;
         }
 
-        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isIncreaseStatistics())
+        if (AnimalPenPlugin.configuration().isIncreaseStatistics())
         {
             player.incrementStatistic(Statistic.USE_ITEM, itemStack.getType());
         }
@@ -1669,7 +1669,7 @@ public class AnimalPenManager
             itemStack.damage(1, player);
         }
 
-        int cooldown = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getAttackCooldown();
+        int cooldown = AnimalPenPlugin.configuration().getAttackCooldown();
 
         if (cooldown > 0)
         {
@@ -1726,14 +1726,14 @@ public class AnimalPenManager
             0.2,
             0);
 
-        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isTriggerAdvancements())
+        if (AnimalPenPlugin.configuration().isTriggerAdvancements())
         {
             CriteriaTriggers.PLAYER_KILLED_ENTITY.trigger(((CraftPlayer) player).getHandle(),
                 ((CraftEntity) entity).getHandle(),
                 ((CraftDamageSource) DamageSource.builder(DamageType.PLAYER_ATTACK).build()).getHandle());
         }
 
-        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isIncreaseStatistics())
+        if (AnimalPenPlugin.configuration().isIncreaseStatistics())
         {
             player.incrementStatistic(Statistic.MOB_KILLS);
             player.incrementStatistic(Statistic.KILL_ENTITY, entity.getType());
@@ -1750,7 +1750,7 @@ public class AnimalPenManager
     {
         if (entity.getType() == EntityType.TURTLE &&
             key == Material.APPLE &&
-            !AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isDropScuteAtStart())
+            !AnimalPenPlugin.configuration().isDropScuteAtStart())
         {
             AnimalPenManager.handleScutes(entity, animalData);
         }

@@ -1,11 +1,12 @@
 package lv.id.bonne.animalpenpaper;
 
 
-import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import lv.id.bonne.animalpenpaper.commands.AnimalPenCommands;
+import lv.id.bonne.animalpenpaper.config.AnimalFoodConfiguration;
+import lv.id.bonne.animalpenpaper.config.Configuration;
 import lv.id.bonne.animalpenpaper.config.ConfigurationManager;
 import lv.id.bonne.animalpenpaper.listeners.AnimalCageListener;
 import lv.id.bonne.animalpenpaper.listeners.AnimalPenListener;
@@ -29,7 +30,7 @@ public class AnimalPenPlugin extends JavaPlugin
     @Override
     public void onEnable()
     {
-        AnimalPenPlugin.CONFIG_MANAGER.readConfig();
+        this.configuration.readConfig();
 
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, AnimalPenCommands::register);
 
@@ -44,7 +45,7 @@ public class AnimalPenPlugin extends JavaPlugin
         this.task = new DisplayTextManager();
         this.task.runTask();
 
-        this.getLogger().info("AnimalPen enabled.");
+        this.getLogger().info("AnimalPen plugin enabled.");
     }
 
 
@@ -52,8 +53,7 @@ public class AnimalPenPlugin extends JavaPlugin
     public void onDisable()
     {
         this.task.bukkitTask.cancel();
-        this.getServer().removeRecipe(new NamespacedKey(this, "animal_cage"));
-        this.getLogger().info("AnimalPen disabled.");
+        this.getLogger().info("AnimalPen plugin disabled.");
     }
 
 
@@ -69,11 +69,29 @@ public class AnimalPenPlugin extends JavaPlugin
     }
 
 
+    public static ConfigurationManager configurationManager()
+    {
+        return AnimalPenPlugin.instance.configuration;
+    }
+
+
+    public static Configuration configuration()
+    {
+        return AnimalPenPlugin.instance.configuration.getConfiguration();
+    }
+
+
+    public static AnimalFoodConfiguration animalFoodConfiguration()
+    {
+        return AnimalPenPlugin.instance.configuration.getAnimalFoodConfiguration();
+    }
+
+
     public DisplayTextManager task;
 
     private TranslationManager translationManager;
 
-    private static AnimalPenPlugin instance;
+    private final ConfigurationManager configuration = new ConfigurationManager();
 
-    public static final ConfigurationManager CONFIG_MANAGER = new ConfigurationManager();
+    private static AnimalPenPlugin instance;
 }

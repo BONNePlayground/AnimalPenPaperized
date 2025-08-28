@@ -21,7 +21,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.CraftItemEvent;
-import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
@@ -157,7 +156,7 @@ public class AquariumListener implements Listener
             return;
         }
 
-        if (AnimalPenPlugin.CONFIG_MANAGER.getAnimalFoodConfiguration().isFoodItem(entity, itemStack))
+        if (AnimalPenPlugin.animalFoodConfiguration().isFoodItem(entity, itemStack))
         {
             AquariumManager.handleFood(entity, player, itemStack);
         }

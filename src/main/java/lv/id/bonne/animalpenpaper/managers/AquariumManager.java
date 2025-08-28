@@ -80,7 +80,7 @@ public class AquariumManager
 
         animalData.addEntityCount(amount);
 
-        if (animalData.getVariants().size() <= AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getMaxStoredVariants())
+        if (animalData.getVariants().size() <= AnimalPenPlugin.configuration().getMaxStoredVariants())
         {
             animalData.addVariant(entitySnapshot);
         }
@@ -375,12 +375,12 @@ public class AquariumManager
 
             if (attribute != null && livingEntity instanceof WaterMob)
             {
-                if (attribute.getBaseValue() != AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getWaterAnimalSize())
+                if (attribute.getBaseValue() != AnimalPenPlugin.configuration().getWaterAnimalSize())
                 {
-                    attribute.setBaseValue(AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getWaterAnimalSize());
+                    attribute.setBaseValue(AnimalPenPlugin.configuration().getWaterAnimalSize());
                 }
 
-                if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isGrowWaterAnimals())
+                if (AnimalPenPlugin.configuration().isGrowWaterAnimals())
                 {
                     AnimalData animalData = AquariumManager.getAnimalData(entity);
 
@@ -388,7 +388,7 @@ public class AquariumManager
                     {
                         AttributeModifier modifier = attribute.getModifier(Utils.ANIMAL_SIZE_MODIFIER);
                         float multiplier =
-                            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getGrowthMultiplier() *
+                            AnimalPenPlugin.configuration().getGrowthMultiplier() *
                                 animalData.entityCount();
 
                         if (modifier != null && modifier.getAmount() != multiplier)
@@ -485,12 +485,12 @@ public class AquariumManager
 
                 if (attribute != null)
                 {
-                    attribute.setBaseValue(AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getAnimalSize());
+                    attribute.setBaseValue(AnimalPenPlugin.configuration().getAnimalSize());
 
-                    if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isGrowAnimals())
+                    if (AnimalPenPlugin.configuration().isGrowAnimals())
                     {
                         attribute.addModifier(new AttributeModifier(Utils.ANIMAL_SIZE_MODIFIER,
-                            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getGrowthMultiplier() *
+                            AnimalPenPlugin.configuration().getGrowthMultiplier() *
                                 newData.entityCount(),
                             AttributeModifier.Operation.ADD_NUMBER
                         ));
@@ -516,7 +516,7 @@ public class AquariumManager
         {
             entity = block.getWorld().getEntity(blockData.entity);
 
-            if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isGrowAnimals() &&
+            if (AnimalPenPlugin.configuration().isGrowAnimals() &&
                 entity instanceof LivingEntity livingEntity)
             {
                 AttributeInstance attribute = livingEntity.getAttribute(Attribute.SCALE);
@@ -526,7 +526,7 @@ public class AquariumManager
                     attribute.removeModifier(Utils.ANIMAL_SIZE_MODIFIER);
 
                     attribute.addModifier(new AttributeModifier(Utils.ANIMAL_SIZE_MODIFIER,
-                        AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getGrowthMultiplier() * newData.entityCount(),
+                        AnimalPenPlugin.configuration().getGrowthMultiplier() * newData.entityCount(),
                         AttributeModifier.Operation.ADD_NUMBER
                     ));
                 }
@@ -577,7 +577,7 @@ public class AquariumManager
                 AnimalDataType.INSTANCE,
                 newData);
 
-            if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isGrowWaterAnimals() &&
+            if (AnimalPenPlugin.configuration().isGrowWaterAnimals() &&
                 entity instanceof LivingEntity livingEntity)
             {
                 AttributeInstance attribute = livingEntity.getAttribute(Attribute.SCALE);
@@ -587,7 +587,7 @@ public class AquariumManager
                     attribute.removeModifier(Utils.ANIMAL_SIZE_MODIFIER);
 
                     attribute.addModifier(new AttributeModifier(Utils.ANIMAL_SIZE_MODIFIER,
-                        AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getGrowthMultiplier() * newData.entityCount(),
+                        AnimalPenPlugin.configuration().getGrowthMultiplier() * newData.entityCount(),
                         AttributeModifier.Operation.ADD_NUMBER
                     ));
                 }
@@ -718,7 +718,7 @@ public class AquariumManager
             return;
         }
 
-        long maxCount = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getMaximalAnimalCount();
+        long maxCount = AnimalPenPlugin.configuration().getMaximalAnimalCount();
 
         if (maxCount > 0 && data.entityCount() >= maxCount)
         {
@@ -768,7 +768,7 @@ public class AquariumManager
         player.swingMainHand();
 
         data.setCooldown(Material.APPLE,
-            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+            AnimalPenPlugin.configuration().getEntityCooldown(
                 entity.getType(),
                 Material.APPLE,
                 stackSize));
@@ -866,7 +866,7 @@ public class AquariumManager
         player.swingMainHand();
 
         data.setCooldown(Material.WATER_BUCKET,
-            AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+            AnimalPenPlugin.configuration().getEntityCooldown(
                 entity.getType(),
                 Material.WATER_BUCKET,
                 data.entityCount()));
@@ -874,7 +874,7 @@ public class AquariumManager
         // Save data
         AquariumManager.setAquariumData(entity, data);
 
-        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isTriggerAdvancements())
+        if (AnimalPenPlugin.configuration().isTriggerAdvancements())
         {
             // Trigger bucket filling
             CriteriaTriggers.FILLED_BUCKET.trigger(((CraftPlayer) player).getHandle(),
@@ -893,7 +893,7 @@ public class AquariumManager
             return;
         }
 
-        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isIncreaseStatistics())
+        if (AnimalPenPlugin.configuration().isIncreaseStatistics())
         {
             player.incrementStatistic(Statistic.USE_ITEM, itemStack.getType());
         }
@@ -903,7 +903,7 @@ public class AquariumManager
             itemStack.damage(1, player);
         }
 
-        int cooldown = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getAttackCooldown();
+        int cooldown = AnimalPenPlugin.configuration().getAttackCooldown();
 
         if (cooldown > 0)
         {
@@ -960,14 +960,14 @@ public class AquariumManager
             0.2,
             0);
 
-        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isTriggerAdvancements())
+        if (AnimalPenPlugin.configuration().isTriggerAdvancements())
         {
             CriteriaTriggers.PLAYER_KILLED_ENTITY.trigger(((CraftPlayer) player).getHandle(),
                 ((CraftEntity) entity).getHandle(),
                 ((CraftDamageSource) DamageSource.builder(DamageType.PLAYER_ATTACK).build()).getHandle());
         }
 
-        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isIncreaseStatistics())
+        if (AnimalPenPlugin.configuration().isIncreaseStatistics())
         {
             player.incrementStatistic(Statistic.MOB_KILLS);
             player.incrementStatistic(Statistic.KILL_ENTITY, entity.getType());

@@ -60,14 +60,14 @@ public class Utils
 
     public static void triggerItemUse(Entity entity, Player player, ItemStack itemStack, int amount)
     {
-        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isTriggerAdvancements())
+        if (AnimalPenPlugin.configuration().isTriggerAdvancements())
         {
             CriteriaTriggers.PLAYER_INTERACTED_WITH_ENTITY.trigger(((CraftPlayer) player).getHandle(),
                 ((CraftItemStack) itemStack).handle,
                 ((CraftEntity) entity).getHandle());
         }
 
-        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isIncreaseStatistics())
+        if (AnimalPenPlugin.configuration().isIncreaseStatistics())
         {
             player.incrementStatistic(Statistic.USE_ITEM, itemStack.getType(), amount);
         }

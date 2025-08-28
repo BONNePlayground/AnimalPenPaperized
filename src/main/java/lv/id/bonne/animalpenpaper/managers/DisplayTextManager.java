@@ -56,7 +56,7 @@ public class DisplayTextManager implements Listener
     @EventHandler
     public void onPlayerCrouching(PlayerToggleSneakEvent event)
     {
-        if (!AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isShowCooldownsOnlyOnShift())
+        if (!AnimalPenPlugin.configuration().isShowCooldownsOnlyOnShift())
         {
             return;
         }
@@ -207,7 +207,7 @@ public class DisplayTextManager implements Listener
                                             display.setTransformation(transform);
                                             display.setPersistent(false);
 
-                                            if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isShowCooldownsOnlyOnShift())
+                                            if (AnimalPenPlugin.configuration().isShowCooldownsOnlyOnShift())
                                             {
                                                 display.setVisibleByDefault(false);
                                             }
@@ -231,7 +231,7 @@ public class DisplayTextManager implements Listener
                                             display.setDefaultBackground(false);
                                             display.setBackgroundColor(Color.fromARGB(0, 0, 0, 0));
 
-                                            if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isShowCooldownsOnlyOnShift())
+                                            if (AnimalPenPlugin.configuration().isShowCooldownsOnlyOnShift())
                                             {
                                                 display.setVisibleByDefault(false);
                                             }

@@ -26,7 +26,6 @@ import io.papermc.paper.potion.SuspiciousEffectEntry;
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
 import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
-import lv.id.bonne.animalpenpaper.managers.AquariumManager;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
 import lv.id.bonne.animalpenpaper.util.Utils;
 import net.kyori.adventure.text.Component;
@@ -94,7 +93,7 @@ public class AnimalCageListener implements Listener
         }
 
         // Check blocked types
-        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isBlocked(animal.getType()))
+        if (AnimalPenPlugin.configuration().isBlocked(animal.getType()))
         {
             player.sendMessage(AnimalPenPlugin.translations().
                 getTranslatable("item.animal_pen.animal_cage.error.blocked"));
@@ -118,7 +117,7 @@ public class AnimalCageListener implements Listener
             storedData = new AnimalData(entityType, entity.createSnapshot(), 0);
         }
 
-        long maxAmount = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getMaximalAnimalCount();
+        long maxAmount = AnimalPenPlugin.configuration().getMaximalAnimalCount();
 
         if (maxAmount > 0 && storedData.entityCount() + 1 > maxAmount)
         {
@@ -339,7 +338,7 @@ public class AnimalCageListener implements Listener
         itemData.setScutes(0);
 
         // Check variants
-        final int maxStoredVariants = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getMaxStoredVariants();
+        final int maxStoredVariants = AnimalPenPlugin.configuration().getMaxStoredVariants();
         long amount = itemData.entityCount();
 
         if (itemData.entityCount() > 1 &&

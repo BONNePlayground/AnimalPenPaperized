@@ -98,7 +98,7 @@ public class Helper
 
         List<Pair<Material, Component>> lines = new ArrayList<>(4);
 
-        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+        if (AnimalPenPlugin.configuration().getEntityCooldown(
             entityType,
             Material.APPLE,
             animalData.entityCount()) != 0)
@@ -106,7 +106,7 @@ public class Helper
             // Food Items.
 
             List<Material> foodItems =
-                AnimalPenPlugin.CONFIG_MANAGER.getAnimalFoodConfiguration().getFoodItems(entityType);
+                AnimalPenPlugin.animalFoodConfiguration().getFoodItems(entityType);
 
             Material foodItem;
 
@@ -393,7 +393,7 @@ public class Helper
         Material material,
         Material result)
     {
-        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getEntityCooldown(
+        if (AnimalPenPlugin.configuration().getEntityCooldown(
             entityType,
             material,
             animalData.entityCount()) == 0 ||

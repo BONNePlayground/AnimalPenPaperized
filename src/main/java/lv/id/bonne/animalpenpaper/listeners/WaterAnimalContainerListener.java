@@ -11,7 +11,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
-import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -89,7 +88,7 @@ public class WaterAnimalContainerListener implements Listener
         }
 
         // Check blocked types
-        if (AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().isBlocked(animal.getType()))
+        if (AnimalPenPlugin.configuration().isBlocked(animal.getType()))
         {
             player.sendMessage(AnimalPenPlugin.translations().
                 getTranslatable("item.animal_pen.water_animal_container.error.blocked"));
@@ -113,7 +112,7 @@ public class WaterAnimalContainerListener implements Listener
             storedData = new AnimalData(entityType, entity.createSnapshot(), 0);
         }
 
-        long maxAmount = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getMaximalAnimalCount();
+        long maxAmount = AnimalPenPlugin.configuration().getMaximalAnimalCount();
 
         if (maxAmount > 0 && storedData.entityCount() + 1 > maxAmount)
         {
@@ -299,7 +298,7 @@ public class WaterAnimalContainerListener implements Listener
         itemData.setScutes(0);
 
         // Check variants
-        final int maxStoredVariants = AnimalPenPlugin.CONFIG_MANAGER.getConfiguration().getMaxStoredVariants();
+        final int maxStoredVariants = AnimalPenPlugin.configuration().getMaxStoredVariants();
         long amount = itemData.entityCount();
 
         if (itemData.entityCount() > 1 &&

@@ -1,7 +1,9 @@
-name: AnimalPenPlugin
-version: '1.0.0'
 main: lv.id.bonne.animalpenpaper.AnimalPenPlugin
-description: Animal Pen Plugin
-api-version: '1.21.8'
 bootstrapper: lv.id.bonne.animalpenpaper.AnimalPenBootstrap
 load: STARTUP
+
+name: AnimalPenPlugin
+version: ${pluginVersion}
+api-version: ${apiVersion}
+description: A remake of Animal Pens mod into Paper plugin version
+website: "https://github.com/BONNePlayground/AnimalPenPaperized"

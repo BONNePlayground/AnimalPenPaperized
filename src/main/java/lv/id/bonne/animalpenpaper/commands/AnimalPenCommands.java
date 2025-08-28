@@ -20,7 +20,7 @@ public class AnimalPenCommands
         LiteralArgumentBuilder<CommandSourceStack> reload = Commands.literal("reload").
             executes(ctx ->
             {
-                AnimalPenPlugin.CONFIG_MANAGER.reloadConfig();
+                AnimalPenPlugin.configurationManager().reloadConfig();
                 AnimalPenPlugin.translations().reload();
 
                 ctx.getSource().getSender().sendMessage("Config and locale files reloaded.");
@@ -31,8 +31,8 @@ public class AnimalPenCommands
         LiteralArgumentBuilder<CommandSourceStack> reset = Commands.literal("reset").
             executes(ctx ->
             {
-                AnimalPenPlugin.CONFIG_MANAGER.generateConfig(ConfigurationManager.Variants.GENERAL);
-                AnimalPenPlugin.CONFIG_MANAGER.generateConfig(ConfigurationManager.Variants.ANIMAL_FOOD);
+                AnimalPenPlugin.configurationManager().generateConfig(ConfigurationManager.Variants.GENERAL);
+                AnimalPenPlugin.configurationManager().generateConfig(ConfigurationManager.Variants.ANIMAL_FOOD);
                 AnimalPenPlugin.translations().reset();
 
                 ctx.getSource().getSender().sendMessage("Config and locale files reset.");

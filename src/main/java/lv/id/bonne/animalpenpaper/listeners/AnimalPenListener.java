@@ -149,7 +149,7 @@ public class AnimalPenListener implements Listener
             return;
         }
 
-        if (AnimalPenPlugin.CONFIG_MANAGER.getAnimalFoodConfiguration().isFoodItem(entity, itemStack))
+        if (AnimalPenPlugin.animalFoodConfiguration().isFoodItem(entity, itemStack))
         {
             AnimalPenManager.handleFood(entity, player, itemStack);
         }

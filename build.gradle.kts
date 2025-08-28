@@ -9,7 +9,6 @@ plugins {
 
 group = project.findProperty("maven_group") as String
 version = project.findProperty("plugin_version") as String
-description = "Capture and store animals in single block"
 
 val minecraftVersion = project.findProperty("minecraft_version") as String
 val javaVersion = (project.findProperty("java_version") as String).toInt()
@@ -43,4 +42,13 @@ bukkitPluginYaml {
     authors.add("BONNe")
     apiVersion = minecraftVersion
     website = "https://github.com/BONNePlayground/AnimalPenPaperized"
+}
+
+tasks.processResources {
+    filesMatching("paper-plugin.yml") {
+        expand(
+            "apiVersion" to minecraftVersion,
+            "pluginVersion" to version,
+        )
+    }
 }
