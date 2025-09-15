@@ -668,20 +668,30 @@ public class AnimalPenManager
 
 
     /**
-     * Create an animal pen
+     * Create an oak animal pen
      */
     public static ItemStack createAnimalPen()
+    {
+        return AnimalPenManager.createAnimalPen("animal_pen_oak");
+    }
+
+
+    /**
+     * Create an animal pen
+     * @param type wood type
+     */
+    public static ItemStack createAnimalPen(String type)
     {
         ItemStack smoothStoneSlab = new ItemStack(Material.SMOOTH_STONE_SLAB);
         ItemMeta meta = smoothStoneSlab.getItemMeta();
         if (meta == null) return smoothStoneSlab;
 
         CustomModelDataComponent customData = meta.getCustomModelDataComponent();
-        customData.setStrings(List.of(ANIMAL_PEN_MODEL, "animal_pen:animal_pen_oak"));
+        customData.setStrings(List.of(ANIMAL_PEN_MODEL, "animal_pen:" + type));
         meta.setCustomModelDataComponent(customData);
 
         meta.displayName(AnimalPenPlugin.translations().
-            getTranslatable("item.animal_pen.animal_pen_oak").
+            getTranslatable("item.animal_pen." + type).
             style(StyleUtil.WHITE));
 
         meta.lore(List.of(

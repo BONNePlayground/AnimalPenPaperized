@@ -1,3 +1,3 @@
-## Animal Pens Paperized 1.0.1
+## Animal Pens Paperized 1.1.0
 
-- Small cleanups
+- Add Animal Pen creative item menu: /animal_pen items - op command.
