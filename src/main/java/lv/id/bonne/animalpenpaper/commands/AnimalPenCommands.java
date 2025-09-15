@@ -28,6 +28,7 @@ public class AnimalPenCommands
                 AnimalPenPlugin.translations().reload();
 
                 // Recreate menu
+                MENU.close();
                 MENU = new AnimalPenCreativeMenu();
 
                 ctx.getSource().getSender().sendMessage("Config and locale files reloaded.");
@@ -43,6 +44,7 @@ public class AnimalPenCommands
                 AnimalPenPlugin.translations().reset();
 
                 // Recreate menu
+                MENU.close();
                 MENU = new AnimalPenCreativeMenu();
 
                 ctx.getSource().getSender().sendMessage("Config and locale files reset.");

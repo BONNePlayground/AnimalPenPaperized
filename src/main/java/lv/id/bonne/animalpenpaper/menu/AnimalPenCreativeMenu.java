@@ -3,8 +3,10 @@ package lv.id.bonne.animalpenpaper.menu;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -169,6 +171,21 @@ public class AnimalPenCreativeMenu implements Listener, InventoryHolder
             player.sendMessage(AnimalPenPlugin.translations().
                 getTranslatable("menu.animal_pen.creative.success.give", itemToGive.getAmount(), itemName));
         }
+    }
+
+
+    public void close()
+    {
+        HandlerList.unregisterAll(this);
+
+        // Close inventory for all viewers
+        for (HumanEntity viewer : this.inventory.getViewers())
+        {
+            viewer.closeInventory();
+        }
+
+        // Clear and drop reference
+        this.inventory.clear();
     }
 
 
