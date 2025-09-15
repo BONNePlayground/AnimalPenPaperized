@@ -82,8 +82,7 @@ public class AnimalCageListener implements Listener
             return;
         }
 
-        if (entity instanceof Tameable tameable && tameable.isTamed() ||
-            entity instanceof AbstractHorse horse && horse.isTamed() ||
+        if (entity instanceof Tameable tameable && tameable.getOwnerUniqueId() != null ||
             entity instanceof OwnableEntity ownable && ownable.getOwner() != null)
         {
             player.sendMessage(AnimalPenPlugin.translations().
