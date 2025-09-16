@@ -94,7 +94,7 @@ hangarPublish {
 
 modrinth {
     token.set(System.getenv("MODRINTH_TOKEN"))
-    projectId.set("animalpenpaperized")
+    projectId.set("animalpenspaperized")
     versionNumber.set("$version-$minecraftVersion")
     versionName.set("$version-$minecraftVersion-Paper")
     versionType.set("release")

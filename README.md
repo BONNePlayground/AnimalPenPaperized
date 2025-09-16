@@ -62,7 +62,7 @@ Easily adjust gameplay with the **mod’s configuration file** _\[plugins/Animal
     • If enabled, **more animals = larger pen display**.  
     • Adjustable growth multiplier.
 
-📊 **Statistics** – Allows to toggle if interactions with animal in pen should affect statistics. 
+📊 **Statistics** – Allows to toggle if interactions with animal in pen should affect statistics.
 
 🔼 **Advancements** – Allows to toggle if interactions with animal in pen should affect advancements.
 
@@ -96,7 +96,7 @@ Default Resource Pack: https://github.com/BONNePlayground/AnimalPenPaperized/tre
 
 ### Localization
 
-Plugin comes with server side messages `messages.yml`. However, using resource pack you can customize translations for client. 
+Plugin comes with server side messages `messages.yml`. However, using resource pack you can customize translations for client.
 
 ***
 
@@ -120,14 +120,15 @@ With **Animal Pens**, you can **reduce lag, keep your farms organized, and maint
 
 ## ❓ FAQ
 
-### 🔹 Precise clicking 
-In minecraft paper I have less control over whole system, that is why interaction is split between entity and block:
-- Animal cage and water container can interact only with smooth stone slab
-- Killing and Interactions can be done only by clicking on entity
-- Breaking pen and aquarium can happen only by breaking base smooth stone slab
+🔹 Precise Clicking
 
-### 🔹 Is water necessary for Aquariums 
-In minecraft fishes outside water will be always sideway. It is hard-codded mechanics for all water animals to 
-automatically change their pose when they are out of water. In modded environment I can change it, however, it 
-is not possible to do in paper plugin.
-You can mitigate the issue by adding Animal Pens Resource Pack.
+In Minecraft Paper, you have limited control over the overall system, which is why interactions are separated between entities and blocks:
+
+- Animal cages and water containers can only interact when placed on smooth stone slabs.
+- Killing and other entity interactions can only be performed by clicking directly on the entity.
+- Breaking pens and aquariums is only possible by breaking the base smooth stone slab.
+
+🔹 Is Water Necessary for Aquariums?
+
+In Minecraft, fish outside of water will always appear sideways. This is a hard-coded behavior for all water animals - they automatically change their pose when out of water. While this can be modified in modded environments, it is not possible in a Paper plugin.
+You can reduce this issue by using the Animal Pens Resource Pack.
