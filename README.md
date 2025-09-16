@@ -32,9 +32,13 @@ This plugin is reimplementation of Animal Pens mod.
 
 ✔️ **Releasing animals** by crouch clicking on ground.
 
+✔️ **Variant Storage & Selection**  
+    • Picking up an animal **saves its variant** inside the cage.  
+    • Right-click an empty-handed animal to **view stored variants**.
+
 (1) Features not added:  
      Any animal transformation  
-     Any animal interaction with other entites
+     Any animal interaction with other entities
 
 ***
 
@@ -102,6 +106,7 @@ Use these commands (server moderators) to manage the mod:
 
 💾 `/animal_pen reset` – Resets the config file to default values.  
 🔄 `/animal_pen reload` – Reloads the config file without restarting the game.
+🎒 `/animal_pen items` – Custom creative menu to get custom items.
 
 ***
 
@@ -112,3 +117,17 @@ Credit to **Breadcrumb5550** for the mod’s blocks and items!
 ***
 
 With **Animal Pens**, you can **reduce lag, keep your farms organized, and maintain full interactivity!**
+
+## ❓ FAQ
+
+### 🔹 Precise clicking 
+In minecraft paper I have less control over whole system, that is why interaction is split between entity and block:
+- Animal cage and water container can interact only with smooth stone slab
+- Killing and Interactions can be done only by clicking on entity
+- Breaking pen and aquarium can happen only by breaking base smooth stone slab
+
+### 🔹 Is water necessary for Aquariums 
+In minecraft fishes outside water will be always sideway. It is hard-codded mechanics for all water animals to 
+automatically change their pose when they are out of water. In modded environment I can change it, however, it 
+is not possible to do in paper plugin.
+You can mitigate the issue by adding Animal Pens Resource Pack.

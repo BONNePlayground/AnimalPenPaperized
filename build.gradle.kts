@@ -102,7 +102,6 @@ modrinth {
     loaders.add("paper")
 
     uploadFile.set(tasks.jar)
-    additionalFiles.set(listOf(resourcePack.get().archiveFile))
 
     changelog.set(rootProject.file("CHANGELOG_LATEST.md").readText())
     syncBodyFrom.set(rootProject.file("README.md").readText())
