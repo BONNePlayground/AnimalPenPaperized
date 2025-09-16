@@ -147,6 +147,95 @@ public class Utils
     );
 
 
+    public static String getAxolotlType(int val)
+    {
+        if (val >= 0 && val < Axolotl.Variant.values().length) {
+            return Axolotl.Variant.values()[val].name();
+        }
+
+        return "unknown";
+    }
+
+
+    public static String getHorseColor(int val)
+    {
+        if (val >= 0 && val < Horse.Color.values().length) {
+            return Horse.Color.values()[val].name();
+        }
+
+        return "unknown";
+    }
+
+
+    public static String getHorseMarkings(int val)
+    {
+        if (val >= 0 && val < Horse.Style.values().length) {
+            return Horse.Style.values()[val].name();
+        }
+
+        return "unknown";
+    }
+
+
+    public static String getLlamaVariant(int val)
+    {
+        if (val >= 0 && val < Llama.Color.values().length) {
+            return Llama.Color.values()[val].name();
+        }
+
+        return "unknown";
+    }
+
+
+    public static String getParrotVariant(int val)
+    {
+        if (val >= 0 && val < Parrot.Variant.values().length) {
+            return Parrot.Variant.values()[val].name();
+        }
+
+        return "unknown";
+    }
+
+
+    public static String getPufferState(int val)
+    {
+        return switch (val)
+        {
+            case 0 -> "deflated";
+            case 1 -> "halfway puffed-up";
+            case 2 -> "fully puffed-up";
+            default -> "unknown";
+        };
+    }
+
+
+    public static String getRabbitVariant(int val)
+    {
+        if (val >= 0 && val < Rabbit.Type.values().length) {
+            return Rabbit.Type.values()[val].name();
+        }
+
+        return "unknown";
+    }
+
+
+    public static String getDyeColor(byte val)
+    {
+        DyeColor dyeColor = DyeColor.getByWoolData(val);
+        return dyeColor == null ? "unknown" : dyeColor.name();
+    }
+
+
+    public static String getPattern(int pattern)
+    {
+        if (pattern >= 0 && pattern < TropicalFish.Pattern.values().length) {
+            return TropicalFish.Pattern.values()[pattern].name();
+        }
+
+        return "unknown";
+    }
+
+
 // ---------------------------------------------------------------------
 // Section: Text Entity Related methods
 // ---------------------------------------------------------------------

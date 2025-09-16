@@ -35,7 +35,7 @@ public class BlockData
     /**
      * The block face how animal pen was placed.
      */
-    public BlockFace blockFace;
+    public BlockFace blockFace = BlockFace.NORTH;
 
     /**
      * Current version of data storage.

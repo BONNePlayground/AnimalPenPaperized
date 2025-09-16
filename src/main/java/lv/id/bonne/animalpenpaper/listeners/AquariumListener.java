@@ -34,6 +34,7 @@ import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
 import lv.id.bonne.animalpenpaper.data.BlockData;
 import lv.id.bonne.animalpenpaper.managers.AquariumManager;
+import lv.id.bonne.animalpenpaper.menu.AnimalPenVariantMenu;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
 import lv.id.bonne.animalpenpaper.util.Utils;
 
@@ -152,6 +153,8 @@ public class AquariumListener implements Listener
 
         if (itemStack.isEmpty())
         {
+            AnimalPenVariantMenu.openMenu(entity, player);
+
             // Not an item.
             return;
         }

@@ -34,6 +34,7 @@ import lv.id.bonne.animalpenpaper.data.AnimalData;
 import lv.id.bonne.animalpenpaper.data.AnimalDataType;
 import lv.id.bonne.animalpenpaper.data.BlockData;
 import lv.id.bonne.animalpenpaper.data.BlockDataType;
+import lv.id.bonne.animalpenpaper.menu.AnimalPenVariantMenu;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
 import lv.id.bonne.animalpenpaper.util.Utils;
 import net.kyori.adventure.text.Component;
@@ -1772,6 +1773,51 @@ public class AnimalPenManager
             // Remember shear value for snapshot
             animalData.setAppliedFlag(false);
         }
+    }
+
+
+    public static void applyVariant(Entity entity, EntitySnapshot selectedVariant)
+    {
+        if (selectedVariant == null)
+        {
+            return;
+        }
+
+        Block block = entity.getLocation().add(0, -0.5, 0).getBlock();
+        NamespacedKey penKey = new NamespacedKey(AnimalPenPlugin.getInstance(),
+            block.getX() + "_" + block.getY() + "_" + block.getZ() + "_animal_pen");
+
+        BlockData blockData = block.getWorld().getPersistentDataContainer().get(penKey, BlockDataType.INSTANCE);
+
+        if (blockData == null)
+        {
+            return;
+        }
+
+        AnimalData animalData = AnimalPenManager.getAnimalData(entity);
+
+        if (animalData == null)
+        {
+            return;
+        }
+
+        animalData.setAppliedMaterial(null);
+        animalData.setAppliedFlag(null);
+
+        animalData.setEntitySnapshot(selectedVariant);
+        blockData.entity = null;
+
+        // Update animal pen by removing saved entity reference.
+        block.getWorld().getPersistentDataContainer().set(penKey, BlockDataType.INSTANCE, blockData);
+
+        // Remove entity from world
+        AnimalPenPlugin.getInstance().task.stopTrackingEntity(entity, false);
+        entity.getPersistentDataContainer().remove(ANIMAL_DATA_KEY);
+        AnimalPenVariantMenu.close(entity);
+        entity.remove();
+
+        // Trigger new entity creation
+        AnimalPenManager.setAnimalPenData(block, animalData);
     }
 
 
