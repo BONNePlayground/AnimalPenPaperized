@@ -12,6 +12,8 @@ import com.destroystokyo.paper.event.entity.EntityZapEvent;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.TileState;
 import org.bukkit.block.data.type.Slab;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.*;
@@ -25,6 +27,7 @@ import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.List;
 
@@ -394,10 +397,22 @@ public class AnimalPenListener implements Listener
         }
     }
 
+
     @EventHandler
     public void onEntityTarget(EntityTargetLivingEntityEvent event)
     {
         if (event.getTarget() != null && AnimalPenManager.isAnimalPen(event.getTarget()))
+        {
+            event.setCancelled(true);
+        }
+    }
+
+
+
+    @EventHandler
+    public void onDispenseArmor(BlockDispenseArmorEvent event)
+    {
+        if (AnimalPenManager.isAnimalPen(event.getTargetEntity()))
         {
             event.setCancelled(true);
         }

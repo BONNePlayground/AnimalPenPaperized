@@ -400,6 +400,16 @@ public class AquariumListener implements Listener
 
 
     @EventHandler
+    public void onDispenseArmor(BlockDispenseArmorEvent event)
+    {
+        if (AquariumManager.isAquarium(event.getTargetEntity()))
+        {
+            event.setCancelled(true);
+        }
+    }
+
+
+    @EventHandler
     public void onItemCraft(CraftItemEvent event)
     {
         ItemStack result = event.getRecipe().getResult();
