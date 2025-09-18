@@ -11,8 +11,12 @@ import org.bukkit.craftbukkit.entity.*;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.AxolotlBucketMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -38,6 +42,7 @@ import lv.id.bonne.animalpenpaper.menu.AnimalPenVariantMenu;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
 import lv.id.bonne.animalpenpaper.util.Utils;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.util.TriState;
 import net.minecraft.advancements.CriteriaTriggers;
 
 
@@ -1695,6 +1700,12 @@ public class AnimalPenManager
 
         if (lootTable != null)
         {
+            if (player.getInventory().getItemInMainHand().containsEnchantment(Enchantment.FIRE_ASPECT))
+            {
+                entity.setFireTicks(1);
+                entity.setVisualFire(TriState.FALSE);
+            }
+
             Collection<ItemStack> itemStacks = lootTable.populateLoot(new Random(),
                 new LootContext.Builder(entity.getLocation()).
                     killer(player).
