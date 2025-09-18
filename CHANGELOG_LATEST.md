@@ -1,6 +1,5 @@
-## Animal Pens Paperized 1.1.0
+## Animal Pens Paperized 1.2.0
 
-- Added Animal Pen creative item menu: /animal_pen items - op command.
-- Added messages.yml auto-update with new values.
-- Added Variant Selection Menu
-- Fixed a bug when camels were not pick-able
+- Removes dispenser ability to set armor on animals in pens/aquarium
+- Removes dispenser ability to interact with pens/aquarium
+- Adds protection against sponge and water pickup for aquariums

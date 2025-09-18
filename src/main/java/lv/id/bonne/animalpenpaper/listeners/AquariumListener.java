@@ -12,6 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.type.Dispenser;
 import org.bukkit.block.data.type.Slab;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.*;
@@ -22,6 +23,7 @@ import org.bukkit.event.block.*;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -352,9 +354,22 @@ public class AquariumListener implements Listener
     @EventHandler
     public void onWaterPlace(PlayerBucketEmptyEvent event)
     {
-        if (AquariumManager.isAquarium(event.getBlock()))
+        if (AquariumManager.isAquarium(event.getBlock()) ||
+            AquariumManager.isAquarium(event.getBlock().getRelative(BlockFace.DOWN)))
         {
-            // Animal pen cannot be waterlogged
+            // Aquariums cannot be waterlogged
+            event.setCancelled(true);
+        }
+    }
+
+
+    @EventHandler
+    public void onWaterPlace(PlayerBucketFillEvent event)
+    {
+        if (AquariumManager.isAquarium(event.getBlock()) ||
+            AquariumManager.isAquarium(event.getBlock().getRelative(BlockFace.DOWN)))
+        {
+            // Aquariums cannot be removed from water
             event.setCancelled(true);
         }
     }
@@ -406,6 +421,35 @@ public class AquariumListener implements Listener
         {
             event.setCancelled(true);
         }
+    }
+
+
+    @EventHandler
+    public void onDispenseBlock(BlockDispenseEvent event)
+    {
+        if (event.getBlock().getBlockData() instanceof Dispenser dispenser)
+        {
+            // Check if block is aquarium or block bellow is aquarium
+            if (AquariumManager.isAquarium(event.getBlock().getRelative(dispenser.getFacing())) ||
+                AquariumManager.isAquarium(event.getBlock().getRelative(dispenser.getFacing()).
+                    getRelative(BlockFace.DOWN)))
+            {
+                event.setCancelled(true);
+            }
+        }
+    }
+
+
+    @EventHandler
+    public void onSponge(SpongeAbsorbEvent event)
+    {
+        // Remove aquarium blocks from sponge.
+        event.getBlocks().removeIf(blockState ->
+        {
+            Block block = blockState.getBlock();
+            return AquariumManager.isAquarium(block) ||
+                AquariumManager.isAquarium(block.getRelative(BlockFace.DOWN));
+        });
     }
 
 

@@ -14,6 +14,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.TileState;
+import org.bukkit.block.data.type.Dispenser;
 import org.bukkit.block.data.type.Slab;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.*;
@@ -37,6 +38,7 @@ import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
 import lv.id.bonne.animalpenpaper.data.BlockData;
 import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
+import lv.id.bonne.animalpenpaper.managers.AquariumManager;
 import lv.id.bonne.animalpenpaper.menu.AnimalPenVariantMenu;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
 import lv.id.bonne.animalpenpaper.util.Utils;
@@ -415,6 +417,19 @@ public class AnimalPenListener implements Listener
         if (AnimalPenManager.isAnimalPen(event.getTargetEntity()))
         {
             event.setCancelled(true);
+        }
+    }
+
+
+    @EventHandler
+    public void onDispenseBlock(BlockDispenseEvent event)
+    {
+        if (event.getBlock().getBlockData() instanceof Dispenser dispenser)
+        {
+            if (AnimalPenManager.isAnimalPen(event.getBlock().getRelative(dispenser.getFacing())))
+            {
+                event.setCancelled(true);
+            }
         }
     }
 
