@@ -445,6 +445,16 @@ public class AnimalPenListener implements Listener
 
 
     @EventHandler
+    public void onEntityPickUpItems(EntityPickupItemEvent event)
+    {
+        if (AnimalPenManager.isAnimalPen(event.getEntity()))
+        {
+            event.setCancelled(true);
+        }
+    }
+
+
+    @EventHandler
     public void onItemCraft(CraftItemEvent event)
     {
         ItemStack result = event.getRecipe().getResult();

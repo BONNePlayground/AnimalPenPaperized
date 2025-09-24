@@ -35,7 +35,6 @@ import io.papermc.paper.datacomponent.item.CustomModelData;
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
 import lv.id.bonne.animalpenpaper.data.BlockData;
-import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
 import lv.id.bonne.animalpenpaper.managers.AquariumManager;
 import lv.id.bonne.animalpenpaper.menu.AnimalPenVariantMenu;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
@@ -457,7 +456,17 @@ public class AquariumListener implements Listener
     @EventHandler
     public void onEntityDropItems(EntityDropItemEvent event)
     {
-        if (AnimalPenManager.isAnimalPen(event.getEntity()))
+        if (AquariumManager.isAquarium(event.getEntity()))
+        {
+            event.setCancelled(true);
+        }
+    }
+
+
+    @EventHandler
+    public void onEntityPickUpItems(EntityPickupItemEvent event)
+    {
+        if (AquariumManager.isAquarium(event.getEntity()))
         {
             event.setCancelled(true);
         }
