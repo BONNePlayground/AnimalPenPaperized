@@ -26,6 +26,7 @@ import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -149,7 +150,7 @@ public class AnimalPenListener implements Listener
         // I CONTROL IT!!! NO CUSTOM INTERACTIONS HAHAHAHA
         event.setCancelled(true);
 
-        if (itemStack.isEmpty())
+        if (itemStack.isEmpty() && event.getHand() == EquipmentSlot.HAND)
         {
             AnimalPenVariantMenu.openMenu(entity, player);
             // Not an item.
