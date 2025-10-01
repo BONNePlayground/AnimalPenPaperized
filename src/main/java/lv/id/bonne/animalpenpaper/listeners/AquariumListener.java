@@ -258,7 +258,7 @@ public class AquariumListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onAnimalPenPush(BlockPistonExtendEvent event)
     {
         boolean hasAnimalPen = event.getBlocks().stream().anyMatch(AquariumManager::isAquarium);
@@ -274,7 +274,7 @@ public class AquariumListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onAnimalPenPush(BlockPistonRetractEvent event)
     {
         boolean hasAnimalPen = event.getBlocks().stream().anyMatch(AquariumManager::isAquarium);
@@ -290,7 +290,7 @@ public class AquariumListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onAnimalPenPlaceBlock(BlockCanBuildEvent event)
     {
         if (!AquariumManager.isAquarium(event.getBlock()))
@@ -304,7 +304,7 @@ public class AquariumListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onEntityDamage(EntityDamageEvent event)
     {
         Entity entity = event.getEntity();
@@ -319,7 +319,22 @@ public class AquariumListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
+    public void onDamageOtherEntities(EntityDamageEvent event)
+    {
+        Entity entity = event.getDamageSource().getCausingEntity();
+
+        if (entity == null || !AquariumManager.isAquarium(entity))
+        {
+            return;
+        }
+
+        // Animal pen entities cannot damage anything else.
+        event.setCancelled(true);
+    }
+
+
+    @EventHandler(ignoreCancelled = true)
     public void onEntityRemoveEvent(EntityDeathEvent event)
     {
         if (AquariumManager.isAquarium(event.getEntity()))
@@ -330,7 +345,7 @@ public class AquariumListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onEntityZapEvent(EntityZapEvent event)
     {
         if (AquariumManager.isAquarium(event.getEntity()))
@@ -341,7 +356,7 @@ public class AquariumListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onEntityTransformEvent(EntityTransformEvent event)
     {
         if (AquariumManager.isAquarium(event.getEntity()))
@@ -352,7 +367,7 @@ public class AquariumListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onWaterPlace(PlayerBucketEmptyEvent event)
     {
         if (AquariumManager.isAquarium(event.getBlock()) ||
@@ -364,7 +379,7 @@ public class AquariumListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onWaterPlace(PlayerBucketFillEvent event)
     {
         if (AquariumManager.isAquarium(event.getBlock()) ||
@@ -376,7 +391,7 @@ public class AquariumListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onWaterSpread(BlockFromToEvent event)
     {
         if (AquariumManager.isAquarium(event.getToBlock()))
@@ -405,7 +420,7 @@ public class AquariumListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onEntityTarget(EntityTargetLivingEntityEvent event)
     {
         if (event.getTarget() != null && AquariumManager.isAquarium(event.getTarget()))
@@ -415,7 +430,7 @@ public class AquariumListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onDispenseArmor(BlockDispenseArmorEvent event)
     {
         if (AquariumManager.isAquarium(event.getTargetEntity()))
@@ -425,7 +440,7 @@ public class AquariumListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onDispenseBlock(BlockDispenseEvent event)
     {
         if (event.getBlock().getBlockData() instanceof Dispenser dispenser)
@@ -454,7 +469,7 @@ public class AquariumListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onEntityDropItems(EntityDropItemEvent event)
     {
         if (AquariumManager.isAquarium(event.getEntity()))
@@ -464,7 +479,7 @@ public class AquariumListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onEntityPickUpItems(EntityPickupItemEvent event)
     {
         if (AquariumManager.isAquarium(event.getEntity()))

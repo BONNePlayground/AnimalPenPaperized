@@ -12,8 +12,6 @@ import com.destroystokyo.paper.event.entity.EntityZapEvent;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.TileState;
 import org.bukkit.block.data.type.Dispenser;
 import org.bukkit.block.data.type.Slab;
 import org.bukkit.damage.DamageType;
@@ -29,7 +27,6 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 
 import java.util.List;
 
@@ -39,7 +36,6 @@ import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
 import lv.id.bonne.animalpenpaper.data.BlockData;
 import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
-import lv.id.bonne.animalpenpaper.managers.AquariumManager;
 import lv.id.bonne.animalpenpaper.menu.AnimalPenVariantMenu;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
 import lv.id.bonne.animalpenpaper.util.Utils;
@@ -285,7 +281,7 @@ public class AnimalPenListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onAnimalPenPush(BlockPistonExtendEvent event)
     {
         boolean hasAnimalPen = event.getBlocks().stream().anyMatch(AnimalPenManager::isAnimalPen);
@@ -301,7 +297,7 @@ public class AnimalPenListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onAnimalPenPush(BlockPistonRetractEvent event)
     {
         boolean hasAnimalPen = event.getBlocks().stream().anyMatch(AnimalPenManager::isAnimalPen);
@@ -317,7 +313,7 @@ public class AnimalPenListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onAnimalPenPlaceBlock(BlockCanBuildEvent event)
     {
         if (!AnimalPenManager.isAnimalPen(event.getBlock()))
@@ -331,7 +327,7 @@ public class AnimalPenListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onEntityDamage(EntityDamageEvent event)
     {
         Entity entity = event.getEntity();
@@ -346,7 +342,22 @@ public class AnimalPenListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
+    public void onDamageOtherEntities(EntityDamageEvent event)
+    {
+        Entity entity = event.getDamageSource().getCausingEntity();
+
+        if (entity == null || !AnimalPenManager.isAnimalPen(entity))
+        {
+            return;
+        }
+
+        // Animal pen entities cannot damage anything else.
+        event.setCancelled(true);
+    }
+
+
+    @EventHandler(ignoreCancelled = true)
     public void onEntityRemoveEvent(EntityDeathEvent event)
     {
         if (AnimalPenManager.isAnimalPen(event.getEntity()))
@@ -357,7 +368,7 @@ public class AnimalPenListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onEntityZapEvent(EntityZapEvent event)
     {
         if (AnimalPenManager.isAnimalPen(event.getEntity()))
@@ -368,7 +379,7 @@ public class AnimalPenListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onEntityTransformEvent(EntityTransformEvent event)
     {
         if (AnimalPenManager.isAnimalPen(event.getEntity()))
@@ -379,7 +390,7 @@ public class AnimalPenListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onWaterPlace(PlayerBucketEmptyEvent event)
     {
         if (AnimalPenManager.isAnimalPen(event.getBlock()))
@@ -390,7 +401,7 @@ public class AnimalPenListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onWaterSpread(BlockFromToEvent event)
     {
         if (AnimalPenManager.isAnimalPen(event.getToBlock()))
@@ -401,7 +412,7 @@ public class AnimalPenListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onEntityTarget(EntityTargetLivingEntityEvent event)
     {
         if (event.getTarget() != null && AnimalPenManager.isAnimalPen(event.getTarget()))
@@ -412,7 +423,7 @@ public class AnimalPenListener implements Listener
 
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onDispenseArmor(BlockDispenseArmorEvent event)
     {
         if (AnimalPenManager.isAnimalPen(event.getTargetEntity()))
@@ -422,7 +433,7 @@ public class AnimalPenListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onDispenseBlock(BlockDispenseEvent event)
     {
         if (event.getBlock().getBlockData() instanceof Dispenser dispenser)
@@ -435,7 +446,7 @@ public class AnimalPenListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onEntityDropItems(EntityDropItemEvent event)
     {
         if (AnimalPenManager.isAnimalPen(event.getEntity()))
@@ -445,7 +456,7 @@ public class AnimalPenListener implements Listener
     }
 
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onEntityPickUpItems(EntityPickupItemEvent event)
     {
         if (AnimalPenManager.isAnimalPen(event.getEntity()))
