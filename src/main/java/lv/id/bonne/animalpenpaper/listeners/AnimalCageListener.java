@@ -143,7 +143,7 @@ public class AnimalCageListener implements Listener
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onEntityRelease(PlayerInteractEvent event)
     {
-        if (event.getAction() != Action.RIGHT_CLICK_BLOCK)
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getHand() == null)
         {
             return;
         }
@@ -243,6 +243,11 @@ public class AnimalCageListener implements Listener
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onInteractWithPenWithAnimalCage(PlayerInteractEvent event)
     {
+        if (event.getHand() == null)
+        {
+            return;
+        }
+
         Player player = event.getPlayer();
         ItemStack item = player.getInventory().getItem(event.getHand());
 
@@ -386,7 +391,9 @@ public class AnimalCageListener implements Listener
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onInteractWithPenWithEmptyHand(PlayerInteractEvent event)
     {
-        if (event.getItem() != null && !event.getItem().getType().isAir() || event.getHand() == EquipmentSlot.OFF_HAND)
+        if (event.getHand() == null ||
+            event.getItem() != null && !event.getItem().getType().isAir() ||
+            event.getHand() == EquipmentSlot.OFF_HAND)
         {
             return;
         }
