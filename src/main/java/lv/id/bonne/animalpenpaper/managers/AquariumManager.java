@@ -881,7 +881,7 @@ public class AquariumManager
         {
             // Trigger bucket filling
             CriteriaTriggers.FILLED_BUCKET.trigger(((CraftPlayer) player).getHandle(),
-                ((CraftItemStack) newBucket).handle);
+                CraftItemStack.asNMSCopy(newBucket));
         }
     }
 

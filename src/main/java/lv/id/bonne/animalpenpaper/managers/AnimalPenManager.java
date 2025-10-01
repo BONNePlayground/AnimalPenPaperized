@@ -14,9 +14,6 @@ import org.bukkit.damage.DamageType;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.AxolotlBucketMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -44,8 +41,6 @@ import lv.id.bonne.animalpenpaper.util.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.util.TriState;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 
 /**
@@ -984,7 +979,7 @@ public class AnimalPenManager
         {
             // Trigger bucket filling
             CriteriaTriggers.FILLED_BUCKET.trigger(((CraftPlayer) player).getHandle(),
-                ((CraftItemStack) newBucket).handle);
+                CraftItemStack.asNMSCopy(newBucket));
         }
     }
 
