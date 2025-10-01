@@ -44,6 +44,8 @@ import lv.id.bonne.animalpenpaper.util.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.util.TriState;
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 
 /**
@@ -833,6 +835,13 @@ public class AnimalPenManager
             // Ignore non-breedable mobs
             return;
         }
+
+        // Use gaussian spread to get random amount.
+        entity.getWorld().spawnEntity(entity.getLocation().add(0, 0.5, 0),
+            EntityType.EXPERIENCE_ORB,
+            CreatureSpawnEvent.SpawnReason.CUSTOM,
+            orb -> ((ExperienceOrb) orb).setExperience((int)
+                Math.round(amount * 4 + new Random().nextGaussian() * Math.sqrt(amount * 4))));
 
         if (AnimalPenPlugin.configuration().isTriggerAdvancements())
         {
@@ -1714,6 +1723,12 @@ public class AnimalPenManager
 
             Location location = entity.getLocation().add(0, 1, 0);
             itemStacks.forEach(item -> entity.getWorld().dropItemNaturally(location, item));
+
+            int reward = ((Mob) entity).getPossibleExperienceReward();
+            entity.getWorld().spawnEntity(location,
+                EntityType.EXPERIENCE_ORB,
+                CreatureSpawnEvent.SpawnReason.CUSTOM,
+                orb -> ((ExperienceOrb) orb).setExperience(reward));
         }
 
         Sound deathSound = entity.getDeathSound();

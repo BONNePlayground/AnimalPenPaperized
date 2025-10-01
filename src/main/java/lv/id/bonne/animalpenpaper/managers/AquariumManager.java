@@ -935,6 +935,12 @@ public class AquariumManager
 
             Location location = entity.getLocation().add(0, 1, 0);
             itemStacks.forEach(item -> entity.getWorld().dropItemNaturally(location, item));
+
+            int reward = ((Mob) entity).getPossibleExperienceReward();
+            entity.getWorld().spawnEntity(location,
+                EntityType.EXPERIENCE_ORB,
+                CreatureSpawnEvent.SpawnReason.CUSTOM,
+                orb -> ((ExperienceOrb) orb).setExperience(reward));
         }
 
         Sound deathSound = entity.getDeathSound();

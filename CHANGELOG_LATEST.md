@@ -1,5 +1,4 @@
-## Animal Pens Paperized 1.2.1
+## Animal Pens Paperized 1.3
 
-- Remove random loot drops from animals (chicken eggs, armadillo scutes)
-- Remove ability to pickup items from animals in pens
-- Fixes a bug with GUI opening on wrong empty hand
+- Fixed a crash when player interaction is not done with a hand.
+- Added missing XP drops for killing animals and breeding them.
