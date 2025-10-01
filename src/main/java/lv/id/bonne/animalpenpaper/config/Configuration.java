@@ -54,7 +54,8 @@ public class Configuration
             this.maxStoredAnimalVariants < 0 ||
             this.triggerAdvancements == null ||
             this.increaseStatistics == null ||
-            this.showCooldownsOnlyOnShift == null;
+            this.showCooldownsOnlyOnShift == null ||
+            this.showAllInteractions == null;
     }
 
 
@@ -118,6 +119,11 @@ public class Configuration
         if (this.showCooldownsOnlyOnShift == null || init)
         {
             this.showCooldownsOnlyOnShift = false;
+        }
+
+        if (this.showAllInteractions == null || init)
+        {
+            this.showAllInteractions = true;
         }
 
         if (init)
@@ -419,6 +425,17 @@ public class Configuration
     }
 
 
+    /**
+     * Is show all interactions value.
+     *
+     * @return the boolean
+     */
+    public boolean isShowAllInteractions()
+    {
+        return this.showAllInteractions;
+    }
+
+
 // ---------------------------------------------------------------------
 // Section: variables
 // ---------------------------------------------------------------------
@@ -537,6 +554,12 @@ public class Configuration
     @Expose
     @SerializedName("show_cooldowns_only_on_crouch")
     private Boolean showCooldownsOnlyOnShift;
+
+    @JsonComment("Allows to toggle if animal interactions should be showed even if the cooldown is not set.")
+    @JsonComment("Default value = true")
+    @Expose
+    @SerializedName("show_all_interactions")
+    private Boolean showAllInteractions;
 
     @JsonComment("Allows to enable animal growing in animal pen.")
     @JsonComment("The more animals are inside it, the larger it will be.")

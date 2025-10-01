@@ -8,6 +8,7 @@ package lv.id.bonne.animalpenpaper.managers;
 
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
@@ -98,10 +99,11 @@ public class Helper
 
         List<Pair<Material, Component>> lines = new ArrayList<>(4);
 
-        if (AnimalPenPlugin.configuration().getEntityCooldown(
-            entityType,
-            Material.APPLE,
-            animalData.entityCount()) != 0)
+        if (AnimalPenPlugin.configuration().isShowAllInteractions() ||
+            AnimalPenPlugin.configuration().getEntityCooldown(
+                entityType,
+                Material.APPLE,
+                animalData.entityCount()) != 0)
         {
             // Food Items.
 
@@ -349,10 +351,14 @@ public class Helper
                     lines.add(textPairMessage);
                 }
 
+                int dye = Math.abs(tick / 100) % 16;
+                DyeColor value = DyeColor.values()[dye];
+
                 textPairMessage = createTextPairMessage(entityType,
                     animalData,
                     Material.WHITE_DYE,
-                    Utils.getWoolMaterial(((Sheep) entity).getColor()));
+                    Material.valueOf(value.name() + "_DYE"),
+                    Utils.getWoolMaterial(value));
 
                 if (textPairMessage != null)
                 {
@@ -393,10 +399,22 @@ public class Helper
         Material material,
         Material result)
     {
-        if (AnimalPenPlugin.configuration().getEntityCooldown(
-            entityType,
-            material,
-            animalData.entityCount()) == 0 ||
+        return createTextPairMessage(entityType, animalData, material, material, result);
+    }
+
+
+    private static Pair<Material, Component> createTextPairMessage(
+        EntityType entityType,
+        AnimalData animalData,
+        Material material,
+        Material displayMaterial,
+        Material result)
+    {
+        if (!AnimalPenPlugin.configuration().isShowAllInteractions() &&
+            AnimalPenPlugin.configuration().getEntityCooldown(
+                entityType,
+                material,
+                animalData.entityCount()) == 0 ||
             result.isAir())
         {
             return null;
@@ -409,7 +427,7 @@ public class Helper
         if (!animalData.hasCooldown(material))
         {
             component = AnimalPenPlugin.translations().getTranslatable("display.animal_pen.ready");
-            icon = material;
+            icon = displayMaterial;
         }
         else
         {
