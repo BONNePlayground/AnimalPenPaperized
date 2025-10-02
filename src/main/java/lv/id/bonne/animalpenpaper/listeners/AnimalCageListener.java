@@ -13,6 +13,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -89,6 +90,35 @@ public class AnimalCageListener implements Listener
                 getTranslatable("item.animal_pen.animal_cage.error.tame"));
 
             return;
+        }
+
+        if (animal.isLeashed())
+        {
+            player.sendMessage(AnimalPenPlugin.translations().
+                getTranslatable("item.animal_pen.animal_cage.error.leashed"));
+
+            return;
+        }
+
+        if (!animal.isEmpty())
+        {
+            // Eject all passengers
+            animal.eject();
+        }
+
+        // Drop all equipment
+        EntityEquipment equipment = animal.getEquipment();
+
+        for (EquipmentSlot slot : EquipmentSlot.values())
+        {
+            ItemStack itemStack = equipment.getItem(slot);
+
+            if (Math.random() <= equipment.getDropChance(slot))
+            {
+                entity.getWorld().dropItemNaturally(entity.getLocation(), itemStack);
+            }
+
+            equipment.setDropChance(slot, 0);
         }
 
         // Check blocked types
@@ -222,10 +252,13 @@ public class AnimalCageListener implements Listener
             storedData.setEntitySnapshot(entity.createSnapshot());
         }
 
-        if (!(entity instanceof Animals))
+        if (!(entity instanceof Animals animal))
         {
             return;
         }
+
+        // Clear all equipment to avoid its dropping.
+        animal.getEquipment().clear();
 
         AnimalPenManager.removeAnimal(item, 1);
 

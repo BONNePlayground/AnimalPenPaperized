@@ -29,6 +29,7 @@ item.animal_pen.animal_cage.error.wrong: "§4The animal cage contains a differen
 item.animal_pen.animal_cage.error.unknown: "§4Failed to catch the animal"
 item.animal_pen.animal_cage.error.not_animal: "§4Only animals can be caught"
 item.animal_pen.animal_cage.error.too_many_variants: "§4Variant cannot be stored. Memory is full"
+item.animal_pen.animal_cage.error.leashed: "§4Leashed animals cannot be picked up"
 
 # Water Animal Container
 item.animal_pen.water_animal_container.name: "Water Mob Container"
@@ -54,6 +55,7 @@ item.animal_pen.water_animal_container.error.wrong: "§4The water mob container 
 item.animal_pen.water_animal_container.error.unknown: "§4Failed to catch the water mob"
 item.animal_pen.water_animal_container.error.not_water_animal: "§4Only water mobs can be caught"
 item.animal_pen.water_animal_container.error.too_many_variants: "§4Variant cannot be stored. Memory is full"
+item.animal_pen.water_animal_container.error.leashed: "§4Leashed water mobs cannot be picked up"
 
 # Animal Pen Items
 item.animal_pen.animal_pen_acacia: "Acacia Animal Pen"
