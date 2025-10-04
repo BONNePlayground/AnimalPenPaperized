@@ -164,7 +164,7 @@ public class AnimalPenVariantMenu implements Listener, InventoryHolder
             componentList.add(AnimalPenPlugin.translations().getTranslatable(
                 "menu.animal_pen.variants.angry", angry < 0)));
 
-        compoundTag.getBoolean("variant").ifPresent(variant ->
+        compoundTag.getString("variant").ifPresent(variant ->
             componentList.add(AnimalPenPlugin.translations().getTranslatable(
                 "menu.animal_pen.variants.variant", variant)));
 

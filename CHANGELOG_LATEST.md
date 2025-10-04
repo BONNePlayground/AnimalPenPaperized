@@ -2,3 +2,4 @@
 
 - "Hides" issue with permanent `counter` text even when pen is removed
 - Fixed chicken egg drops
+- Fixed variant display message
