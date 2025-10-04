@@ -1263,7 +1263,21 @@ public class AnimalPenManager
         {
             case CHICKEN ->
             {
-                material = Material.EGG;
+                Chicken.Variant variant = ((Chicken) entity).getVariant();
+
+                if (variant == Chicken.Variant.WARM)
+                {
+                    material = Material.BROWN_EGG;
+                }
+                else if (variant == Chicken.Variant.COLD)
+                {
+                    material = Material.BLUE_EGG;
+                }
+                else
+                {
+                    material = Material.EGG;
+                }
+
                 sound = Sound.ENTITY_CHICKEN_EGG;
             }
             case SNIFFER ->

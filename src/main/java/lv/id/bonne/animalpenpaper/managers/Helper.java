@@ -272,10 +272,26 @@ public class Helper
             }
             case CHICKEN ->
             {
+                Chicken.Variant variant = ((Chicken) entity).getVariant();
+                Material result;
+
+                if (variant == Chicken.Variant.WARM)
+                {
+                    result = Material.BROWN_EGG;
+                }
+                else if (variant == Chicken.Variant.COLD)
+                {
+                    result = Material.BLUE_EGG;
+                }
+                else
+                {
+                    result = Material.EGG;
+                }
+
                 Pair<Material, Component> textPairMessage = createTextPairMessage(entityType,
                     animalData,
                     Material.BUCKET,
-                    Material.EGG);
+                    result);
 
                 if (textPairMessage != null)
                 {
