@@ -300,7 +300,7 @@ public class AquariumManager
             CreatureSpawnEvent.SpawnReason.CUSTOM,
             (newEntity) ->
             {
-                newEntity.setPersistent(true);
+                newEntity.setPersistent(false);
                 newEntity.setRotation(Utils.blockFaceToYaw(blockData.blockFace), 0);
 
                 if (newEntity instanceof TextDisplay display)

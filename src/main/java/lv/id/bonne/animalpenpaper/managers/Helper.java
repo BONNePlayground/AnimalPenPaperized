@@ -62,7 +62,7 @@ public class Helper
                 CreatureSpawnEvent.SpawnReason.CUSTOM,
                 (newEntity) ->
                 {
-                    newEntity.setPersistent(true);
+                    newEntity.setPersistent(false);
                     newEntity.setRotation(Utils.blockFaceToYaw(blockData.blockFace), 0);
 
                     if (newEntity instanceof TextDisplay display)
@@ -89,6 +89,7 @@ public class Helper
         if (entity instanceof TextDisplay display)
         {
             display.text(Component.text(entityCount));
+            entity.setPersistent(false);
         }
     }
 

@@ -156,7 +156,8 @@ public class DisplayTextManager implements Listener
                             List<Display> displayList = cache.get(entityReference);
 
                             // Reduce cooldowns by 20
-                            animalData.getCooldowns().replaceAll((key, value) -> {
+                            animalData.getCooldowns().replaceAll((key, value) ->
+                            {
                                 int newValue = Math.max(0, value - 20);
 
                                 if (newValue == 0 && value > 0 && entityReference.isPen())
@@ -285,6 +286,7 @@ public class DisplayTextManager implements Listener
     public record EntityReference(UUID entityId, UUID worldId, boolean isPen)
     {
     }
+
 
     public BukkitTask bukkitTask;
 
