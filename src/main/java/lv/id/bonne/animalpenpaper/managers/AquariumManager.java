@@ -288,7 +288,9 @@ public class AquariumManager
                     display.setTransformation(transform);
                 }
 
-                newEntity.getPersistentDataContainer().set(penKey, PersistentDataType.BOOLEAN, true);
+                newEntity.getPersistentDataContainer().set(Helper.DECORATION_ENTITY_KEY,
+                    PersistentDataType.STRING,
+                    penKey.getKey());
             });
 
         blockData.decorationEntity = decorationEntity.getUniqueId();
@@ -310,7 +312,9 @@ public class AquariumManager
                     display.text(Component.text(0));
                 }
 
-                newEntity.getPersistentDataContainer().set(penKey, PersistentDataType.BOOLEAN, true);
+                newEntity.getPersistentDataContainer().set(Helper.COUNTER_ENTITY_KEY,
+                    PersistentDataType.STRING,
+                    penKey.getKey());
             });
 
         blockData.countEntity = countEntity.getUniqueId();
@@ -646,6 +650,16 @@ public class AquariumManager
             Helper.removeEntity(block.getWorld(), blockData.decorationEntity);
 
             block.getWorld().getPersistentDataContainer().remove(penKey);
+
+            // BugFix - remove all display entities within 1 block
+            block.getWorld().getNearbyEntitiesByType(Display.class, block.getLocation(), 1).
+                forEach(display ->
+                {
+                    if (display.getPersistentDataContainer().has(penKey, PersistentDataType.BOOLEAN))
+                    {
+                        display.remove();
+                    }
+                });
         }
     }
 

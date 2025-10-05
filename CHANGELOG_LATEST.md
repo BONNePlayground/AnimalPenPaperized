@@ -1,5 +1,3 @@
-## Animal Pens Paperized 1.3.3
+## Animal Pens Paperized 1.3.4
 
-- "Hides" issue with permanent `counter` text even when pen is removed
-- Fixed chicken egg drops
-- Fixed variant display message
+- Implemented better handling of `counter` entity, to avoid its de-linking with animal pen

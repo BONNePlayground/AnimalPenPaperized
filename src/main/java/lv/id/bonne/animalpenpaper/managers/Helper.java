@@ -89,7 +89,17 @@ public class Helper
         if (entity instanceof TextDisplay display)
         {
             display.text(Component.text(entityCount));
+
+            // Remove persistence for existing text entities
             entity.setPersistent(false);
+
+            if (!entity.getPersistentDataContainer().has(Helper.COUNTER_ENTITY_KEY,
+                PersistentDataType.STRING))
+            {
+                entity.getPersistentDataContainer().set(Helper.COUNTER_ENTITY_KEY,
+                    PersistentDataType.STRING,
+                    penKey.getKey());
+            }
         }
     }
 
@@ -466,4 +476,11 @@ public class Helper
         appendLiteral(':').
         appendValue(SECOND_OF_MINUTE, 2).
         toFormatter();
+
+
+    public final static NamespacedKey DECORATION_ENTITY_KEY =
+        new NamespacedKey(AnimalPenPlugin.getInstance(), "decoration_entity");
+
+    public final static NamespacedKey COUNTER_ENTITY_KEY =
+        new NamespacedKey(AnimalPenPlugin.getInstance(), "counter_entity");
 }

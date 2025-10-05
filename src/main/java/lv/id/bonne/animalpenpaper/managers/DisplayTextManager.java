@@ -8,10 +8,7 @@ package lv.id.bonne.animalpenpaper.managers;
 
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,6 +17,7 @@ import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.event.world.EntitiesUnloadEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Transformation;
@@ -29,6 +27,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
+import lv.id.bonne.animalpenpaper.data.BlockData;
+import lv.id.bonne.animalpenpaper.data.BlockDataType;
 import net.kyori.adventure.text.Component;
 
 
@@ -48,6 +48,28 @@ public class DisplayTextManager implements Listener
             {
                 AquariumManager.validateAquarium(entity);
                 this.startTrackingEntity(entity, true, false);
+            }
+            else if (entity instanceof ItemDisplay display)
+            {
+                if (display.getPersistentDataContainer().has(Helper.DECORATION_ENTITY_KEY,
+                    PersistentDataType.STRING))
+                {
+                    String key = display.getPersistentDataContainer().get(Helper.DECORATION_ENTITY_KEY,
+                        PersistentDataType.STRING);
+                    NamespacedKey penKey = new NamespacedKey(AnimalPenPlugin.getInstance(), key);
+
+                    // I need this code to generate 0 for empty pens/aquariums
+                    BlockData blockData = display.getWorld().getPersistentDataContainer().
+                        get(penKey, BlockDataType.INSTANCE);
+
+                    if (blockData != null && blockData.entity == null)
+                    {
+                        Helper.updateCountTextEntity(display.getLocation().getBlock(),
+                            blockData,
+                            0,
+                            penKey);
+                    }
+                }
             }
         }
     }
@@ -87,6 +109,13 @@ public class DisplayTextManager implements Listener
             else if (AquariumManager.isAquarium(entity))
             {
                 this.stopTrackingEntity(entity, false);
+            }
+            else if (entity instanceof Display display &&
+                display.getPersistentDataContainer().has(Helper.COUNTER_ENTITY_KEY,
+                    PersistentDataType.STRING))
+            {
+                // Remove entity on unloading it. Prevents chunk loading issues.
+                display.remove();
             }
         }
     }
