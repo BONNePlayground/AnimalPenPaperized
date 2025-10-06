@@ -228,6 +228,8 @@ public class Configuration
     {
         this.dropLimitList = new HashMap<>();
         this.dropLimitList.put(Material.EGG.getKey(), 16 * 5);
+        this.dropLimitList.put(Material.BROWN_EGG.getKey(), 16 * 5);
+        this.dropLimitList.put(Material.BLUE_EGG.getKey(), 16 * 5);
         this.dropLimitList.put(Material.TURTLE_EGG.getKey(), 64 * 5);
         this.dropLimitList.put(Material.WHITE_WOOL.getKey(), 64 * 5);
         this.dropLimitList.put(Material.PEARLESCENT_FROGLIGHT.getKey(), 64 * 5);
