@@ -1,4 +1,3 @@
-## Animal Pens Paperized 1.3.5
+## Animal Pens Paperized 1.3.6
 
-- Fixed a bug when cooldown display text could stuck even when animal pen is removed.
-- Add default drop limit for blue and brown egg limit.
+- Fixed a bug that allowed to get random color axolotls and tropical fishes

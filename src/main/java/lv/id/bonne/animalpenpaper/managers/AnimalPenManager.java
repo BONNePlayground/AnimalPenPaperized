@@ -15,7 +15,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.AxolotlBucketMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SuspiciousStewMeta;
 import org.bukkit.inventory.meta.components.CustomModelDataComponent;
@@ -29,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
+import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.potion.SuspiciousEffectEntry;
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
@@ -943,24 +943,20 @@ public class AnimalPenManager
             return;
         }
 
-        ItemStack newBucket;
-        Sound sound;
-
-        if (entity.getType() == EntityType.AXOLOTL)
+        if (!(entity instanceof Axolotl axolotl))
         {
-            newBucket = new ItemStack(Material.AXOLOTL_BUCKET);
-            AxolotlBucketMeta itemMeta = (AxolotlBucketMeta) newBucket.getItemMeta();
-            Axolotl axolotl = (Axolotl) entity;
-            itemMeta.setVariant(axolotl.getVariant());
-            newBucket.setItemMeta(itemMeta);
-
-            sound = Sound.ITEM_BUCKET_FILL_FISH;
-        }
-        else
-        {
-            // Should not ever happen.
             return;
         }
+
+        ItemStack newBucket = axolotl.getBaseBucketItem();
+        newBucket.setData(DataComponentTypes.AXOLOTL_VARIANT, axolotl.getVariant());
+
+        if (axolotl.customName() != null)
+        {
+            newBucket.setData(DataComponentTypes.CUSTOM_NAME, axolotl.customName());
+        }
+
+        Sound sound = Sound.ITEM_BUCKET_FILL_AXOLOTL;
 
         data.reduceEntityCount(1);
 

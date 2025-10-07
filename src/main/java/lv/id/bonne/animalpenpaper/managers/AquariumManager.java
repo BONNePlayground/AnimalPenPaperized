@@ -19,7 +19,6 @@ import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.TropicalFishBucketMeta;
 import org.bukkit.inventory.meta.components.CustomModelDataComponent;
 import org.bukkit.loot.LootContext;
 import org.bukkit.loot.LootTable;
@@ -30,6 +29,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.entity.Bucketable;
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
 import lv.id.bonne.animalpenpaper.data.AnimalDataType;
@@ -820,47 +821,33 @@ public class AquariumManager
             return;
         }
 
-        ItemStack newBucket;
-        Sound sound;
+        if (!(entity instanceof Bucketable bucketable))
+        {
+            // Not bucketable
+            return;
+        }
+
+        ItemStack newBucket = bucketable.getBaseBucketItem();
+        Sound sound = bucketable.getPickupSound();
 
         switch (entity.getType())
         {
-            case COD ->
-            {
-                newBucket = new ItemStack(Material.COD_BUCKET);
-                sound = Sound.ITEM_BUCKET_FILL_FISH;
-            }
-            case PUFFERFISH ->
-            {
-                newBucket = new ItemStack(Material.PUFFERFISH_BUCKET);
-                sound = Sound.ITEM_BUCKET_FILL_FISH;
-            }
+            case COD -> sound = Sound.ITEM_BUCKET_FILL_FISH;
+            case PUFFERFISH -> sound = Sound.ITEM_BUCKET_FILL_FISH;
             case SALMON ->
             {
-                newBucket = new ItemStack(Material.SALMON_BUCKET);
+                newBucket.setData(DataComponentTypes.SALMON_SIZE, ((Salmon) entity).getVariant());
                 sound = Sound.ITEM_BUCKET_FILL_FISH;
             }
-            case TADPOLE ->
-            {
-                newBucket = new ItemStack(Material.TADPOLE_BUCKET);
-                sound = Sound.ITEM_BUCKET_FILL_TADPOLE;
-            }
+            case TADPOLE -> sound = Sound.ITEM_BUCKET_FILL_TADPOLE;
             case TROPICAL_FISH ->
             {
-                newBucket = new ItemStack(Material.TROPICAL_FISH_BUCKET);
-                TropicalFishBucketMeta itemMeta = (TropicalFishBucketMeta) newBucket.getItemMeta();
                 TropicalFish tropicalFish = (TropicalFish) entity;
-                itemMeta.setBodyColor(tropicalFish.getBodyColor());
-                itemMeta.setPattern(tropicalFish.getPattern());
-                itemMeta.setPatternColor(tropicalFish.getPatternColor());
-                newBucket.setItemMeta(itemMeta);
+                newBucket.setData(DataComponentTypes.TROPICAL_FISH_BASE_COLOR, tropicalFish.getBodyColor());
+                newBucket.setData(DataComponentTypes.TROPICAL_FISH_PATTERN, tropicalFish.getPattern());
+                newBucket.setData(DataComponentTypes.TROPICAL_FISH_PATTERN_COLOR,tropicalFish.getPatternColor());
 
                 sound = Sound.ITEM_BUCKET_FILL_FISH;
-            }
-            default ->
-            {
-                // Should not ever happen.
-                return;
             }
         }
 
