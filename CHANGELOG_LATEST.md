@@ -1,3 +1,4 @@
-## Animal Pens Paperized 1.3.4
+## Animal Pens Paperized 1.3.5
 
-- Implemented better handling of `counter` entity, to avoid its de-linking with animal pen
+- Fixed a bug when cooldown display text could stuck even when animal pen is removed.
+- Add default drop limit for blue and brown egg limit.

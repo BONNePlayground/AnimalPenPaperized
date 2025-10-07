@@ -144,19 +144,24 @@ public class DisplayTextManager implements Listener
             return;
         }
 
-        List<Display> leftOverEntities =
-            cache.remove(new EntityReference(entityUUID, world.getUID(), isPen));
-
-        if (leftOverEntities != null)
-        {
-            leftOverEntities.forEach(Entity::remove);
-        }
+        stopTrackingEntity(new EntityReference(entityUUID, world.getUID(), isPen));
     }
 
 
     public void stopTrackingEntity(Entity entity, boolean isPen)
     {
         stopTrackingEntity(entity.getUniqueId(), entity.getWorld(), isPen);
+    }
+
+
+    private void stopTrackingEntity(EntityReference entityReference)
+    {
+        List<Display> leftOverEntities = cache.remove(entityReference);
+
+        if (leftOverEntities != null)
+        {
+            leftOverEntities.forEach(Entity::remove);
+        }
     }
 
 
@@ -296,6 +301,16 @@ public class DisplayTextManager implements Listener
                                 }
                             }
                         }
+                        else
+                        {
+                            // Remove reference as data is not present.
+                            stopTrackingEntity(entityReference);
+                        }
+                    }
+                    else
+                    {
+                        // Remove reference as entity is not present.
+                        stopTrackingEntity(entityReference);
                     }
                 });
 

@@ -36,6 +36,9 @@ tasks {
     javadoc {
         options.encoding = Charsets.UTF_8.name()
     }
+    runServer {
+        runDirectory.set(layout.projectDirectory.dir("run/$minecraftVersion"))
+    }
 }
 
 // Configure plugin.yml generation
@@ -80,7 +83,7 @@ hangarPublish {
                 // TODO: If you're using ShadowJar, replace the jar lines with the appropriate task:
                 //   jar.set(tasks.shadowJar.flatMap { it.archiveFile })
                 // Set the JAR file to upload
-                jar.set(tasks.jar.flatMap { it.archiveFile })
+                jar.set(tasks.named<Jar>("jar").flatMap { it.archiveFile })
 
                 // Set platform versions from gradle.properties file
                 val versions: List<String> = (property("paper_version") as String)
@@ -101,7 +104,7 @@ modrinth {
     gameVersions.addAll("1.21.8")
     loaders.add("paper")
 
-    uploadFile.set(tasks.jar)
+    uploadFile.set(tasks.named<Jar>("jar").flatMap { it.archiveFile })
 
     changelog.set(rootProject.file("CHANGELOG_LATEST.md").readText())
     syncBodyFrom.set(rootProject.file("README.md").readText())
@@ -117,10 +120,7 @@ curseforge {
         releaseType = "release"
 
         addGameVersion("1.21.8")
-        addGameVersion("Paper")
-        addGameVersion("Java 21")
 
-        mainArtifact(tasks.jar)
-        addArtifact(resourcePack.get())
+        mainArtifact(tasks.named<Jar>("jar").flatMap { it.archiveFile })
     })
 }
