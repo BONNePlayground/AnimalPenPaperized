@@ -61,6 +61,13 @@ public abstract class AbstractAnimalPenItemEvent extends Event implements Cancel
     }
 
 
+    @NotNull
+    public static HandlerList getHandlerList()
+    {
+        return HANDLER_LIST;
+    }
+
+
     public Location getLocation()
     {
         return this.location;

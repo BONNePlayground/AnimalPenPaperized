@@ -61,6 +61,13 @@ public abstract class AbstractAnimalPenBlockEvent extends Event implements Cance
     }
 
 
+    @NotNull
+    public static HandlerList getHandlerList()
+    {
+        return HANDLER_LIST;
+    }
+
+
     public Location getLocation()
     {
         return this.location;

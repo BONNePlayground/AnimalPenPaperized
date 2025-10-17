@@ -53,7 +53,15 @@ public class AnimalBlockBreakEvent extends Event implements Cancellable
 
 
     @Override
-    public @NotNull HandlerList getHandlers()
+    @NotNull
+    public HandlerList getHandlers()
+    {
+        return HANDLER_LIST;
+    }
+
+
+    @NotNull
+    public static HandlerList getHandlerList()
     {
         return HANDLER_LIST;
     }
