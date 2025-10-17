@@ -36,6 +36,7 @@ import lv.id.bonne.animalpenpaper.data.AnimalData;
 import lv.id.bonne.animalpenpaper.data.AnimalDataType;
 import lv.id.bonne.animalpenpaper.data.BlockData;
 import lv.id.bonne.animalpenpaper.data.BlockDataType;
+import lv.id.bonne.animalpenpaper.events.block.AnimalBlockBreedEvent;
 import lv.id.bonne.animalpenpaper.menu.AnimalPenVariantMenu;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
 import lv.id.bonne.animalpenpaper.util.Utils;
@@ -770,6 +771,14 @@ public class AquariumManager
         }
 
         int amount = stackSize / 2;
+
+        AnimalBlockBreedEvent breedEvent = new AnimalBlockBreedEvent(player,
+            entity.getLocation(),
+            entity.getType(),
+            data.entityCount(),
+            amount,
+            false);
+
         data.addEntityCount(amount);
 
         entity.getWorld().spawnParticle(Particle.HEART,
@@ -793,6 +802,7 @@ public class AquariumManager
 
         // Save data
         AquariumManager.setAquariumData(entity, data);
+        breedEvent.callEvent();
     }
 
 

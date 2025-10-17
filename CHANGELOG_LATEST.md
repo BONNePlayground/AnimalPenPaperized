@@ -9,5 +9,6 @@ Added events that allows to detect when players interact with plugin items:
 - AnimalBlockAttackEvent - triggered right before processing entity killing in animal pen/aquarium
 - AnimalBlockBreakEvent - triggered right before animal pen/aquarium is broken
 - AnimalBlockPlaceEvent - triggered right before animal pen/aquarium is placed in world.
+- AnimalBlockBreedEvent - triggered right after animal pen/aquarium entity is breed.
 
 Fixed a bug that ignored `max_amount` in animal cage.
