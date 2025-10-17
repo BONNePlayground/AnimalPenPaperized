@@ -4,7 +4,7 @@
 //
 
 
-package lv.id.bonne.animalpenpaper.events;
+package lv.id.bonne.animalpenpaper.events.block;
 
 
 import org.bukkit.Location;

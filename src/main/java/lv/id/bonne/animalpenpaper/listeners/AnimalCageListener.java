@@ -1,7 +1,6 @@
 package lv.id.bonne.animalpenpaper.listeners;
 
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -27,10 +26,10 @@ import io.papermc.paper.datacomponent.item.CustomModelData;
 import io.papermc.paper.potion.SuspiciousEffectEntry;
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
-import lv.id.bonne.animalpenpaper.events.AnimalCatchEvent;
-import lv.id.bonne.animalpenpaper.events.AnimalDepositEvent;
-import lv.id.bonne.animalpenpaper.events.AnimalReleaseEvent;
-import lv.id.bonne.animalpenpaper.events.AnimalWithdrawEvent;
+import lv.id.bonne.animalpenpaper.events.item.AnimalCatchEvent;
+import lv.id.bonne.animalpenpaper.events.item.AnimalDepositEvent;
+import lv.id.bonne.animalpenpaper.events.item.AnimalReleaseEvent;
+import lv.id.bonne.animalpenpaper.events.item.AnimalWithdrawEvent;
 import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
 import lv.id.bonne.animalpenpaper.util.Utils;
