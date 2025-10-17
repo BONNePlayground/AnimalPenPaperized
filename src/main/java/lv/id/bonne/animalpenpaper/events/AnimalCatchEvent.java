@@ -8,6 +8,7 @@ package lv.id.bonne.animalpenpaper.events;
 
 
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 
 import lv.id.bonne.animalpenpaper.data.AnimalData;
 
@@ -17,11 +18,18 @@ import lv.id.bonne.animalpenpaper.data.AnimalData;
  */
 public class AnimalCatchEvent extends AbstractAnimalPenItemEvent
 {
-    public AnimalCatchEvent(Entity entity,
+    /**
+     * @param player Player who performed catching
+     * @param entity Entity that was caught
+     * @param animalData ItemStack stored data
+     * @param isAnimalCage The animal cage (true) or water mob container (false)
+     */
+    public AnimalCatchEvent(Player player,
+        Entity entity,
         AnimalData animalData,
         boolean isAnimalCage)
     {
-        super(entity.getLocation(), animalData, isAnimalCage);
+        super(player, entity.getLocation(), animalData, isAnimalCage);
         this.entity = entity;
     }
 

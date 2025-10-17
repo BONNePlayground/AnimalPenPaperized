@@ -9,6 +9,7 @@ package lv.id.bonne.animalpenpaper.events;
 
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -20,10 +21,18 @@ import lv.id.bonne.animalpenpaper.data.AnimalData;
 
 public abstract class AbstractAnimalPenItemEvent extends Event implements Cancellable
 {
-    protected AbstractAnimalPenItemEvent(Location location,
+    /**
+     * @param player The player who performed event
+     * @param location The location of event
+     * @param animalData The data stored inside item
+     * @param isAnimalCage The animal cage (true) or water mob container (false)
+     */
+    protected AbstractAnimalPenItemEvent(Player player,
+        Location location,
         @Nullable AnimalData animalData,
         boolean isAnimalCage)
     {
+        this.player = player;
         this.location = location;
         this.animalData = animalData;
         this.isAnimalCage = isAnimalCage;
@@ -84,10 +93,17 @@ public abstract class AbstractAnimalPenItemEvent extends Event implements Cancel
     }
 
 
+    public Player getPlayer()
+    {
+        return this.player;
+    }
+
+
 // ---------------------------------------------------------------------
 // Section: Variables
 // ---------------------------------------------------------------------
 
+    private final Player player;
 
     private final Location location;
 

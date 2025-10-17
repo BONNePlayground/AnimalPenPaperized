@@ -162,7 +162,8 @@ public class AnimalCageListener implements Listener
         }
 
         AnimalCatchEvent animalCatchEvent =
-            new AnimalCatchEvent(entity,
+            new AnimalCatchEvent(player,
+                entity,
                 storedData,
                 true);
 
@@ -224,7 +225,8 @@ public class AnimalCageListener implements Listener
         Location spawnLoc = block.getLocation().add(0.5, 1, 0.5);
         World world = player.getWorld();
 
-        AnimalReleaseEvent animalReleaseEvent = new AnimalReleaseEvent(spawnLoc,
+        AnimalReleaseEvent animalReleaseEvent = new AnimalReleaseEvent(player,
+            spawnLoc,
             storedData,
             true);
 
@@ -343,7 +345,8 @@ public class AnimalCageListener implements Listener
 
         if (penData == null)
         {
-            AnimalDepositEvent animalDepositEvent = new AnimalDepositEvent(block.getLocation(),
+            AnimalDepositEvent animalDepositEvent = new AnimalDepositEvent(player,
+                block.getLocation(),
                 itemData,
                 null,
                 true);
@@ -386,7 +389,8 @@ public class AnimalCageListener implements Listener
             penData.getAppliedMaterial().ifPresent(itemData::setAppliedMaterial);
             penData.getAppliedFlag().ifPresent(itemData::setAppliedFlag);
 
-            AnimalWithdrawEvent animalWithdrawEvent = new AnimalWithdrawEvent(block.getLocation(),
+            AnimalWithdrawEvent animalWithdrawEvent = new AnimalWithdrawEvent(player,
+                block.getLocation(),
                 itemData,
                 penData,
                 true);
@@ -416,7 +420,8 @@ public class AnimalCageListener implements Listener
             return;
         }
 
-        AnimalDepositEvent animalDepositEvent = new AnimalDepositEvent(block.getLocation(),
+        AnimalDepositEvent animalDepositEvent = new AnimalDepositEvent(player,
+            block.getLocation(),
             itemData,
             penData,
             true);
@@ -517,7 +522,8 @@ public class AnimalCageListener implements Listener
             return;
         }
 
-        AnimalWithdrawEvent animalWithdrawEvent = new AnimalWithdrawEvent(block.getLocation(),
+        AnimalWithdrawEvent animalWithdrawEvent = new AnimalWithdrawEvent(event.getPlayer(),
+            block.getLocation(),
             null,
             penData,
             true);

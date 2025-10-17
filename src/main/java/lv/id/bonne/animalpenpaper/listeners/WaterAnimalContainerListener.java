@@ -157,7 +157,8 @@ public class WaterAnimalContainerListener implements Listener
         }
 
         AnimalCatchEvent animalCatchEvent =
-            new AnimalCatchEvent(entity,
+            new AnimalCatchEvent(player,
+                entity,
                 storedData,
                 false);
 
@@ -219,7 +220,8 @@ public class WaterAnimalContainerListener implements Listener
         Location spawnLoc = block.getLocation().add(0.5, 1, 0.5);
         World world = player.getWorld();
 
-        AnimalReleaseEvent animalReleaseEvent = new AnimalReleaseEvent(spawnLoc,
+        AnimalReleaseEvent animalReleaseEvent = new AnimalReleaseEvent(player,
+            spawnLoc,
             storedData,
             false);
 
@@ -309,7 +311,8 @@ public class WaterAnimalContainerListener implements Listener
 
         if (penData == null)
         {
-            AnimalDepositEvent animalDepositEvent = new AnimalDepositEvent(block.getLocation(),
+            AnimalDepositEvent animalDepositEvent = new AnimalDepositEvent(player,
+                block.getLocation(),
                 itemData,
                 null,
                 false);
@@ -346,7 +349,8 @@ public class WaterAnimalContainerListener implements Listener
             itemData = new AnimalData(penData.entityType(), penData.entitySnapshot(), penData.entityCount() / 2);
             itemData.getCooldowns().putAll(penData.getCooldowns());
 
-            AnimalWithdrawEvent animalWithdrawEvent = new AnimalWithdrawEvent(block.getLocation(),
+            AnimalWithdrawEvent animalWithdrawEvent = new AnimalWithdrawEvent(player,
+                block.getLocation(),
                 itemData,
                 penData,
                 false);
@@ -376,7 +380,8 @@ public class WaterAnimalContainerListener implements Listener
             return;
         }
 
-        AnimalDepositEvent animalDepositEvent = new AnimalDepositEvent(block.getLocation(),
+        AnimalDepositEvent animalDepositEvent = new AnimalDepositEvent(player,
+            block.getLocation(),
             itemData,
             penData,
             false);
@@ -475,7 +480,8 @@ public class WaterAnimalContainerListener implements Listener
             return;
         }
 
-        AnimalWithdrawEvent animalWithdrawEvent = new AnimalWithdrawEvent(block.getLocation(),
+        AnimalWithdrawEvent animalWithdrawEvent = new AnimalWithdrawEvent(event.getPlayer(),
+            block.getLocation(),
             null,
             penData,
             false);
