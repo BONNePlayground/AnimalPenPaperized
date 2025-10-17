@@ -1,4 +1,3 @@
-import io.papermc.hangarpublishplugin.model.Platforms
 import xyz.jpenilla.resourcefactory.bukkit.BukkitPluginYaml
 
 plugins {
@@ -6,9 +5,7 @@ plugins {
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.18"
     id("xyz.jpenilla.run-paper") version "3.0.0-beta.1"
     id("xyz.jpenilla.resource-factory-bukkit-convention") version "1.3.0"
-    id("io.papermc.hangar-publish-plugin") version "0.1.2"
     id("com.modrinth.minotaur") version "2.+"
-    id("com.matthewprenger.cursegradle") version "1.4.0"
 }
 
 group = project.findProperty("maven_group") as String
@@ -69,31 +66,6 @@ val resourcePack = tasks.register<Zip>("resourcePack") {
     from("src/main/resources/animal_pen_resource_pack")
 }
 
-hangarPublish {
-    publications.register("plugin") {
-        version.set(project.version as String)
-        channel.set("Release")
-        id.set("AnimalPenPaperized")
-        apiKey.set(System.getenv("HANGAR_API_TOKEN"))
-
-        changelog.set(rootProject.file("CHANGELOG_LATEST.md").readText())
-
-        platforms {
-            register(Platforms.PAPER) {
-                // TODO: If you're using ShadowJar, replace the jar lines with the appropriate task:
-                //   jar.set(tasks.shadowJar.flatMap { it.archiveFile })
-                // Set the JAR file to upload
-                jar.set(tasks.named<Jar>("jar").flatMap { it.archiveFile })
-
-                // Set platform versions from gradle.properties file
-                val versions: List<String> = (property("paper_version") as String)
-                    .split(",")
-                    .map { it.trim() }
-                platformVersions.set(versions)
-            }
-        }
-    }
-}
 
 modrinth {
     token.set(System.getenv("MODRINTH_TOKEN"))
@@ -108,19 +80,4 @@ modrinth {
 
     changelog.set(rootProject.file("CHANGELOG_LATEST.md").readText())
     syncBodyFrom.set(rootProject.file("README.md").readText())
-}
-
-
-curseforge {
-    project(closureOf<com.matthewprenger.cursegradle.CurseProject> {
-        apiKey = System.getenv("CURSEFORGE_TOKEN")
-        id = "1336479"
-        changelog = rootProject.file("CHANGELOG_LATEST.md").readText()
-        changelogType = "text"
-        releaseType = "release"
-
-        addGameVersion("1.21.8")
-
-        mainArtifact(tasks.named<Jar>("jar").flatMap { it.archiveFile })
-    })
 }

@@ -24,6 +24,10 @@ import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.CustomModelData;
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
+import lv.id.bonne.animalpenpaper.events.AnimalCatchEvent;
+import lv.id.bonne.animalpenpaper.events.AnimalDepositEvent;
+import lv.id.bonne.animalpenpaper.events.AnimalReleaseEvent;
+import lv.id.bonne.animalpenpaper.events.AnimalWithdrawEvent;
 import lv.id.bonne.animalpenpaper.managers.AquariumManager;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
 import net.kyori.adventure.text.Component;
@@ -152,6 +156,19 @@ public class WaterAnimalContainerListener implements Listener
             return;
         }
 
+        AnimalCatchEvent animalCatchEvent =
+            new AnimalCatchEvent(entity,
+                storedData,
+                false);
+
+        if (!animalCatchEvent.callEvent())
+        {
+            player.sendMessage(AnimalPenPlugin.translations().
+                getTranslatable("item.animal_pen.water_animal_container.error.unknown",
+                    Component.translatable(entity.getType().translationKey())));
+            return;
+        }
+
         AquariumManager.addAnimal(item, entityType, entity.createSnapshot(), 1);
 
         entity.remove();
@@ -201,6 +218,17 @@ public class WaterAnimalContainerListener implements Listener
 
         Location spawnLoc = block.getLocation().add(0.5, 1, 0.5);
         World world = player.getWorld();
+
+        AnimalReleaseEvent animalReleaseEvent = new AnimalReleaseEvent(spawnLoc,
+            storedData,
+            false);
+
+        if (!animalReleaseEvent.callEvent())
+        {
+            player.sendMessage(AnimalPenPlugin.translations().
+                getTranslatable("item.animal_pen.water_animal_container.error.release"));
+            return;
+        }
 
         Entity entity;
 
@@ -281,6 +309,18 @@ public class WaterAnimalContainerListener implements Listener
 
         if (penData == null)
         {
+            AnimalDepositEvent animalDepositEvent = new AnimalDepositEvent(block.getLocation(),
+                itemData,
+                null,
+                false);
+
+            if (!animalDepositEvent.callEvent())
+            {
+                player.sendMessage(AnimalPenPlugin.translations().
+                    getTranslatable("item.animal_pen.water_animal_container.error.deposit"));
+                return;
+            }
+
             // Animal pen data is null.
             AquariumManager.setAquariumData(block, itemData);
 
@@ -306,6 +346,18 @@ public class WaterAnimalContainerListener implements Listener
             itemData = new AnimalData(penData.entityType(), penData.entitySnapshot(), penData.entityCount() / 2);
             itemData.getCooldowns().putAll(penData.getCooldowns());
 
+            AnimalWithdrawEvent animalWithdrawEvent = new AnimalWithdrawEvent(block.getLocation(),
+                itemData,
+                penData,
+                false);
+
+            if (!animalWithdrawEvent.callEvent())
+            {
+                event.getPlayer().sendMessage(AnimalPenPlugin.translations().
+                    getTranslatable("item.animal_pen.water_animal_container.error.withdrawn"));
+                return;
+            }
+
             AquariumManager.setWaterContainerData(item, itemData);
 
             penData.reduceEntityCount(itemData.entityCount());
@@ -321,6 +373,18 @@ public class WaterAnimalContainerListener implements Listener
         if (penData.entityType() != itemData.entityType())
         {
             // Cannot merge different entities
+            return;
+        }
+
+        AnimalDepositEvent animalDepositEvent = new AnimalDepositEvent(block.getLocation(),
+            itemData,
+            penData,
+            false);
+
+        if (!animalDepositEvent.callEvent())
+        {
+            player.sendMessage(AnimalPenPlugin.translations().
+                getTranslatable("item.animal_pen.water_animal_container.error.deposit"));
             return;
         }
 
@@ -408,6 +472,18 @@ public class WaterAnimalContainerListener implements Listener
 
         if (penData == null)
         {
+            return;
+        }
+
+        AnimalWithdrawEvent animalWithdrawEvent = new AnimalWithdrawEvent(block.getLocation(),
+            null,
+            penData,
+            false);
+
+        if (!animalWithdrawEvent.callEvent())
+        {
+            event.getPlayer().sendMessage(AnimalPenPlugin.translations().
+                getTranslatable("item.animal_pen.water_animal_container.error.withdrawn"));
             return;
         }
 

@@ -26,6 +26,9 @@
   "item.animal_pen.animal_cage.error.not_animal": "§4Only animals can be caught",
   "item.animal_pen.animal_cage.error.too_many_variants": "§4Variant cannot be stored. Memory is full",
   "item.animal_pen.animal_cage.error.leashed": "§4Leashed animals cannot be picked up",
+  "item.animal_pen.animal_cage.error.release": "§4Failed to release animal",
+  "item.animal_pen.animal_cage.error.deposit": "§4Failed to deposit animal cage into animal pen",
+  "item.animal_pen.animal_cage.error.withdrawn": "§4Failed to withdrawn animals from animal pen",
 
   "item.animal_pen.water_animal_container.name": "Water Mob Container",
   "item.animal_pen.water_animal_container.description.top": "",
@@ -51,6 +54,9 @@
   "item.animal_pen.water_animal_container.error.not_water_animal": "§4Only water mobs can be caught",
   "item.animal_pen.water_animal_container.error.too_many_variants": "§4Variant cannot be stored. Memory is full",
   "item.animal_pen.water_animal_container.error.leashed": "§4Leashed water mobs cannot be picked up",
+  "item.animal_pen.water_animal_container.error.release": "§4Failed to release water mob",
+  "item.animal_pen.water_animal_container.error.deposit": "§4Failed to deposit water mob container into aquarium",
+  "item.animal_pen.water_animal_container.error.withdrawn": "§4Failed to withdrawn water mob from aquarium",
 
   "item.animal_pen.animal_pen_acacia": "Acacia Animal Pen",
   "item.animal_pen.animal_pen_bamboo": "Bamboo Animal Pen",

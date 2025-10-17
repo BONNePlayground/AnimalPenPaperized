@@ -1,6 +1,7 @@
 package lv.id.bonne.animalpenpaper.listeners;
 
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -26,6 +27,10 @@ import io.papermc.paper.datacomponent.item.CustomModelData;
 import io.papermc.paper.potion.SuspiciousEffectEntry;
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
+import lv.id.bonne.animalpenpaper.events.AnimalCatchEvent;
+import lv.id.bonne.animalpenpaper.events.AnimalDepositEvent;
+import lv.id.bonne.animalpenpaper.events.AnimalReleaseEvent;
+import lv.id.bonne.animalpenpaper.events.AnimalWithdrawEvent;
 import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
 import lv.id.bonne.animalpenpaper.util.Utils;
@@ -156,6 +161,19 @@ public class AnimalCageListener implements Listener
             return;
         }
 
+        AnimalCatchEvent animalCatchEvent =
+            new AnimalCatchEvent(entity,
+                storedData,
+                true);
+
+        if (!animalCatchEvent.callEvent())
+        {
+            player.sendMessage(AnimalPenPlugin.translations().
+                getTranslatable("item.animal_pen.animal_cage.error.unknown",
+                    Component.translatable(entity.getType().translationKey())));
+            return;
+        }
+
         AnimalPenManager.addAnimal(item, entityType, entity.createSnapshot(), 1);
 
         entity.remove();
@@ -205,6 +223,17 @@ public class AnimalCageListener implements Listener
 
         Location spawnLoc = block.getLocation().add(0.5, 1, 0.5);
         World world = player.getWorld();
+
+        AnimalReleaseEvent animalReleaseEvent = new AnimalReleaseEvent(spawnLoc,
+            storedData,
+            true);
+
+        if (!animalReleaseEvent.callEvent())
+        {
+            player.sendMessage(AnimalPenPlugin.translations().
+                getTranslatable("item.animal_pen.animal_cage.error.release"));
+            return;
+        }
 
         Entity entity;
 
@@ -314,6 +343,18 @@ public class AnimalCageListener implements Listener
 
         if (penData == null)
         {
+            AnimalDepositEvent animalDepositEvent = new AnimalDepositEvent(block.getLocation(),
+                itemData,
+                null,
+                true);
+
+            if (!animalDepositEvent.callEvent())
+            {
+                player.sendMessage(AnimalPenPlugin.translations().
+                    getTranslatable("item.animal_pen.animal_cage.error.deposit"));
+                return;
+            }
+
             // Animal pen data is null.
             AnimalPenManager.setAnimalPenData(block, itemData);
 
@@ -345,6 +386,18 @@ public class AnimalCageListener implements Listener
             penData.getAppliedMaterial().ifPresent(itemData::setAppliedMaterial);
             penData.getAppliedFlag().ifPresent(itemData::setAppliedFlag);
 
+            AnimalWithdrawEvent animalWithdrawEvent = new AnimalWithdrawEvent(block.getLocation(),
+                itemData,
+                penData,
+                true);
+
+            if (!animalWithdrawEvent.callEvent())
+            {
+                event.getPlayer().sendMessage(AnimalPenPlugin.translations().
+                    getTranslatable("item.animal_pen.animal_cage.error.withdrawn"));
+                return;
+            }
+
             AnimalPenManager.setAnimalCageData(item, itemData);
 
             penData.reduceEntityCount(itemData.entityCount());
@@ -360,6 +413,18 @@ public class AnimalCageListener implements Listener
         if (penData.entityType() != itemData.entityType())
         {
             // Cannot merge different entities
+            return;
+        }
+
+        AnimalDepositEvent animalDepositEvent = new AnimalDepositEvent(block.getLocation(),
+            itemData,
+            penData,
+            true);
+
+        if (!animalDepositEvent.callEvent())
+        {
+            player.sendMessage(AnimalPenPlugin.translations().
+                getTranslatable("item.animal_pen.animal_cage.error.deposit"));
             return;
         }
 
@@ -449,6 +514,18 @@ public class AnimalCageListener implements Listener
 
         if (penData == null)
         {
+            return;
+        }
+
+        AnimalWithdrawEvent animalWithdrawEvent = new AnimalWithdrawEvent(block.getLocation(),
+            null,
+            penData,
+            true);
+
+        if (!animalWithdrawEvent.callEvent())
+        {
+            event.getPlayer().sendMessage(AnimalPenPlugin.translations().
+                getTranslatable("item.animal_pen.animal_cage.error.withdrawn"));
             return;
         }
 
