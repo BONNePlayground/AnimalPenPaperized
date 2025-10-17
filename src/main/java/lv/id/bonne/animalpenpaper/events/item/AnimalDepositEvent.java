@@ -38,7 +38,7 @@ public class AnimalDepositEvent extends AbstractAnimalPenItemEvent
 
 
     @Nullable
-    public AnimalData getBlockData()
+    public AnimalData blockData()
     {
         return this.blockData;
     }

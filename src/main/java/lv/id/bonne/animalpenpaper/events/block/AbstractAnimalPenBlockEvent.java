@@ -68,27 +68,27 @@ public abstract class AbstractAnimalPenBlockEvent extends Event implements Cance
     }
 
 
-    public Location getLocation()
+    public Location location()
     {
         return this.location;
     }
 
 
     @Nullable
-    public AnimalData getAnimalData()
+    public AnimalData animalData()
     {
         return this.animalData;
     }
 
 
     @Nullable
-    public EntityType getEntityType()
+    public EntityType entityType()
     {
         return this.animalData == null ? null : this.animalData.entityType();
     }
 
 
-    public long getAnimalCount()
+    public long animalCount()
     {
         return this.animalData == null ? 0 : this.animalData.entityCount();
     }

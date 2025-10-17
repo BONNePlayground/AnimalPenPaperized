@@ -62,21 +62,21 @@ public class AnimalBlockPlaceEvent extends Event implements Cancellable
     }
 
 
-    public Player getPlayer()
+    public Player player()
     {
-        return player;
+        return this.player;
     }
 
 
-    public Location getLocation()
+    public Location location()
     {
-        return location;
+        return this.location;
     }
 
 
     public boolean isAnimalPen()
     {
-        return isAnimalPen;
+        return this.isAnimalPen;
     }
 
 

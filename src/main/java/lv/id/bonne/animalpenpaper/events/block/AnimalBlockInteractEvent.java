@@ -42,13 +42,13 @@ public class AnimalBlockInteractEvent extends AbstractAnimalPenBlockEvent
     }
 
 
-    public ItemStack getItemStack()
+    public ItemStack itemStack()
     {
         return this.itemStack;
     }
 
 
-    public EquipmentSlot getInteractionHand()
+    public EquipmentSlot interactionHand()
     {
         return this.interactionHand;
     }

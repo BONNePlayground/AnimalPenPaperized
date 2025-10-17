@@ -39,7 +39,7 @@ public class AnimalWithdrawEvent extends AbstractAnimalPenItemEvent
 
 
     @NotNull
-    public AnimalData getBlockData()
+    public AnimalData blockData()
     {
         return this.blockData;
     }

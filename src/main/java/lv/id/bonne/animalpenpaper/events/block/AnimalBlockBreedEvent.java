@@ -54,39 +54,39 @@ public class AnimalBlockBreedEvent extends Event
     }
 
 
-    public Player getPlayer()
+    public Player player()
     {
-        return player;
+        return this.player;
     }
 
 
-    public Location getLocation()
+    public Location location()
     {
-        return location;
+        return this.location;
     }
 
 
     public boolean isAnimalPen()
     {
-        return isAnimalPen;
+        return this.isAnimalPen;
     }
 
 
-    public EntityType getEntityType()
+    public EntityType entityType()
     {
-        return entityType;
+        return this.entityType;
     }
 
 
-    public long getAnimalsInPen()
+    public long animalsInPen()
     {
-        return animalsInPen;
+        return this.animalsInPen;
     }
 
 
-    public long getAnimalsAdded()
+    public long animalsAdded()
     {
-        return animalsAdded;
+        return this.animalsAdded;
     }
 
 

@@ -34,7 +34,7 @@ public class AnimalCatchEvent extends AbstractAnimalPenItemEvent
     }
 
 
-    public Entity getEntity()
+    public Entity entity()
     {
         return this.entity;
     }

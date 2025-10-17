@@ -38,7 +38,7 @@ public class AnimalBlockAttackEvent extends AbstractAnimalPenBlockEvent
     }
 
 
-    public ItemStack getItemStack()
+    public ItemStack itemStack()
     {
         return this.itemStack;
     }
