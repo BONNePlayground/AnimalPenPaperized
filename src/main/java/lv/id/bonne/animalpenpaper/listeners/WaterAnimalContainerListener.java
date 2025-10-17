@@ -141,7 +141,7 @@ public class WaterAnimalContainerListener implements Listener
 
             return;
         }
-        else
+        else if (storedData == null)
         {
             storedData = new AnimalData(entityType, entity.createSnapshot(), 0);
         }
