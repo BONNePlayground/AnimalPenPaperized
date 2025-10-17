@@ -19,23 +19,23 @@ import org.jetbrains.annotations.Nullable;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
 
 
-public abstract class AbstractAnimalPenItemEvent extends Event implements Cancellable
+public abstract class AbstractAnimalPenBlockEvent extends Event implements Cancellable
 {
     /**
-     * @param player The player who performed event
-     * @param location The location of event
-     * @param animalData The data stored inside item
-     * @param isAnimalCage The animal cage (true) or water mob container (false)
+     * @param player The player who performed event.
+     * @param location The location of animal pen/aquarium
+     * @param animalData The animal data
+     * @param isAnimalPen The indication if block is animal pen (true) or aquarium (false)
      */
-    protected AbstractAnimalPenItemEvent(Player player,
+    protected AbstractAnimalPenBlockEvent(Player player,
         Location location,
         @Nullable AnimalData animalData,
-        boolean isAnimalCage)
+        boolean isAnimalPen)
     {
         this.player = player;
         this.location = location;
         this.animalData = animalData;
-        this.isAnimalCage = isAnimalCage;
+        this.isAnimalPen = isAnimalPen;
     }
 
 
@@ -87,13 +87,13 @@ public abstract class AbstractAnimalPenItemEvent extends Event implements Cancel
     }
 
 
-    public boolean isAnimalCage()
+    public boolean isAnimalPen()
     {
-        return this.isAnimalCage;
+        return this.isAnimalPen;
     }
 
 
-    public Player getPlayer()
+    public Player player()
     {
         return this.player;
     }
@@ -103,14 +103,15 @@ public abstract class AbstractAnimalPenItemEvent extends Event implements Cancel
 // Section: Variables
 // ---------------------------------------------------------------------
 
-    private final Player player;
 
     private final Location location;
 
     @Nullable
     private final AnimalData animalData;
 
-    private final boolean isAnimalCage;
+    private final Player player;
+
+    private final boolean isAnimalPen;
 
     private boolean cancel = false;
 

@@ -36,6 +36,10 @@ import io.papermc.paper.datacomponent.item.CustomModelData;
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
 import lv.id.bonne.animalpenpaper.data.BlockData;
+import lv.id.bonne.animalpenpaper.events.AnimalBlockAttackEvent;
+import lv.id.bonne.animalpenpaper.events.AnimalBlockBreakEvent;
+import lv.id.bonne.animalpenpaper.events.AnimalBlockInteractEvent;
+import lv.id.bonne.animalpenpaper.events.AnimalBlockPlaceEvent;
 import lv.id.bonne.animalpenpaper.managers.AquariumManager;
 import lv.id.bonne.animalpenpaper.menu.AnimalPenVariantMenu;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
@@ -59,6 +63,16 @@ public class AquariumListener implements Listener
         if (event.getBlockReplacedState().getType() == Material.SMOOTH_STONE_SLAB)
         {
             // Cannot place animal pen on another slab.
+            event.setCancelled(true);
+            return;
+        }
+
+        AnimalBlockPlaceEvent placeEvent =
+            new AnimalBlockPlaceEvent(event.getPlayer(), event.getBlock().getLocation(), false);
+
+        if (!placeEvent.callEvent())
+        {
+            // placing is blocked.
             event.setCancelled(true);
             return;
         }
@@ -100,6 +114,18 @@ public class AquariumListener implements Listener
 
         // Get data.
         AnimalData animalData = AquariumManager.getAnimalData(block);
+
+        AnimalBlockBreakEvent breakEvent = new AnimalBlockBreakEvent(event.getPlayer(),
+            event.getBlock().getLocation(),
+            animalData,
+            false);
+
+        if (!breakEvent.callEvent())
+        {
+            // block breaking
+            event.setCancelled(true);
+            return;
+        }
 
         if (animalData != null)
         {
@@ -153,6 +179,19 @@ public class AquariumListener implements Listener
 
         // I CONTROL IT!!! NO CUSTOM INTERACTIONS HAHAHAHA
         event.setCancelled(true);
+
+        AnimalBlockInteractEvent interactEvent = new AnimalBlockInteractEvent(player,
+            itemStack,
+            event.getHand(),
+            entity.getLocation(),
+            AquariumManager.getAnimalData(entity),
+            false);
+
+        if (!interactEvent.callEvent())
+        {
+            // Do nothing. Interaction failed.
+            return;
+        }
 
         if (itemStack.isEmpty() && event.getHand() == EquipmentSlot.HAND)
         {
@@ -214,6 +253,18 @@ public class AquariumListener implements Listener
             !Utils.getTag(NamespacedKey.minecraft("axes")).isTagged(attackItem.getType()))
         {
             // Only swords and axes can attack.
+            return;
+        }
+
+        AnimalBlockAttackEvent attackEvent = new AnimalBlockAttackEvent(player,
+            attackItem,
+            entity.getLocation(),
+            AquariumManager.getAnimalData(entity),
+            false);
+
+        if (!attackEvent.callEvent())
+        {
+            // Do nothing. Interaction failed.
             return;
         }
 

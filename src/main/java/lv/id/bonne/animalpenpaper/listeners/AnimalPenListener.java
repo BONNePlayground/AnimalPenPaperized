@@ -35,6 +35,10 @@ import io.papermc.paper.datacomponent.item.CustomModelData;
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
 import lv.id.bonne.animalpenpaper.data.BlockData;
+import lv.id.bonne.animalpenpaper.events.AnimalBlockAttackEvent;
+import lv.id.bonne.animalpenpaper.events.AnimalBlockBreakEvent;
+import lv.id.bonne.animalpenpaper.events.AnimalBlockInteractEvent;
+import lv.id.bonne.animalpenpaper.events.AnimalBlockPlaceEvent;
 import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
 import lv.id.bonne.animalpenpaper.menu.AnimalPenVariantMenu;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
@@ -58,6 +62,16 @@ public class AnimalPenListener implements Listener
         if (event.getBlockReplacedState().getType() == Material.SMOOTH_STONE_SLAB)
         {
             // Cannot place animal pen on another slab.
+            event.setCancelled(true);
+            return;
+        }
+
+        AnimalBlockPlaceEvent placeEvent =
+            new AnimalBlockPlaceEvent(event.getPlayer(), event.getBlock().getLocation(), true);
+
+        if (!placeEvent.callEvent())
+        {
+            // placing is blocked.
             event.setCancelled(true);
             return;
         }
@@ -99,6 +113,18 @@ public class AnimalPenListener implements Listener
 
         // Get data.
         AnimalData animalData = AnimalPenManager.getAnimalData(block);
+
+        AnimalBlockBreakEvent breakEvent = new AnimalBlockBreakEvent(event.getPlayer(),
+            event.getBlock().getLocation(),
+            animalData,
+            true);
+
+        if (!breakEvent.callEvent())
+        {
+            // block breaking
+            event.setCancelled(true);
+            return;
+        }
 
         if (animalData != null)
         {
@@ -145,6 +171,19 @@ public class AnimalPenListener implements Listener
 
         // I CONTROL IT!!! NO CUSTOM INTERACTIONS HAHAHAHA
         event.setCancelled(true);
+
+        AnimalBlockInteractEvent interactEvent = new AnimalBlockInteractEvent(player,
+            itemStack,
+            event.getHand(),
+            entity.getLocation(),
+            AnimalPenManager.getAnimalData(entity),
+            true);
+
+        if (!interactEvent.callEvent())
+        {
+            // Do nothing. Interaction failed.
+            return;
+        }
 
         if (itemStack.isEmpty() && event.getHand() == EquipmentSlot.HAND)
         {
@@ -237,6 +276,18 @@ public class AnimalPenListener implements Listener
             !Utils.getTag(NamespacedKey.minecraft("axes")).isTagged(attackItem.getType()))
         {
             // Only swords and axes can attack.
+            return;
+        }
+
+        AnimalBlockAttackEvent attackEvent = new AnimalBlockAttackEvent(player,
+            attackItem,
+            entity.getLocation(),
+            AnimalPenManager.getAnimalData(entity),
+            true);
+
+        if (!attackEvent.callEvent())
+        {
+            // Do nothing. Interaction failed.
             return;
         }
 
