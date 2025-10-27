@@ -223,10 +223,13 @@ public class AnimalPenVariantMenu implements Listener, InventoryHolder
             {
                 compoundTag.getInt("Variant").ifPresent(variant ->
                 {
+                    int colorValue = variant & 0xFF;
+                    int styleValue = (variant >> 8) & 0xFF;
+
                     componentList.add(AnimalPenPlugin.translations().getTranslatable(
-                        "menu.animal_pen.variants.color", Utils.getHorseColor(variant)));
+                        "menu.animal_pen.variants.color", Utils.getHorseColor(colorValue)));
                     componentList.add(AnimalPenPlugin.translations().getTranslatable(
-                        "menu.animal_pen.variants.markings", Utils.getHorseMarkings(variant)));
+                        "menu.animal_pen.variants.markings", Utils.getHorseMarkings(styleValue)));
                 });
 
                 if (AnimalPenPlugin.configuration().isSecretStats())
