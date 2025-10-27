@@ -29,6 +29,8 @@ import lv.id.bonne.animalpenpaper.managers.AquariumManager;
 import lv.id.bonne.animalpenpaper.util.Utils;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
 
 
@@ -217,22 +219,58 @@ public class AnimalPenVariantMenu implements Listener, InventoryHolder
                     componentList.add(AnimalPenPlugin.translations().getTranslatable(
                         "menu.animal_pen.variants.is_screaming", screaming)));
             }
-            case HORSE -> compoundTag.getInt("Variant").ifPresent(variant ->
+            case HORSE ->
             {
-                componentList.add(AnimalPenPlugin.translations().getTranslatable(
-                    "menu.animal_pen.variants.color", Utils.getHorseColor(variant)));
-                componentList.add(AnimalPenPlugin.translations().getTranslatable(
-                    "menu.animal_pen.variants.markings", Utils.getHorseMarkings(variant)));
-            });
-            case LLAMA, TRADER_LLAMA -> compoundTag.getInt("Variant").ifPresent(variant ->
-                componentList.add(AnimalPenPlugin.translations().getTranslatable(
-                    "menu.animal_pen.variants.variant", Utils.getLlamaVariant(variant))));
+                compoundTag.getInt("Variant").ifPresent(variant ->
+                {
+                    componentList.add(AnimalPenPlugin.translations().getTranslatable(
+                        "menu.animal_pen.variants.color", Utils.getHorseColor(variant)));
+                    componentList.add(AnimalPenPlugin.translations().getTranslatable(
+                        "menu.animal_pen.variants.markings", Utils.getHorseMarkings(variant)));
+                });
+
+                if (AnimalPenPlugin.configuration().isSecretStats())
+                {
+                    AnimalPenVariantMenu.parseAttributes(componentList,
+                        compoundTag.getListOrEmpty("attributes"));
+                }
+            }
+            case DONKEY, MULE ->
+            {
+                if (AnimalPenPlugin.configuration().isSecretStats())
+                {
+                    AnimalPenVariantMenu.parseAttributes(componentList,
+                        compoundTag.getListOrEmpty("attributes"));
+                }
+            }
+            case LLAMA, TRADER_LLAMA ->
+            {
+                compoundTag.getInt("Variant").ifPresent(variant ->
+                    componentList.add(AnimalPenPlugin.translations().getTranslatable(
+                        "menu.animal_pen.variants.variant", Utils.getLlamaVariant(variant))));
+
+                if (AnimalPenPlugin.configuration().isSecretStats())
+                {
+                    compoundTag.getInt("Strength").ifPresent(strength ->
+                        componentList.add(AnimalPenPlugin.translations().getTranslatable(
+                            "menu.animal_pen.variants.strength", strength)));
+                }
+            }
             case MOOSHROOM -> compoundTag.getString("Type").ifPresent(variant ->
                 componentList.add(AnimalPenPlugin.translations().getTranslatable(
                     "menu.animal_pen.variants.type", variant)));
-            case PANDA -> compoundTag.getString("MainGene").ifPresent(variant ->
+            case PANDA -> {
+                compoundTag.getString("MainGene").ifPresent(variant ->
                 componentList.add(AnimalPenPlugin.translations().getTranslatable(
                     "menu.animal_pen.variants.variant", variant)));
+
+                if (AnimalPenPlugin.configuration().isSecretStats())
+                {
+                    compoundTag.getString("HiddenGene").ifPresent(variant ->
+                        componentList.add(AnimalPenPlugin.translations().getTranslatable(
+                            "menu.animal_pen.variants.gene", variant)));
+                }
+            }
             case PARROT -> compoundTag.getInt("Variant").ifPresent(variant ->
                 componentList.add(AnimalPenPlugin.translations().getTranslatable(
                     "menu.animal_pen.variants.variant", Utils.getParrotVariant(variant))));
@@ -270,6 +308,39 @@ public class AnimalPenVariantMenu implements Listener, InventoryHolder
         }
 
         return componentList;
+    }
+
+
+    private static void parseAttributes(List<Component> componentList, ListTag attributes)
+    {
+        for (Tag tag : attributes)
+        {
+            if (tag instanceof CompoundTag attributeTag)
+            {
+                if ("minecraft:movement_speed".equals(attributeTag.getStringOr("id", "")))
+                {
+                    double speed = Utils.getSpeed(attributeTag.getDoubleOr("base", 0));
+                    componentList.add(AnimalPenPlugin.translations().getTranslatable(
+                        "menu.animal_pen.variants.speed",
+                        Utils.sanitizeValue(speed)));
+                }
+
+                if ("minecraft:jump_strength".equals(attributeTag.getStringOr("id", "")))
+                {
+                    double jump = Utils.getJumpHeight(attributeTag.getDoubleOr("base", 0));
+                    componentList.add(AnimalPenPlugin.translations().getTranslatable(
+                        "menu.animal_pen.variants.jump",
+                        Utils.sanitizeValue(jump)));
+                }
+
+                if ("minecraft:max_health".equals(attributeTag.getStringOr("id", "")))
+                {
+                    componentList.add(AnimalPenPlugin.translations().getTranslatable(
+                        "menu.animal_pen.variants.health",
+                        attributeTag.getIntOr("base", 0)));
+                }
+            }
+        }
     }
 
 

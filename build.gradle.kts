@@ -2,6 +2,7 @@ import xyz.jpenilla.resourcefactory.bukkit.BukkitPluginYaml
 
 plugins {
     `java-library`
+    `maven-publish`
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.18"
     id("xyz.jpenilla.run-paper") version "3.0.0-beta.1"
     id("xyz.jpenilla.resource-factory-bukkit-convention") version "1.3.0"
@@ -80,4 +81,24 @@ modrinth {
 
     changelog.set(rootProject.file("CHANGELOG_LATEST.md").readText())
     syncBodyFrom.set(rootProject.file("README.md").readText())
+}
+
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/BONNePlayground/AnimalPenPaperized")
+            credentials {
+                username = System.getenv("GITHUB_USERNAME")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+    publications {
+        register<MavenPublication>("gpr") {
+            from(components["java"])
+            artifactId = project.name.lowercase()
+        }
+    }
 }

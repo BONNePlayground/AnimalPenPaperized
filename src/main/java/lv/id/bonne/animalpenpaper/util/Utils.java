@@ -16,6 +16,7 @@ import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
+import java.text.DecimalFormat;
 import java.util.Map;
 
 import io.papermc.paper.potion.SuspiciousEffectEntry;
@@ -236,6 +237,27 @@ public class Utils
     }
 
 
+    public static String sanitizeValue(double value)
+    {
+        return DECIMAL_FORMAT.format(value);
+    }
+
+
+    public static double getSpeed(double speed)
+    {
+        return speed * 42.157788;
+    }
+
+
+    public static double getJumpHeight(double jumpStrength)
+    {
+        return -0.1817584952 * Math.pow(jumpStrength, 3)
+            + 3.689713992 * Math.pow(jumpStrength, 2)
+            + 2.128599134 * jumpStrength
+            - 0.343930367;
+    }
+
+
 // ---------------------------------------------------------------------
 // Section: Text Entity Related methods
 // ---------------------------------------------------------------------
@@ -274,4 +296,6 @@ public class Utils
     private static final Vector EAST_CENTER = new Vector(1, 0.125, 0.5025);
 
     private static final Vector WEST_CENTER = new Vector(0, 0.125, 0.502);
+
+    private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.##");
 }

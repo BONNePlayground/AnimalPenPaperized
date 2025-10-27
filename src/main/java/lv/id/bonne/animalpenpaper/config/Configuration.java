@@ -55,7 +55,8 @@ public class Configuration
             this.triggerAdvancements == null ||
             this.increaseStatistics == null ||
             this.showCooldownsOnlyOnShift == null ||
-            this.showAllInteractions == null;
+            this.showAllInteractions == null ||
+            this.secretStats == null;
     }
 
 
@@ -124,6 +125,11 @@ public class Configuration
         if (this.showAllInteractions == null || init)
         {
             this.showAllInteractions = true;
+        }
+
+        if (this.secretStats == null || init)
+        {
+            this.secretStats = false;
         }
 
         if (init)
@@ -438,6 +444,17 @@ public class Configuration
     }
 
 
+    /**
+     * Is secret stats boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isSecretStats()
+    {
+        return this.secretStats;
+    }
+
+
 // ---------------------------------------------------------------------
 // Section: variables
 // ---------------------------------------------------------------------
@@ -620,6 +637,12 @@ public class Configuration
     @Expose
     @SerializedName("increase_statistics")
     private Boolean increaseStatistics;
+
+    @JsonComment("Allows to set if all secret statistics should be shown in animal view menu.")
+    @JsonComment("Default value = false")
+    @Expose
+    @SerializedName("secret_stats")
+    private Boolean secretStats;
 
     @JsonComment("Set of animals that are blocked from picking up.")
     @Expose
