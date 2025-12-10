@@ -7,7 +7,6 @@
 package lv.id.bonne.animalpenpaper.listeners;
 
 
-import com.destroystokyo.paper.MaterialTags;
 import com.destroystokyo.paper.event.entity.EntityZapEvent;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -41,6 +40,7 @@ import lv.id.bonne.animalpenpaper.events.block.AnimalBlockInteractEvent;
 import lv.id.bonne.animalpenpaper.events.block.AnimalBlockPlaceEvent;
 import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
 import lv.id.bonne.animalpenpaper.menu.AnimalPenVariantMenu;
+import lv.id.bonne.animalpenpaper.managers.InteractionHandler;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
 import lv.id.bonne.animalpenpaper.util.Utils;
 
@@ -192,46 +192,12 @@ public class AnimalPenListener implements Listener
             return;
         }
 
-        if (AnimalPenPlugin.animalFoodConfiguration().isFoodItem(entity, itemStack))
-        {
-            AnimalPenManager.handleFood(entity, player, itemStack);
-        }
-        else if (itemStack.getType() == Material.BRUSH)
-        {
-            AnimalPenManager.handleBrush(entity, player, itemStack);
-        }
-        else if (itemStack.getType() == Material.WATER_BUCKET)
-        {
-            AnimalPenManager.handleWaterBucket(entity, player, itemStack);
-        }
-        else if (itemStack.getType() == Material.SHEARS)
-        {
-            AnimalPenManager.handleShears(entity, player, itemStack);
-        }
-        else if (MaterialTags.DYES.isTagged(itemStack))
-        {
-            AnimalPenManager.handleDyes(entity, player, itemStack);
-        }
-        else if (itemStack.getType() == Material.BUCKET)
-        {
-            AnimalPenManager.handleBucket(entity, player, itemStack);
-        }
-        else if (itemStack.getType() == Material.GLASS_BOTTLE)
-        {
-            AnimalPenManager.handleGlassBottle(entity, player, itemStack);
-        }
-        else if (itemStack.getType() == Material.MAGMA_BLOCK)
-        {
-            AnimalPenManager.handleMagmaBlock(entity, player, itemStack);
-        }
-        else if (itemStack.getType() == Material.BOWL)
-        {
-            AnimalPenManager.handleBowl(entity, player, itemStack);
-        }
-        else if (Utils.getTag(NamespacedKey.minecraft("small_flowers")).isTagged(itemStack.getType()))
-        {
-            AnimalPenManager.handleSmallFlowers(entity, player, itemStack);
-        }
+        InteractionHandler.handleItemInteraction(entity,
+            player,
+            itemStack,
+            AnimalPenManager.getAnimalData(entity),
+            data -> AnimalPenManager.setAnimalPenData(entity, data),
+            true);
     }
 
 
@@ -272,10 +238,9 @@ public class AnimalPenListener implements Listener
             return;
         }
 
-        if (!Utils.getTag(NamespacedKey.minecraft("swords")).isTagged(attackItem.getType()) &&
-            !Utils.getTag(NamespacedKey.minecraft("axes")).isTagged(attackItem.getType()))
+        if (!Utils.getTag(CAN_ATTACK_PEN).isTagged(attackItem.getType()))
         {
-            // Only swords and axes can attack.
+            // Only tagged items can attack.
             return;
         }
 
@@ -291,7 +256,11 @@ public class AnimalPenListener implements Listener
             return;
         }
 
-        AnimalPenManager.handleKilling(entity, player, attackItem);
+        InteractionHandler.handleKilling(entity,
+            player,
+            attackItem,
+            AnimalPenManager.getAnimalData(entity),
+            data -> AnimalPenManager.setAnimalPenData(entity, data));
     }
 
 
@@ -556,4 +525,8 @@ public class AnimalPenListener implements Listener
             event.setCurrentItem(result);
         }
     }
+
+
+    private final static NamespacedKey CAN_ATTACK_PEN =
+        new NamespacedKey("animal_pen", "can_attack_pen");
 }

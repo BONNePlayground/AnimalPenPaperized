@@ -106,7 +106,7 @@ public class AnimalFoodConfiguration
 
         // Dolphin
         this.foodItems.computeIfAbsent(NamespacedKey.minecraft("dolphin"), i -> List.of(
-            new FoodItem("#minecraft:fishes")
+            new FoodItem("#minecraft:nautilus_food")
         ));
 
         // Donkey
@@ -126,7 +126,7 @@ public class AnimalFoodConfiguration
 
         // Glow Squid
         this.foodItems.computeIfAbsent(NamespacedKey.minecraft("glow_squid"), i -> List.of(
-            new FoodItem("#minecraft:fishes")
+            new FoodItem("#minecraft:nautilus_food")
         ));
 
         // Goat
@@ -218,7 +218,7 @@ public class AnimalFoodConfiguration
 
         // Squid
         this.foodItems.computeIfAbsent(NamespacedKey.minecraft("squid"), i -> List.of(
-            new FoodItem("#minecraft:fishes")
+            new FoodItem("#minecraft:nautilus_food")
         ));
 
         // Strider
@@ -249,7 +249,21 @@ public class AnimalFoodConfiguration
 
         // Zombie Horse
         this.foodItems.computeIfAbsent(NamespacedKey.minecraft("zombie_horse"), i -> List.of(
-            new FoodItem("#minecraft:horse_food")
+            new FoodItem("#minecraft:zombie_horse_food")
+        ));
+
+        // Camel Husk
+        this.foodItems.computeIfAbsent(NamespacedKey.minecraft("camel_husk"), i -> List.of(
+            new FoodItem("#minecraft:camel_husk_food")
+        ));
+
+        // Nautilus
+        this.foodItems.computeIfAbsent(NamespacedKey.minecraft("nautilus"), i -> List.of(
+            new FoodItem("#minecraft:nautilus_food")
+        ));
+
+        this.foodItems.computeIfAbsent(NamespacedKey.minecraft("zombie_nautilus"), i -> List.of(
+            new FoodItem("#minecraft:nautilus_food")
         ));
     }
 

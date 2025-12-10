@@ -102,7 +102,7 @@ public class AnimalPenCreativeMenu implements Listener, InventoryHolder
             return;
         }
 
-        if (event.getInventory().getHolder() != this)
+        if (event.getInventory().getHolder() != this || event.getClickedInventory() != this.inventory)
         {
             return;
         }

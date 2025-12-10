@@ -8,20 +8,17 @@ import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.Slab;
-import org.bukkit.craftbukkit.damage.CraftDamageSource;
-import org.bukkit.craftbukkit.entity.CraftEntity;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
-import org.bukkit.craftbukkit.inventory.CraftItemStack;
-import org.bukkit.damage.DamageSource;
-import org.bukkit.damage.DamageType;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Display;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntitySnapshot;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ItemDisplay;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.TextDisplay;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.components.CustomModelDataComponent;
-import org.bukkit.loot.LootContext;
-import org.bukkit.loot.LootTable;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Transformation;
@@ -29,20 +26,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
-import io.papermc.paper.datacomponent.DataComponentTypes;
-import io.papermc.paper.entity.Bucketable;
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
 import lv.id.bonne.animalpenpaper.data.AnimalDataType;
 import lv.id.bonne.animalpenpaper.data.BlockData;
 import lv.id.bonne.animalpenpaper.data.BlockDataType;
-import lv.id.bonne.animalpenpaper.events.block.AnimalBlockBreedEvent;
 import lv.id.bonne.animalpenpaper.menu.AnimalPenVariantMenu;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
 import lv.id.bonne.animalpenpaper.util.Utils;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.util.TriState;
-import net.minecraft.advancements.CriteriaTriggers;
 
 
 /**
@@ -382,7 +374,7 @@ public class AquariumManager
             // Validate attributes
             AttributeInstance attribute = livingEntity.getAttribute(Attribute.SCALE);
 
-            if (attribute != null && livingEntity instanceof WaterMob)
+            if (attribute != null && Utils.getTagEntity(WATER_MOB_CONTAINER_PICKABLE).isTagged(entity.getType()))
             {
                 if (attribute.getBaseValue() != AnimalPenPlugin.configuration().getWaterAnimalSize())
                 {
@@ -525,7 +517,7 @@ public class AquariumManager
         {
             entity = block.getWorld().getEntity(blockData.entity);
 
-            if (AnimalPenPlugin.configuration().isGrowAnimals() &&
+            if (AnimalPenPlugin.configuration().isGrowWaterAnimals() &&
                 entity instanceof LivingEntity livingEntity)
             {
                 AttributeInstance attribute = livingEntity.getAttribute(Attribute.SCALE);
@@ -722,285 +714,6 @@ public class AquariumManager
 // ---------------------------------------------------------------------
 
 
-    public static void handleFood(LivingEntity entity, Player player, ItemStack itemStack)
-    {
-        AnimalData data = AquariumManager.getAnimalData(entity);
-
-        if (data == null)
-        {
-            return;
-        }
-
-        if (data.hasCooldown(Material.APPLE))
-        {
-            // under cooldown for feeding
-            return;
-        }
-
-        long maxCount = AnimalPenPlugin.configuration().getMaximalAnimalCount();
-
-        if (maxCount > 0 && data.entityCount() >= maxCount)
-        {
-            // Too many entities already in pen
-            return;
-        }
-
-        int stackSize = itemStack.getAmount();
-        stackSize = (int) Math.min(data.entityCount(), stackSize);
-
-        if (stackSize < 2)
-        {
-            // Cannot feed 1 animal only for breeding.
-            return;
-        }
-
-        stackSize = (int) Math.min((maxCount - data.entityCount()) * 2, stackSize);
-
-        Utils.triggerItemUse(entity, player, itemStack, stackSize % 2 == 1 ? stackSize - 1 : stackSize);
-
-        if (player.getGameMode() != GameMode.CREATIVE)
-        {
-            if (stackSize % 2 == 1)
-            {
-                itemStack.subtract(stackSize - 1);
-            }
-            else
-            {
-                itemStack.subtract(stackSize);
-            }
-        }
-
-        int amount = stackSize / 2;
-
-        AnimalBlockBreedEvent breedEvent = new AnimalBlockBreedEvent(player,
-            entity.getLocation(),
-            entity.getType(),
-            data.entityCount(),
-            amount,
-            false);
-
-        data.addEntityCount(amount);
-
-        entity.getWorld().spawnParticle(Particle.HEART,
-            entity.getLocation(),
-            5,
-            0.2, 0.2, 0.2,
-            0.05);
-
-        entity.getWorld().playSound(entity,
-            entity.getEatingSound(itemStack),
-            new Random().nextFloat(0.8f, 1.2f),
-            1);
-
-        player.swingMainHand();
-
-        data.setCooldown(Material.APPLE,
-            AnimalPenPlugin.configuration().getEntityCooldown(
-                entity.getType(),
-                Material.APPLE,
-                stackSize));
-
-        // Save data
-        AquariumManager.setAquariumData(entity, data);
-        breedEvent.callEvent();
-    }
-
-
-    public static void handleWaterBucket(Entity entity, Player player, ItemStack itemStack)
-    {
-        if (entity.getType() != EntityType.TROPICAL_FISH &&
-            entity.getType() != EntityType.SALMON &&
-            entity.getType() != EntityType.PUFFERFISH &&
-            entity.getType() != EntityType.COD &&
-            entity.getType() != EntityType.TADPOLE)
-        {
-            // Only axolotl and fishes can be interacted with water bucket
-            return;
-        }
-
-        AnimalData data = AquariumManager.getAnimalData(entity);
-
-        if (data == null)
-        {
-            return;
-        }
-
-        if (data.hasCooldown(Material.WATER_BUCKET))
-        {
-            // under cooldown for feeding
-            return;
-        }
-
-        if (!(entity instanceof Bucketable bucketable))
-        {
-            // Not bucketable
-            return;
-        }
-
-        ItemStack newBucket = bucketable.getBaseBucketItem();
-        Sound sound = bucketable.getPickupSound();
-
-        switch (entity.getType())
-        {
-            case COD -> sound = Sound.ITEM_BUCKET_FILL_FISH;
-            case PUFFERFISH -> sound = Sound.ITEM_BUCKET_FILL_FISH;
-            case SALMON ->
-            {
-                newBucket.setData(DataComponentTypes.SALMON_SIZE, ((Salmon) entity).getVariant());
-                sound = Sound.ITEM_BUCKET_FILL_FISH;
-            }
-            case TADPOLE -> sound = Sound.ITEM_BUCKET_FILL_TADPOLE;
-            case TROPICAL_FISH ->
-            {
-                TropicalFish tropicalFish = (TropicalFish) entity;
-                newBucket.setData(DataComponentTypes.TROPICAL_FISH_BASE_COLOR, tropicalFish.getBodyColor());
-                newBucket.setData(DataComponentTypes.TROPICAL_FISH_PATTERN, tropicalFish.getPattern());
-                newBucket.setData(DataComponentTypes.TROPICAL_FISH_PATTERN_COLOR,tropicalFish.getPatternColor());
-
-                sound = Sound.ITEM_BUCKET_FILL_FISH;
-            }
-        }
-
-        data.reduceEntityCount(1);
-
-        Utils.triggerItemUse(entity, player, itemStack, 1);
-
-        if (player.getGameMode() != GameMode.CREATIVE)
-        {
-            itemStack.subtract();
-        }
-
-        player.getInventory().addItem(newBucket);
-
-        entity.getWorld().playSound(entity,
-            sound,
-            new Random().nextFloat(0.8f, 1.2f),
-            1);
-
-        player.swingMainHand();
-
-        data.setCooldown(Material.WATER_BUCKET,
-            AnimalPenPlugin.configuration().getEntityCooldown(
-                entity.getType(),
-                Material.WATER_BUCKET,
-                data.entityCount()));
-
-        // Save data
-        AquariumManager.setAquariumData(entity, data);
-
-        if (AnimalPenPlugin.configuration().isTriggerAdvancements())
-        {
-            // Trigger bucket filling
-            CriteriaTriggers.FILLED_BUCKET.trigger(((CraftPlayer) player).getHandle(),
-                CraftItemStack.asNMSCopy(newBucket));
-        }
-    }
-
-
-    public static void handleKilling(LivingEntity entity, Player player, ItemStack itemStack)
-    {
-        AnimalData data = AquariumManager.getAnimalData(entity);
-
-        if (data == null)
-        {
-            // Something is wrong. No entity on other end.
-            return;
-        }
-
-        if (AnimalPenPlugin.configuration().isIncreaseStatistics())
-        {
-            player.incrementStatistic(Statistic.USE_ITEM, itemStack.getType());
-        }
-
-        if (player.getGameMode() != GameMode.CREATIVE)
-        {
-            itemStack.damage(1, player);
-        }
-
-        int cooldown = AnimalPenPlugin.configuration().getAttackCooldown();
-
-        if (cooldown > 0)
-        {
-            player.setCooldown(itemStack, cooldown);
-        }
-
-        data.reduceEntityCount(1);
-        AquariumManager.setAquariumData(entity, data);
-
-        LootTable lootTable =
-            Bukkit.getLootTable(NamespacedKey.minecraft("entities/" + entity.getType().getKey().value()));
-
-        if (lootTable != null)
-        {
-            if (player.getInventory().getItemInMainHand().containsEnchantment(Enchantment.FIRE_ASPECT))
-            {
-                entity.setFireTicks(1);
-                entity.setVisualFire(TriState.FALSE);
-            }
-
-            Collection<ItemStack> itemStacks = lootTable.populateLoot(new Random(),
-                new LootContext.Builder(entity.getLocation()).
-                    killer(player).
-                    lootedEntity(entity).
-                    build());
-
-            Location location = entity.getLocation().add(0, 1, 0);
-            itemStacks.forEach(item -> entity.getWorld().dropItemNaturally(location, item));
-
-            int reward = ((Mob) entity).getPossibleExperienceReward();
-            entity.getWorld().spawnEntity(location,
-                EntityType.EXPERIENCE_ORB,
-                CreatureSpawnEvent.SpawnReason.CUSTOM,
-                orb -> ((ExperienceOrb) orb).setExperience(reward));
-        }
-
-        Sound deathSound = entity.getDeathSound();
-
-        if (deathSound != null)
-        {
-            entity.getWorld().playSound(entity.getLocation(),
-                deathSound,
-                new Random().nextFloat(0.5f, 1f),
-                1f);
-        }
-        else
-        {
-            entity.getWorld().playSound(entity.getLocation(),
-                Sound.ENTITY_GENERIC_DEATH,
-                new Random().nextFloat(0.5f, 1f),
-                1f);
-        }
-
-        entity.getWorld().spawnParticle(Particle.SMOKE,
-            entity.getLocation().add(0, 0.5, 0),
-            10,
-            0.3,
-            0.3,
-            0.3,
-            0.01);
-        entity.getWorld().spawnParticle(Particle.ANGRY_VILLAGER,
-            entity.getLocation().add(0, 0.5, 0),
-            2,
-            0.2,
-            0.2,
-            0.2,
-            0);
-
-        if (AnimalPenPlugin.configuration().isTriggerAdvancements())
-        {
-            CriteriaTriggers.PLAYER_KILLED_ENTITY.trigger(((CraftPlayer) player).getHandle(),
-                ((CraftEntity) entity).getHandle(),
-                ((CraftDamageSource) DamageSource.builder(DamageType.PLAYER_ATTACK).build()).getHandle());
-        }
-
-        if (AnimalPenPlugin.configuration().isIncreaseStatistics())
-        {
-            player.incrementStatistic(Statistic.MOB_KILLS);
-            player.incrementStatistic(Statistic.KILL_ENTITY, entity.getType());
-        }
-    }
-
-
     public static void applyVariant(Entity entity, EntitySnapshot selectedVariant)
     {
         if (selectedVariant == null)
@@ -1053,6 +766,8 @@ public class AquariumManager
 
 
     public final static NamespacedKey AQUARIUM_DATA_KEY = new NamespacedKey("animal_pen", "aquarium_data");
+
+    public final static NamespacedKey WATER_MOB_CONTAINER_PICKABLE = new NamespacedKey("animal_pen", "water_mob_container_pickable");
 
     public final static String WATER_CONTAINER_MODEL = "animal_pen:water_animal_container";
 

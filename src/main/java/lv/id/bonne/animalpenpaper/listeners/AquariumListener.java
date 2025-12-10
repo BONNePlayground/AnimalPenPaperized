@@ -42,6 +42,7 @@ import lv.id.bonne.animalpenpaper.events.block.AnimalBlockInteractEvent;
 import lv.id.bonne.animalpenpaper.events.block.AnimalBlockPlaceEvent;
 import lv.id.bonne.animalpenpaper.managers.AquariumManager;
 import lv.id.bonne.animalpenpaper.menu.AnimalPenVariantMenu;
+import lv.id.bonne.animalpenpaper.managers.InteractionHandler;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
 import lv.id.bonne.animalpenpaper.util.Utils;
 
@@ -201,14 +202,12 @@ public class AquariumListener implements Listener
             return;
         }
 
-        if (AnimalPenPlugin.animalFoodConfiguration().isFoodItem(entity, itemStack))
-        {
-            AquariumManager.handleFood(entity, player, itemStack);
-        }
-        else if (itemStack.getType() == Material.WATER_BUCKET)
-        {
-            AquariumManager.handleWaterBucket(entity, player, itemStack);
-        }
+        InteractionHandler.handleItemInteraction(entity,
+            player,
+            itemStack,
+            AquariumManager.getAnimalData(entity),
+            data -> AquariumManager.setAquariumData(entity, data),
+            false);
     }
 
 
@@ -249,8 +248,7 @@ public class AquariumListener implements Listener
             return;
         }
 
-        if (!Utils.getTag(NamespacedKey.minecraft("swords")).isTagged(attackItem.getType()) &&
-            !Utils.getTag(NamespacedKey.minecraft("axes")).isTagged(attackItem.getType()))
+        if (!Utils.getTag(CAN_ATTACK_AQUARIUM).isTagged(attackItem.getType()))
         {
             // Only swords and axes can attack.
             return;
@@ -268,7 +266,12 @@ public class AquariumListener implements Listener
             return;
         }
 
-        AquariumManager.handleKilling(entity, player, attackItem);
+
+        InteractionHandler.handleKilling(entity,
+            player,
+            attackItem,
+            AquariumManager.getAnimalData(entity),
+            data -> AquariumManager.setAquariumData(entity, data));
     }
 
 
@@ -569,4 +572,8 @@ public class AquariumListener implements Listener
             event.setCurrentItem(result);
         }
     }
+
+
+    private final static NamespacedKey CAN_ATTACK_AQUARIUM =
+        new NamespacedKey("animal_pen", "can_attack_aquarium");
 }

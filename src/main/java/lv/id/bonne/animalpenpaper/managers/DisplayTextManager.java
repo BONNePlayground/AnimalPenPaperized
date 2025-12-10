@@ -194,9 +194,9 @@ public class DisplayTextManager implements Listener
                             {
                                 int newValue = Math.max(0, value - 20);
 
-                                if (newValue == 0 && value > 0 && entityReference.isPen())
+                                if (newValue == 0 && value > 0)
                                 {
-                                    AnimalPenManager.processCooldownFinish(entity, key, animalData);
+                                    InteractionHandler.handleCooldownFinish(entity, key, animalData);
                                 }
 
                                 return newValue;

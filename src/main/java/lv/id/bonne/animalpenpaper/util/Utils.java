@@ -81,6 +81,12 @@ public class Utils
     }
 
 
+    public static Tag<EntityType> getTagEntity(NamespacedKey tagKey)
+    {
+        return Bukkit.getTag(Tag.REGISTRY_ENTITY_TYPES, tagKey, EntityType.class);
+    }
+
+
     public static Material getWoolMaterial(DyeColor color)
     {
         try

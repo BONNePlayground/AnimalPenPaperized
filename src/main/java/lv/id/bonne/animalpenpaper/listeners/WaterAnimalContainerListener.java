@@ -17,6 +17,7 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.util.Vector;
 import java.util.Iterator;
 import java.util.List;
 
@@ -30,6 +31,7 @@ import lv.id.bonne.animalpenpaper.events.item.AnimalReleaseEvent;
 import lv.id.bonne.animalpenpaper.events.item.AnimalWithdrawEvent;
 import lv.id.bonne.animalpenpaper.managers.AquariumManager;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
+import lv.id.bonne.animalpenpaper.util.Utils;
 import net.kyori.adventure.text.Component;
 import net.minecraft.world.entity.OwnableEntity;
 
@@ -62,7 +64,15 @@ public class WaterAnimalContainerListener implements Listener
 
         event.setCancelled(true);
 
-        if (!(entity instanceof WaterMob animal))
+        if (!Utils.getTagEntity(AquariumManager.WATER_MOB_CONTAINER_PICKABLE).isTagged(entity.getType()))
+        {
+            player.sendMessage(AnimalPenPlugin.translations().
+                getTranslatable("item.animal_pen.water_animal_container.error.not_water_animal"));
+
+            return;
+        }
+
+        if (!(entity instanceof LivingEntity animal))
         {
             player.sendMessage(AnimalPenPlugin.translations().
                 getTranslatable("item.animal_pen.water_animal_container.error.not_water_animal"));
@@ -84,7 +94,8 @@ public class WaterAnimalContainerListener implements Listener
             return;
         }
 
-        if (entity instanceof OwnableEntity ownableEntity && ownableEntity.getOwner() != null)
+        if (entity instanceof Tameable tameable && tameable.getOwnerUniqueId() != null ||
+            entity instanceof OwnableEntity ownable && ownable.getOwner() != null)
         {
             player.sendMessage(AnimalPenPlugin.translations().
                 getTranslatable("item.animal_pen.water_animal_container.error.owned"));
@@ -217,7 +228,7 @@ public class WaterAnimalContainerListener implements Listener
 
         EntityType entityType = storedData.entityType();
 
-        Location spawnLoc = block.getLocation().add(0.5, 1, 0.5);
+        Location spawnLoc = block.getLocation().add(event.getBlockFace().getDirection().add(MIDDLE_BLOCK));
         World world = player.getWorld();
 
         AnimalReleaseEvent animalReleaseEvent = new AnimalReleaseEvent(player,
@@ -249,13 +260,16 @@ public class WaterAnimalContainerListener implements Listener
             storedData.setEntitySnapshot(entity.createSnapshot());
         }
 
-        if (!(entity instanceof WaterMob mob))
+        if (!(entity instanceof LivingEntity mob))
         {
             return;
         }
 
         // Clear all equipment to avoid its dropping.
-        mob.getEquipment().clear();
+        if (mob.getEquipment() != null)
+        {
+            mob.getEquipment().clear();
+        }
 
         AquariumManager.removeAnimal(item, 1);
 
@@ -562,4 +576,7 @@ public class WaterAnimalContainerListener implements Listener
             event.setCurrentItem(result);
         }
     }
+
+
+    private static final Vector MIDDLE_BLOCK = new Vector(0.5, 0, 0.5);
 }

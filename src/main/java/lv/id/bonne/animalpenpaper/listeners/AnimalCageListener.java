@@ -4,7 +4,15 @@ package lv.id.bonne.animalpenpaper.listeners;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Ageable;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntitySnapshot;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.MushroomCow;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Tameable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -17,6 +25,7 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.util.Vector;
 
 import java.util.Iterator;
 import java.util.List;
@@ -65,7 +74,7 @@ public class AnimalCageListener implements Listener
 
         event.setCancelled(true);
 
-        if (!(entity instanceof Animals animal))
+        if (!Utils.getTagEntity(AnimalPenManager.ANIMAL_CAGE_PICKABLE).isTagged(entity.getType()))
         {
             player.sendMessage(AnimalPenPlugin.translations().
                 getTranslatable("item.animal_pen.animal_cage.error.not_animal"));
@@ -73,13 +82,22 @@ public class AnimalCageListener implements Listener
             return;
         }
 
+        if (!(entity instanceof LivingEntity animal))
+        {
+            player.sendMessage(AnimalPenPlugin.translations().
+                getTranslatable("item.animal_pen.animal_cage.error.not_animal"));
+
+            return;
+        }
+
+
         if (animal.isDead() || !animal.hasAI())
         {
             // Silent death
             return;
         }
 
-        if (!animal.isAdult())
+        if (animal instanceof Ageable ageable && !ageable.isAdult())
         {
             player.sendMessage(AnimalPenPlugin.translations().
                 getTranslatable("item.animal_pen.animal_cage.error.baby"));
@@ -221,7 +239,7 @@ public class AnimalCageListener implements Listener
 
         EntityType entityType = storedData.entityType();
 
-        Location spawnLoc = block.getLocation().add(0.5, 1, 0.5);
+        Location spawnLoc = block.getLocation().add(event.getBlockFace().getDirection().add(MIDDLE_BLOCK));
         World world = player.getWorld();
 
         AnimalReleaseEvent animalReleaseEvent = new AnimalReleaseEvent(player,
@@ -282,13 +300,17 @@ public class AnimalCageListener implements Listener
             storedData.setEntitySnapshot(entity.createSnapshot());
         }
 
-        if (!(entity instanceof Animals animal))
+        if (!(entity instanceof LivingEntity animal))
         {
             return;
         }
 
         // Clear all equipment to avoid its dropping.
-        animal.getEquipment().clear();
+
+        if (animal.getEquipment() != null)
+        {
+            animal.getEquipment().clear();
+        }
 
         AnimalPenManager.removeAnimal(item, 1);
 
@@ -603,4 +625,7 @@ public class AnimalCageListener implements Listener
             event.setCurrentItem(result);
         }
     }
+
+
+    private static final Vector MIDDLE_BLOCK = new Vector(0.5, 0, 0.5);
 }
