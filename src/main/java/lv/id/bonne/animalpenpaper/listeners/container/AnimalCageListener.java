@@ -7,8 +7,8 @@ import org.bukkit.entity.Sheep;
 
 import io.papermc.paper.potion.SuspiciousEffectEntry;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
-import lv.id.bonne.animalpenpaper.managers.AbstractContainerManager;
-import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
+import lv.id.bonne.animalpenpaper.managers.container.AbstractContainerManager;
+import lv.id.bonne.animalpenpaper.managers.container.AnimalPenManager;
 import lv.id.bonne.animalpenpaper.util.Utils;
 
 

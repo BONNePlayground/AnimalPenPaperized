@@ -14,7 +14,7 @@ import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.event.world.EntitiesUnloadEvent;
 
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
-import lv.id.bonne.animalpenpaper.managers.AbstractContainerManager;
+import lv.id.bonne.animalpenpaper.managers.container.AbstractContainerManager;
 
 
 public class EntityTrackingListener implements Listener

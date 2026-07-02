@@ -1,4 +1,4 @@
-package lv.id.bonne.animalpenpaper.managers;
+package lv.id.bonne.animalpenpaper.managers.container;
 
 
 import org.bukkit.Material;
@@ -26,6 +26,7 @@ import lv.id.bonne.animalpenpaper.data.AnimalData;
 import lv.id.bonne.animalpenpaper.data.AnimalDataType;
 import lv.id.bonne.animalpenpaper.data.BlockData;
 import lv.id.bonne.animalpenpaper.data.BlockDataType;
+import lv.id.bonne.animalpenpaper.managers.Helper;
 import lv.id.bonne.animalpenpaper.menu.AnimalPenVariantMenu;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
 import lv.id.bonne.animalpenpaper.util.Utils;

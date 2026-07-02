@@ -36,7 +36,7 @@ import lv.id.bonne.animalpenpaper.events.item.AnimalCatchEvent;
 import lv.id.bonne.animalpenpaper.events.item.AnimalDepositEvent;
 import lv.id.bonne.animalpenpaper.events.item.AnimalReleaseEvent;
 import lv.id.bonne.animalpenpaper.events.item.AnimalWithdrawEvent;
-import lv.id.bonne.animalpenpaper.managers.AbstractContainerManager;
+import lv.id.bonne.animalpenpaper.managers.container.AbstractContainerManager;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
 import lv.id.bonne.animalpenpaper.util.Utils;
 import net.kyori.adventure.text.Component;

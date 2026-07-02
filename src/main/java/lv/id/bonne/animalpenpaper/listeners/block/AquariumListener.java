@@ -17,8 +17,8 @@ import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.SpongeAbsorbEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 
-import lv.id.bonne.animalpenpaper.managers.AbstractContainerManager;
-import lv.id.bonne.animalpenpaper.managers.AquariumManager;
+import lv.id.bonne.animalpenpaper.managers.container.AbstractContainerManager;
+import lv.id.bonne.animalpenpaper.managers.container.AquariumManager;
 
 
 /**

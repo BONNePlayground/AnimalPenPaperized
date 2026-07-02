@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
 import lv.id.bonne.animalpenpaper.data.BlockData;
+import lv.id.bonne.animalpenpaper.managers.container.AbstractContainerManager;
 import lv.id.bonne.animalpenpaper.util.Utils;
 import net.kyori.adventure.text.Component;
 

@@ -11,8 +11,8 @@ import org.bukkit.NamespacedKey;
 
 import io.papermc.paper.datacomponent.item.CustomModelData;
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
-import lv.id.bonne.animalpenpaper.managers.AbstractContainerManager;
-import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
+import lv.id.bonne.animalpenpaper.managers.container.AbstractContainerManager;
+import lv.id.bonne.animalpenpaper.managers.container.AnimalPenManager;
 import net.kyori.adventure.text.Component;
 
 

@@ -50,7 +50,7 @@ import lv.id.bonne.animalpenpaper.events.block.AnimalBlockAttackEvent;
 import lv.id.bonne.animalpenpaper.events.block.AnimalBlockBreakEvent;
 import lv.id.bonne.animalpenpaper.events.block.AnimalBlockInteractEvent;
 import lv.id.bonne.animalpenpaper.events.block.AnimalBlockPlaceEvent;
-import lv.id.bonne.animalpenpaper.managers.AbstractContainerManager;
+import lv.id.bonne.animalpenpaper.managers.container.AbstractContainerManager;
 import lv.id.bonne.animalpenpaper.managers.InteractionHandler;
 import lv.id.bonne.animalpenpaper.menu.AnimalPenVariantMenu;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;

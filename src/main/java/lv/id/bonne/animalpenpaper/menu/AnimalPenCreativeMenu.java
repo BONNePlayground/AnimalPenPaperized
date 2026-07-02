@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
-import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
-import lv.id.bonne.animalpenpaper.managers.AquariumManager;
+import lv.id.bonne.animalpenpaper.managers.container.AnimalPenManager;
+import lv.id.bonne.animalpenpaper.managers.container.AquariumManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 

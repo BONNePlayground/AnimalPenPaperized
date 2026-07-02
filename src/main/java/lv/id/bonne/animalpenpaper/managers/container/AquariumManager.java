@@ -1,4 +1,4 @@
-package lv.id.bonne.animalpenpaper.managers;
+package lv.id.bonne.animalpenpaper.managers.container;
 
 
 import org.bukkit.Material;

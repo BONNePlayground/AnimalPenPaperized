@@ -24,7 +24,7 @@ import java.util.WeakHashMap;
 
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
-import lv.id.bonne.animalpenpaper.managers.AbstractContainerManager;
+import lv.id.bonne.animalpenpaper.managers.container.AbstractContainerManager;
 import lv.id.bonne.animalpenpaper.util.Utils;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.CompoundTag;

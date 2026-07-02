@@ -13,8 +13,8 @@ import lv.id.bonne.animalpenpaper.listeners.block.AnimalPenListener;
 import lv.id.bonne.animalpenpaper.listeners.block.AquariumListener;
 import lv.id.bonne.animalpenpaper.listeners.container.AnimalCageListener;
 import lv.id.bonne.animalpenpaper.listeners.container.WaterAnimalContainerListener;
-import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
-import lv.id.bonne.animalpenpaper.managers.AquariumManager;
+import lv.id.bonne.animalpenpaper.managers.container.AnimalPenManager;
+import lv.id.bonne.animalpenpaper.managers.container.AquariumManager;
 import lv.id.bonne.animalpenpaper.managers.DisplayTextManager;
 import lv.id.bonne.animalpenpaper.managers.TranslationManager;
 
