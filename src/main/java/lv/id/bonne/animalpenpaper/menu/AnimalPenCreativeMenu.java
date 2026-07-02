@@ -2,16 +2,18 @@ package lv.id.bonne.animalpenpaper.menu;
 
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
@@ -102,16 +104,33 @@ public class AnimalPenCreativeMenu implements Listener, InventoryHolder
             return;
         }
 
-        if (event.getInventory().getHolder() != this || event.getClickedInventory() != this.inventory)
+        InventoryView view = event.getView();
+
+        if (!(view.getTopInventory().getHolder() == this))
         {
             return;
         }
 
-        event.setCancelled(true);
+        int topSize = view.getTopInventory().getSize();
+        int rawSlot = event.getRawSlot();
+
+        // BLOCK anything involving GUI
+        if (rawSlot < topSize ||
+            event.getAction() == InventoryAction.COLLECT_TO_CURSOR ||
+            event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY)
+        {
+            event.setCancelled(true);
+        }
+
+        // Only handle clicks inside GUI
+        if (rawSlot >= topSize)
+        {
+            return;
+        }
 
         ItemStack clickedItem = event.getCurrentItem();
 
-        if (clickedItem == null || clickedItem.getType() == Material.AIR)
+        if (clickedItem == null || clickedItem.getType().isAir())
         {
             return;
         }
@@ -134,42 +153,106 @@ public class AnimalPenCreativeMenu implements Listener, InventoryHolder
         // Give the item to the player
         ItemStack itemToGive = clickedItem.clone();
 
-        // Different click types give different amounts
-        if (event.isShiftClick())
+        if (!event.getCursor().isEmpty() && !itemToGive.isSimilar(event.getCursor()) ||
+            event.getAction() == InventoryAction.NOTHING ||
+            event.getAction() == InventoryAction.UNKNOWN)
         {
-            // Handle custom item giving
-            if (player.getGameMode() != org.bukkit.GameMode.CREATIVE)
+            // Wrong item in inventory
+            view.setCursor(ItemStack.empty());
+            return;
+        }
+
+        if (event.getAction() == InventoryAction.HOTBAR_SWAP)
+        {
+            // Handle swapping with offhand
+            if (player.getGameMode() != GameMode.CREATIVE)
             {
-                player.sendMessage(AnimalPenPlugin.translations().
-                    getTranslatable("menu.animal_pen.creative.error.creative"));
-                return;
+                player.getInventory().setItem(EquipmentSlot.OFF_HAND,
+                    itemToGive.asQuantity(itemToGive.getMaxStackSize()));
+            }
+            else
+            {
+                player.getInventory().setItem(EquipmentSlot.OFF_HAND,
+                    itemToGive.asOne());
             }
 
-            itemToGive.setAmount(itemToGive.getMaxStackSize());
-        }
-        else
-        {
-            itemToGive.setAmount(1);
+            return;
         }
 
-        // Try to add to inventory, drop if full
-        Map<Integer, ItemStack> leftover = player.getInventory().addItem(itemToGive);
-
-        if (!leftover.isEmpty())
+        if (event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY)
         {
-            leftover.values().forEach(item -> player.getWorld().dropItem(player.getLocation(), item));
-            player.sendMessage(AnimalPenPlugin.translations().
-                getTranslatable("menu.animal_pen.creative.warn.full-inventory"));
+            // Try to add to inventory, drop if full
+            Map<Integer, ItemStack> leftover = player.getInventory().addItem(
+                player.getGameMode() == GameMode.CREATIVE ?
+                    itemToGive.asQuantity(itemToGive.getMaxStackSize()) :
+                    itemToGive.asOne());
+
+            if (!leftover.isEmpty())
+            {
+                leftover.values().forEach(item -> player.getWorld().dropItem(player.getLocation(), item));
+                player.sendMessage(AnimalPenPlugin.translations().
+                    getTranslatable("menu.animal_pen.creative.warn.full-inventory"));
+            }
+            else
+            {
+                // Success message with amount
+                Component itemName = clickedItem.getItemMeta().hasDisplayName() ?
+                    clickedItem.getItemMeta().displayName() :
+                    Component.text(clickedItem.getType().name().replace("_", " ").toLowerCase());
+
+                player.sendMessage(AnimalPenPlugin.translations().
+                    getTranslatable("menu.animal_pen.creative.success.give", itemToGive.getAmount(), itemName));
+            }
+
+            return;
         }
-        else
-        {
-            // Success message with amount
-            Component itemName = clickedItem.getItemMeta().hasDisplayName() ?
-                clickedItem.getItemMeta().displayName() :
-                Component.text(clickedItem.getType().name().replace("_", " ").toLowerCase());
 
-            player.sendMessage(AnimalPenPlugin.translations().
-                getTranslatable("menu.animal_pen.creative.success.give", itemToGive.getAmount(), itemName));
+        if (event.getAction() == InventoryAction.PICKUP_ALL ||
+            event.getAction() == InventoryAction.PICKUP_HALF ||
+            event.getAction() == InventoryAction.PICKUP_ONE ||
+            event.getAction() == InventoryAction.PLACE_ALL ||
+            event.getAction() == InventoryAction.PLACE_SOME ||
+            event.getAction() == InventoryAction.PLACE_ONE)
+        {
+            int amount = view.getCursor().getAmount();
+
+            if (event.getClick() == ClickType.RIGHT && amount > 0)
+            {
+                amount--;
+            }
+            else
+            {
+                amount = Math.min(amount + 1, itemToGive.getMaxStackSize());
+            }
+
+            view.setCursor(itemToGive.asQuantity(amount));
+        }
+        else if (event.getClick() == ClickType.DOUBLE_CLICK ||
+            event.getAction() == InventoryAction.CLONE_STACK)
+        {
+            view.setCursor(itemToGive.asQuantity(itemToGive.getMaxStackSize()));
+        }
+    }
+
+
+    @EventHandler
+    public void onInventoryDrag(InventoryDragEvent event)
+    {
+        if (!(event.getWhoClicked() instanceof Player))
+        {
+            return;
+        }
+
+        InventoryView view = event.getView();
+
+        if (!(view.getTopInventory().getHolder() == this))
+        {
+            return;
+        }
+
+        if (event.getRawSlots().stream().anyMatch(slot -> slot < 36))
+        {
+            event.setCancelled(true);
         }
     }
 
