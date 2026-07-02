@@ -10,3 +10,4 @@
 - Added Aviary: 
   - Added `animal_pen:bird_catcher_pickable` tag that defines pickable mobs
   - Added `animal_pen:can_attack_aviary` tag that defines items that can attack aviary
+- Fixed issue where certain actions worked only if you clicked on animal or block bellow it.

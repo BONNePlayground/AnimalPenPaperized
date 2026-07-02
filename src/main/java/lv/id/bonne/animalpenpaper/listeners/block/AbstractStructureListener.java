@@ -35,9 +35,11 @@ import org.bukkit.event.entity.EntityTransformEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -264,45 +266,7 @@ public abstract class AbstractStructureListener implements Listener
             return;
         }
 
-        // Check for food items
-        Player player = event.getPlayer();
-        ItemStack itemStack = player.getInventory().getItem(event.getHand());
-
-        if (manager.isContainer(itemStack))
-        {
-            // This does not interact with hand-held containers.
-            return;
-        }
-
-        // Track on interaction
-        AnimalPenPlugin.getInstance().task.startTrackingEntity(entity, false, this.getManager());
-
-        AnimalBlockInteractEvent interactEvent = new AnimalBlockInteractEvent(player,
-            itemStack,
-            event.getHand(),
-            entity.getLocation(),
-            manager.getAnimalData(entity),
-            this.getManager().getBlockPrefix());
-
-        if (!interactEvent.callEvent())
-        {
-            // Do nothing. Interaction failed.
-            return;
-        }
-
-        if (itemStack.isEmpty() && event.getHand() == EquipmentSlot.HAND)
-        {
-            AnimalPenVariantMenu.openMenu(entity, player, this.getManager());
-            // Not an item.
-            return;
-        }
-
-        InteractionHandler.handleItemInteraction(entity,
-            player,
-            itemStack,
-            manager.getAnimalData(entity),
-            data -> manager.setStructureData(entity, data),
-            manager.getBlockPrefix());
+        this.processEntity(event.getPlayer(), event.getHand(), entity);
     }
 
 
@@ -367,6 +331,86 @@ public abstract class AbstractStructureListener implements Listener
             attackItem,
             manager.getAnimalData(entity),
             data -> manager.setStructureData(entity, data));
+    }
+
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onBlockInteract(PlayerInteractEvent event)
+    {
+        Block clickedBlock = event.getClickedBlock();
+
+        if (clickedBlock == null)
+        {
+            return;
+        }
+
+        AbstractContainerManager manager = this.getManager();
+
+        if (!manager.isStructureBlock(clickedBlock))
+        {
+            return;
+        }
+
+        // I CONTROL IT!!! NO CUSTOM INTERACTIONS HAHAHAHA
+        event.setCancelled(true);
+
+        if (event.getHand() != EquipmentSlot.HAND)
+        {
+            // Prevent interactions with offhand to avoid double triggering.,
+            return;
+        }
+
+        Entity entity = manager.getStructureEntity(clickedBlock);
+
+        if (entity instanceof LivingEntity livingEntity)
+        {
+            this.processEntity(event.getPlayer(), event.getHand(), livingEntity);
+        }
+    }
+
+
+    private void processEntity(@NotNull Player player,
+        @NotNull EquipmentSlot hand,
+        @NotNull LivingEntity entity)
+    {
+        ItemStack itemStack = player.getInventory().getItem(hand);
+        AbstractContainerManager manager = this.getManager();
+
+        if (manager.isContainer(itemStack))
+        {
+            // This does not interact with hand-held containers.
+            return;
+        }
+
+        // Track on interaction
+        AnimalPenPlugin.getInstance().task.startTrackingEntity(entity, false, this.getManager());
+
+        AnimalBlockInteractEvent interactEvent = new AnimalBlockInteractEvent(player,
+            itemStack,
+            hand,
+            entity.getLocation(),
+            manager.getAnimalData(entity),
+            this.getManager().getBlockPrefix());
+
+        if (!interactEvent.callEvent())
+        {
+            // Do nothing. Interaction failed.
+            return;
+        }
+
+        if (itemStack.isEmpty() && hand == EquipmentSlot.HAND)
+        {
+            AnimalPenVariantMenu.openMenu(entity, player, this.getManager());
+            // Not an item.
+            return;
+        }
+
+        InteractionHandler.handleItemInteraction(entity,
+            player,
+            itemStack,
+            manager.getAnimalData(entity),
+            data -> manager.setStructureData(entity, data),
+            manager.getBlockPrefix());
     }
 
 

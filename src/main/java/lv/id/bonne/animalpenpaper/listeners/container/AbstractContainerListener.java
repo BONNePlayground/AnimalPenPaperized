@@ -407,6 +407,182 @@ public abstract class AbstractContainerListener implements Listener
      * This listener checks if player can interact with the structure using a hand-held container.
      */
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onInteractWithStructureEntityWithContainer(PlayerInteractEntityEvent event)
+    {
+        Player player = event.getPlayer();
+        ItemStack item = player.getInventory().getItem(event.getHand());
+        AbstractContainerManager manager = this.getManager();
+
+        if (!manager.isContainer(item))
+        {
+            return;
+        }
+
+        if (!(event.getRightClicked() instanceof LivingEntity livingEntity))
+        {
+            return;
+        }
+
+        if (!manager.isStructureEntity(livingEntity))
+        {
+            return;
+        }
+
+        event.setCancelled(true);
+
+        AnimalData penData = manager.getAnimalData(livingEntity);
+        AnimalData itemData = manager.getAnimalData(item);
+
+        if (itemData == null && penData == null)
+        {
+            // Both are empty
+            return;
+        }
+
+        if (penData == null)
+        {
+            AnimalDepositEvent animalDepositEvent = new AnimalDepositEvent(player,
+                livingEntity.getLocation(),
+                itemData,
+                null,
+                this.getManager().getItemPrefix());
+
+            if (!animalDepositEvent.callEvent())
+            {
+                player.sendMessage(AnimalPenPlugin.translations().
+                    getTranslatable(this.getManager().getContainerTranslationPrefix() + ".error.deposit"));
+                return;
+            }
+
+            // Structure data is null.
+            manager.setStructureData(livingEntity, itemData);
+
+            item.setAmount(-1);
+            player.getInventory().setItem(event.getHand(), item);
+            player.swingMainHand();
+
+            player.sendMessage(AnimalPenPlugin.translations().
+                getTranslatable(this.getManager().getContainerTranslationPrefix() + ".inserted"));
+
+            return;
+        }
+
+        if (itemData == null)
+        {
+            if (!player.isSneaking() || penData.entityCount() < 2)
+            {
+                // Only on sneaking or there is something to split
+                return;
+            }
+
+            // Clone half of data to new item
+            itemData = new AnimalData(penData.entityType(), penData.entitySnapshot(), penData.entityCount() / 2);
+            itemData.getCooldowns().putAll(penData.getCooldowns());
+
+            this.onWithdrawSplit(penData, itemData);
+
+            AnimalWithdrawEvent animalWithdrawEvent = new AnimalWithdrawEvent(player,
+                livingEntity.getLocation(),
+                itemData,
+                penData,
+                this.getManager().getItemPrefix());
+
+            if (!animalWithdrawEvent.callEvent())
+            {
+                event.getPlayer().sendMessage(AnimalPenPlugin.translations().
+                    getTranslatable(this.getManager().getContainerTranslationPrefix() + ".error.withdrawn"));
+                return;
+            }
+
+            manager.setContainerData(item, itemData);
+
+            penData.reduceEntityCount(itemData.entityCount());
+
+            manager.setStructureData(livingEntity, penData);
+
+            player.sendMessage(AnimalPenPlugin.translations().
+                getTranslatable(this.getManager().getContainerTranslationPrefix() + ".withdrawn", itemData.entityCount()));
+
+            return;
+        }
+
+        if (penData.entityType() != itemData.entityType())
+        {
+            // Cannot merge different entities
+            return;
+        }
+
+        AnimalDepositEvent animalDepositEvent = new AnimalDepositEvent(player,
+            livingEntity.getLocation(),
+            itemData,
+            penData,
+            this.getManager().getItemPrefix());
+
+        if (!animalDepositEvent.callEvent())
+        {
+            player.sendMessage(AnimalPenPlugin.translations().
+                getTranslatable(this.getManager().getContainerTranslationPrefix() + ".error.deposit"));
+            return;
+        }
+
+        // Now just combine both data, and clear item.
+        penData.addEntityCount(itemData.entityCount());
+
+        // Merge cooldowns
+        itemData.getCooldowns().forEach((key, value) -> penData.getCooldowns().merge(key, value, Math::max));
+        itemData.getCooldowns().clear();
+
+        // Merge scute data
+        penData.setScutes(penData.scutes() + itemData.scutes());
+        itemData.setScutes(0);
+
+        // Check variants
+        final int maxStoredVariants = AnimalPenPlugin.configuration().getMaxStoredVariants();
+        long amount = itemData.entityCount();
+
+        if (itemData.entityCount() > 1 &&
+            penData.getVariants().size() + itemData.getVariants().size() > maxStoredVariants)
+        {
+            player.sendMessage(AnimalPenPlugin.translations().
+                getTranslatable(this.getManager().getContainerTranslationPrefix() + ".error.too_many_variants"));
+
+            penData.reduceEntityCount(1);
+            itemData.setEntityCount(1);
+
+            // Save reduced item data
+            manager.setContainerData(item, itemData);
+
+            amount--;
+        }
+        else
+        {
+            int size = penData.getVariants().size();
+            Iterator<EntitySnapshot> iterator = itemData.getVariants().iterator();
+
+            while (size < maxStoredVariants && iterator.hasNext())
+            {
+                penData.addVariant(iterator.next());
+                size++;
+            }
+
+            // just clear remining ones.
+            itemData.getVariants().clear();
+
+            // Clear item data
+            manager.setContainerData(item, null);
+        }
+
+        manager.setStructureData(livingEntity, penData);
+
+        player.sendMessage(AnimalPenPlugin.translations().
+            getTranslatable(this.getManager().getContainerTranslationPrefix() + ".deposited", amount));
+    }
+
+
+    /**
+     * This listener checks if player can interact with the structure using a hand-held container.
+     */
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onInteractWithStructureWithContainer(PlayerInteractEvent event)
     {
         if (event.getHand() == null)

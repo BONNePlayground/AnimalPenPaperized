@@ -17,7 +17,6 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Transformation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jspecify.annotations.NonNull;
 import java.util.Collection;
 import java.util.List;
 
@@ -767,7 +766,7 @@ public abstract class AbstractContainerManager
 
 
     @Nullable
-    public BlockData getStructureData(@NonNull Entity entity)
+    public BlockData getStructureData(@NotNull Entity entity)
     {
         Block block = entity.getLocation().add(0, -0.5, 0).getBlock();
         NamespacedKey key = this.penKey(block);
@@ -776,6 +775,25 @@ public abstract class AbstractContainerManager
     }
 
 
+    @Nullable
+    public Entity getStructureEntity(@NotNull Block block)
+    {
+        NamespacedKey key = this.penKey(block);
+
+        BlockData blockData = block.getWorld().getPersistentDataContainer().
+            getOrDefault(key, BlockDataType.INSTANCE, new BlockData());
+
+        if (blockData.entity == null)
+        {
+            return null;
+        }
+        else
+        {
+            return block.getWorld().getEntity(blockData.entity);
+        }
+    }
+
+    
     public void clearBlockData(Block block, boolean keepBlock)
     {
         NamespacedKey key = this.penKey(block);
