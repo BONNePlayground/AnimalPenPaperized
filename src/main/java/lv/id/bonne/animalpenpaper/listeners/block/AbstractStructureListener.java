@@ -255,6 +255,15 @@ public abstract class AbstractStructureListener implements Listener
             return;
         }
 
+        // I CONTROL IT!!! NO CUSTOM INTERACTIONS HAHAHAHA
+        event.setCancelled(true);
+
+        if (event.getHand() != EquipmentSlot.HAND)
+        {
+            // Prevent interactions with offhand to avoid double triggering.,
+            return;
+        }
+
         // Check for food items
         Player player = event.getPlayer();
         ItemStack itemStack = player.getInventory().getItem(event.getHand());
@@ -267,9 +276,6 @@ public abstract class AbstractStructureListener implements Listener
 
         // Track on interaction
         AnimalPenPlugin.getInstance().task.startTrackingEntity(entity, false, this.getManager());
-
-        // I CONTROL IT!!! NO CUSTOM INTERACTIONS HAHAHAHA
-        event.setCancelled(true);
 
         AnimalBlockInteractEvent interactEvent = new AnimalBlockInteractEvent(player,
             itemStack,
