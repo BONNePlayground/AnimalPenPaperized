@@ -8,10 +8,12 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.Slab;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
+import lv.id.bonne.animalpenpaper.data.BlockDataType;
 import lv.id.bonne.animalpenpaper.util.StyleUtil;
 
 
@@ -106,6 +108,18 @@ public class AquariumManager extends AbstractContainerManager
 // ---------------------------------------------------------------------
 // Section: Lifecycle hooks
 // ---------------------------------------------------------------------
+
+
+    @Override
+    public boolean isStructureBlock(@Nullable Block block)
+    {
+        if (block == null || block.getType() != this.getStructureMaterial() && block.getType() != DEPRECATED_MATERIAL)
+        {
+            return false;
+        }
+
+        return block.getWorld().getPersistentDataContainer().has(this.penKey(block), BlockDataType.INSTANCE);
+    }
 
 
     /** Waterlog the slab and place water above it when the first entity is spawned. */
@@ -213,4 +227,6 @@ public class AquariumManager extends AbstractContainerManager
     private static final String WATER_CONTAINER_FILLED_MODEL = "animal_pen:water_animal_container_filled";
 
     public static final String AQUARIUM_MODEL = "animal_pen:aquarium";
+
+    private final Material DEPRECATED_MATERIAL = Material.SMOOTH_STONE_SLAB;
 }
