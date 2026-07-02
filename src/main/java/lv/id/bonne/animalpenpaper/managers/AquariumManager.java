@@ -138,6 +138,12 @@ public class AquariumManager extends AbstractContainerManager
     }
 
 
+    public Material getStructureMaterial()
+    {
+        return Material.STONE_SLAB;
+    }
+
+
 // ---------------------------------------------------------------------
 // Section: Structure item creation
 // ---------------------------------------------------------------------

@@ -1,0 +1,20 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "minecraft:custom_model_data",
+    "index": 0,
+    "cases": [
+      {
+        "when": "animal_pen:aquarium",
+        "model": {
+          "type": "minecraft:model",
+          "model": "animal_pen:block/aquarium_empty"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:block/stone_slab"
+    }
+  }
+}

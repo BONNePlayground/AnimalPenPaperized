@@ -92,20 +92,17 @@ public abstract class AbstractContainerManager
 
 
     /**
+     * Material of the placeable block. Defaults to {@link Material#SMOOTH_STONE_SLAB}; override if different.
+     */
+    protected abstract Material getStructureMaterial();
+
+
+    /**
      * Material of the hand-held container item. Defaults to {@link Material#GLASS_BOTTLE}; override if different.
      */
     protected Material getContainerMaterial()
     {
         return Material.GLASS_BOTTLE;
-    }
-
-
-    /**
-     * Material of the placeable block. Defaults to {@link Material#SMOOTH_STONE_SLAB}; override if different.
-     */
-    protected Material getStructureMaterial()
-    {
-        return Material.SMOOTH_STONE_SLAB;
     }
 
 
@@ -416,7 +413,7 @@ public abstract class AbstractContainerManager
 
     public boolean isStructureBlock(@Nullable Block block)
     {
-        if (block == null || block.getType() != this.getStructureMaterial())
+        if (block == null || block.getType() != this.getStructureMaterial() && block.getType() != DEPRECATED_MATERIAL)
         {
             return false;
         }
@@ -499,7 +496,7 @@ public abstract class AbstractContainerManager
     {
         Block block = entity.getLocation().add(0, -0.5, 0).getBlock();
 
-        if (block.getType() != this.getStructureMaterial())
+        if (block.getType() != this.getStructureMaterial() && block.getType() != DEPRECATED_MATERIAL)
         {
             return;
         }
@@ -889,4 +886,7 @@ public abstract class AbstractContainerManager
 
         setStructureData(block, animalData);
     }
+
+
+    private final Material DEPRECATED_MATERIAL = Material.SMOOTH_STONE_SLAB;
 }

@@ -1,6 +1,7 @@
 package lv.id.bonne.animalpenpaper.managers;
 
 
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -109,6 +110,12 @@ public class AnimalPenManager extends AbstractContainerManager
     }
 
 
+    public Material getStructureMaterial()
+    {
+        return Material.SMOOTH_STONE_SLAB;
+    }
+
+
 // ---------------------------------------------------------------------
 // Section: Lifecycle hooks
 // ---------------------------------------------------------------------
@@ -149,7 +156,7 @@ public class AnimalPenManager extends AbstractContainerManager
     @Override
     public ItemStack createDefaultStructureItem()
     {
-        return this.createStructureItem("animal_pen_oak");
+        return this.createStructureItem("animal_pen:animal_pen_oak");
     }
 
 
@@ -171,7 +178,7 @@ public class AnimalPenManager extends AbstractContainerManager
         meta.setCustomModelDataComponent(customData);
 
         meta.displayName(AnimalPenPlugin.translations()
-            .getTranslatable("item.animal_pen." + variant.replace(":", "."))
+            .getTranslatable("item." + variant.replace(":", "."))
             .style(StyleUtil.WHITE));
 
         String tipPrefix = this.getStructureTranslationPrefix();

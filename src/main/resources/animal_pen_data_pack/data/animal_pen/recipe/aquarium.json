@@ -12,7 +12,7 @@
     "S": "minecraft:stone"
   },
   "result": {
-    "id": "minecraft:smooth_stone_slab",
+    "id": "minecraft:stone_slab",
     "count": 1,
     "components": {
       "minecraft:item_name": {
