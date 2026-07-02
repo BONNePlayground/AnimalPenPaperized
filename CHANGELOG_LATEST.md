@@ -5,3 +5,4 @@
 - Fixed a bug where armadillo text would be rotated in wrong direction.
 - Changed Aquarium base block from smooth stone slab to stone slab.
 - Improved admin item giving GUI.
+- Renamed Water Animal Container to Aquatic Jar to make parity with Animal Pen mod.

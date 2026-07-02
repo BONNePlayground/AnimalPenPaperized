@@ -16,7 +16,7 @@
       "minecraft:max_stack_size": 1,
       "minecraft:item_name": {
         "translate": "item.animal_pen.water_animal_container.name",
-        "fallback": "Water Mob Container",
+        "fallback": "Aquatic Jar",
         "italic": false,
         "color": "#FFFFFF"
       },
