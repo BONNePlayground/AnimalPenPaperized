@@ -496,7 +496,7 @@ public abstract class AbstractContainerManager
     {
         Block block = entity.getLocation().add(0, -0.5, 0).getBlock();
 
-        if (block.getType() != this.getStructureMaterial() && block.getType() != DEPRECATED_MATERIAL)
+        if (!this.isStructureBlock(block))
         {
             return;
         }
