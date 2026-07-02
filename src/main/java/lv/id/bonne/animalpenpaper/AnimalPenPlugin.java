@@ -11,10 +11,13 @@ import lv.id.bonne.animalpenpaper.config.ConfigurationManager;
 import lv.id.bonne.animalpenpaper.listeners.*;
 import lv.id.bonne.animalpenpaper.listeners.block.AnimalPenListener;
 import lv.id.bonne.animalpenpaper.listeners.block.AquariumListener;
+import lv.id.bonne.animalpenpaper.listeners.block.AviaryListener;
 import lv.id.bonne.animalpenpaper.listeners.container.AnimalCageListener;
+import lv.id.bonne.animalpenpaper.listeners.container.BirdCatcherListener;
 import lv.id.bonne.animalpenpaper.listeners.container.WaterAnimalContainerListener;
 import lv.id.bonne.animalpenpaper.managers.container.AnimalPenManager;
 import lv.id.bonne.animalpenpaper.managers.container.AquariumManager;
+import lv.id.bonne.animalpenpaper.managers.container.AviaryManager;
 import lv.id.bonne.animalpenpaper.managers.DisplayTextManager;
 import lv.id.bonne.animalpenpaper.managers.TranslationManager;
 
@@ -43,12 +46,16 @@ public class AnimalPenPlugin extends JavaPlugin
         this.getServer().getPluginManager().registerEvents(new WaterAnimalContainerListener(), this);
         this.getServer().getPluginManager().registerEvents(new AquariumListener(), this);
 
+        this.getServer().getPluginManager().registerEvents(new BirdCatcherListener(), this);
+        this.getServer().getPluginManager().registerEvents(new AviaryListener(), this);
+
         this.task = new DisplayTextManager();
         this.task.runTask();
 
         this.getServer().getPluginManager().registerEvents(new GeneralDisplayListener(), this);
         this.getServer().getPluginManager().registerEvents(new EntityTrackingListener(AnimalPenManager.INSTANCE), this);
         this.getServer().getPluginManager().registerEvents(new EntityTrackingListener(AquariumManager.INSTANCE), this);
+        this.getServer().getPluginManager().registerEvents(new EntityTrackingListener(AviaryManager.INSTANCE), this);
 
         this.getLogger().info("AnimalPen plugin enabled.");
     }

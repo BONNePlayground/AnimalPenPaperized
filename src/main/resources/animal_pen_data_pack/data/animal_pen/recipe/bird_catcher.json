@@ -2,27 +2,27 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "BBB",
-    "BGB",
-    "BBB"
+    " BB",
+    " SB",
+    "S  "
   ],
   "key": {
-    "B": "#minecraft:bars",
-    "G": "minecraft:glass"
+    "B": "minecraft:string",
+    "S": "minecraft:stick"
   },
   "result": {
     "id": "minecraft:glass_bottle",
     "components": {
       "minecraft:max_stack_size": 1,
       "minecraft:item_name": {
-        "translate": "item.animal_pen.animal_cage.name",
-        "fallback": "Animal Cage",
+        "translate": "item.animal_pen.bird_catcher.name",
+        "fallback": "Aviary Net",
         "italic": false,
         "color": "#FFFFFF"
       },
       "minecraft:custom_model_data": {
         "strings": [
-          "animal_pen:animal_cage"
+          "animal_pen:bird_catcher"
         ]
       }
     }

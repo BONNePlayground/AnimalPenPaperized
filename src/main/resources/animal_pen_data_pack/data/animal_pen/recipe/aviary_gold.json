@@ -1,0 +1,37 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "aviaries",
+  "pattern": [
+    "NGN",
+    "G G",
+    "SSS"
+  ],
+  "key": {
+    "G": "minecraft:gold_ingot",
+    "N": "minecraft:gold_nugget",
+    "S": "minecraft:smooth_stone_slab"
+  },
+  "result": {
+    "id": "minecraft:andesite_slab",
+    "count": 1,
+    "components": {
+      "minecraft:item_name": {
+        "translate": "item.animal_pen.aviary_gold.name",
+        "fallback": "Gold Aviary",
+        "italic": false,
+        "color": "#FFFFFF"
+      },
+      "minecraft:custom_model_data": {
+        "strings": [
+          "animal_pen:aviary",
+          "animal_pen:aviary_gold"
+        ]
+      },
+      "minecraft:block_state": {
+        "type": "bottom",
+        "waterlogged": "false"
+      }
+    }
+  }
+}

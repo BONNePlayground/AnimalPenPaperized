@@ -1,0 +1,39 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "aviaries",
+  "pattern": [
+    "FFF",
+    "F F",
+    "SSS"
+  ],
+  "key": {
+    "F": [
+      "minecraft:copper_chain",
+      "minecraft:waxed_copper_chain"
+    ],
+    "S": "minecraft:smooth_stone_slab"
+  },
+  "result": {
+    "id": "minecraft:andesite_slab",
+    "count": 1,
+    "components": {
+      "minecraft:item_name": {
+        "translate": "item.animal_pen.aviary_copper.name",
+        "fallback": "Copper Aviary",
+        "italic": false,
+        "color": "#FFFFFF"
+      },
+      "minecraft:custom_model_data": {
+        "strings": [
+          "animal_pen:aviary",
+          "animal_pen:aviary_copper"
+        ]
+      },
+      "minecraft:block_state": {
+        "type": "bottom",
+        "waterlogged": "false"
+      }
+    }
+  }
+}

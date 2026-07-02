@@ -4,13 +4,7 @@ package lv.id.bonne.animalpenpaper.listeners.container;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Ageable;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntitySnapshot;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Tameable;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -30,6 +24,7 @@ import java.util.List;
 
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.CustomModelData;
+import io.papermc.paper.potion.SuspiciousEffectEntry;
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
 import lv.id.bonne.animalpenpaper.events.item.AnimalCatchEvent;
@@ -98,7 +93,36 @@ public abstract class AbstractContainerListener implements Listener
      */
     protected boolean onEntityReleased(Entity entity, AnimalData storedData)
     {
-        return false;
+        boolean updateSnapshot = storedData.getAppliedFlag().isPresent() ||
+            storedData.getAppliedMaterial().isPresent();
+
+        if (entity instanceof Sheep sheep)
+        {
+            storedData.getAppliedFlag().ifPresent(shared -> {
+                sheep.setSheared(shared);
+                storedData.setAppliedFlag(null);
+            });
+
+            storedData.getAppliedMaterial().ifPresent(dye -> {
+                sheep.setColor(Utils.getDyeColor(dye));
+                storedData.setAppliedMaterial(null);
+            });
+        }
+        else if (entity instanceof MushroomCow cow)
+        {
+            storedData.getAppliedMaterial().ifPresent(dye -> {
+                SuspiciousEffectEntry suspiciousEffectEntry = Utils.FLOWER_EFFECTS.get(dye);
+
+                if (suspiciousEffectEntry != null)
+                {
+                    cow.addEffectToNextStew(suspiciousEffectEntry, true);
+                }
+
+                storedData.setAppliedMaterial(null);
+            });
+        }
+
+        return updateSnapshot;
     }
 
 
@@ -112,7 +136,11 @@ public abstract class AbstractContainerListener implements Listener
      */
     protected void onWithdrawSplit(AnimalData penData, AnimalData itemData)
     {
-        // Default: no-op
+        itemData.setScutes(penData.scutes() / 2);
+        penData.setScutes(penData.scutes() - itemData.scutes());
+
+        penData.getAppliedMaterial().ifPresent(itemData::setAppliedMaterial);
+        penData.getAppliedFlag().ifPresent(itemData::setAppliedFlag);
     }
 
 

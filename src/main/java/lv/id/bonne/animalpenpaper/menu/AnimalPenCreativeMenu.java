@@ -23,6 +23,7 @@ import java.util.Map;
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.managers.container.AnimalPenManager;
 import lv.id.bonne.animalpenpaper.managers.container.AquariumManager;
+import lv.id.bonne.animalpenpaper.managers.container.AviaryManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -51,7 +52,14 @@ public class AnimalPenCreativeMenu implements Listener, InventoryHolder
             AnimalPenManager.INSTANCE.createStructureItem("animal_pen:animal_pen_spruce"),
             AnimalPenManager.INSTANCE.createStructureItem("animal_pen:animal_pen_warped"),
             AquariumManager.INSTANCE.createEmptyContainer(),
-            AquariumManager.INSTANCE.createDefaultStructureItem());
+            AquariumManager.INSTANCE.createDefaultStructureItem(),
+            AviaryManager.INSTANCE.createEmptyContainer(),
+            AviaryManager.INSTANCE.createStructureItem("animal_pen:aviary_iron"),
+            AviaryManager.INSTANCE.createStructureItem("animal_pen:aviary_gold"),
+            AviaryManager.INSTANCE.createStructureItem("animal_pen:aviary_copper"),
+            AviaryManager.INSTANCE.createStructureItem("animal_pen:aviary_exposed_copper"),
+            AviaryManager.INSTANCE.createStructureItem("animal_pen:aviary_weathered_copper"),
+            AviaryManager.INSTANCE.createStructureItem("animal_pen:aviary_oxidized_copper"));
 
         for (int i = 0; i < customItems.size(); i++)
         {

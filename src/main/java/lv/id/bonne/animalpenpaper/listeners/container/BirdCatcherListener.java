@@ -2,13 +2,13 @@ package lv.id.bonne.animalpenpaper.listeners.container;
 
 
 import lv.id.bonne.animalpenpaper.managers.container.AbstractContainerManager;
-import lv.id.bonne.animalpenpaper.managers.container.AnimalPenManager;
+import lv.id.bonne.animalpenpaper.managers.container.AviaryManager;
 
 
 /**
  * This listener manages animal cage interactions.
  */
-public class AnimalCageListener extends AbstractContainerListener
+public class BirdCatcherListener extends AbstractContainerListener
 {
 
 // ---------------------------------------------------------------------
@@ -19,7 +19,7 @@ public class AnimalCageListener extends AbstractContainerListener
     @Override
     protected AbstractContainerManager getManager()
     {
-        return AnimalPenManager.INSTANCE;
+        return AviaryManager.INSTANCE;
     }
 
 

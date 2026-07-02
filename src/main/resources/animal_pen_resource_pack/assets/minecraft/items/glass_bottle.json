@@ -59,6 +59,34 @@
             "model": "animal_pen:item/water_animal_container_filled"
           }
         }
+      },
+      {
+        "when": "animal_pen:bird_catcher",
+        "model": {
+          "type": "minecraft:model",
+          "model": "animal_pen:item/bird_catcher"
+        }
+      },
+      {
+        "when": "animal_pen:bird_catcher_filled",
+        "model": {
+          "type": "minecraft:select",
+          "property": "minecraft:custom_model_data",
+          "index": 1,
+          "cases": [
+            {
+              "when": "minecraft:bee",
+              "model": {
+                "type": "minecraft:model",
+                "model": "animal_pen:item/bird_catcher_filled"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "animal_pen:item/bird_catcher_filled"
+          }
+        }
       }
     ],
     "fallback": {

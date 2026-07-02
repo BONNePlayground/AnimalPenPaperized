@@ -46,6 +46,8 @@ public class Configuration
             this.waterAnimalSize <= 0 ||
             this.animalSize == null ||
             this.animalSize <= 0 ||
+            this.aviaryAnimalSize == null ||
+            this.aviaryAnimalSize <= 0 ||
             this.growthMultiplier == null ||
             this.growthMultiplier < 0 ||
             this.attackCooldown == null ||
@@ -90,6 +92,11 @@ public class Configuration
         if (this.waterAnimalSize == null || this.waterAnimalSize <= 0 || init)
         {
             this.waterAnimalSize = 0.33f;
+        }
+
+        if (this.aviaryAnimalSize == null || this.aviaryAnimalSize <= 0 || init)
+        {
+            this.aviaryAnimalSize = 0.33f;
         }
 
         if (this.growthMultiplier == null || this.growthMultiplier < 0 || init)
@@ -138,6 +145,7 @@ public class Configuration
 
             this.growAnimals = false;
             this.growWaterAnimals = false;
+            this.growAviaryAnimals = false;
 
             this.dropScuteAtStart = false;
         }
@@ -353,6 +361,29 @@ public class Configuration
     {
         return this.waterAnimalSize;
     }
+
+
+    /**
+     * Is grow aviary animals boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isGrowAviaryAnimals()
+    {
+        return this.growAviaryAnimals;
+    }
+
+
+    /**
+     * Gets aviary animal size.
+     *
+     * @return the aviary animal size
+     */
+    public float getAviaryAnimalSize()
+    {
+        return this.aviaryAnimalSize;
+    }
+
 
 
     /**
@@ -601,6 +632,17 @@ public class Configuration
     @Expose
     @SerializedName("water_animal_size")
     private Float waterAnimalSize;
+
+    @JsonComment("Allows to enable animal growing in aviary.")
+    @JsonComment("The more animals are inside it, the larger it will be.")
+    @Expose
+    @SerializedName("aviary_animals_can_grow")
+    private boolean growAviaryAnimals = false;
+
+    @JsonComment("Allows to change default animal size in aviary.")
+    @Expose
+    @SerializedName("aviary_animal_size")
+    private Float aviaryAnimalSize;
 
     @JsonComment("Allows to set how fast animals grows in pen and aquarium.")
     @JsonComment("Each animal is multiplied by given value to get end size.")

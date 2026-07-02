@@ -667,7 +667,7 @@ public abstract class AbstractContainerManager
 
                 if (attribute != null)
                 {
-                    attribute.setBaseValue(getAnimalSize());
+                    attribute.setBaseValue(this.getAnimalSize());
 
                     if (this.isGrowEnabled())
                     {
