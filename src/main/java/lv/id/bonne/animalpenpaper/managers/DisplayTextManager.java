@@ -21,6 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
+import lv.id.bonne.animalpenpaper.data.BlockData;
+import lv.id.bonne.animalpenpaper.util.Utils;
 import net.kyori.adventure.text.Component;
 
 
@@ -88,8 +90,9 @@ public class DisplayTextManager
                     if (entity != null)
                     {
                         AnimalData animalData = entityReference.manager().getAnimalData(entity);
+                        BlockData blockData = entityReference.manager().getStructureData(entity);
 
-                        if (animalData != null)
+                        if (blockData != null && animalData != null)
                         {
                             List<Display> displayList = cache.get(entityReference);
 
@@ -133,6 +136,8 @@ public class DisplayTextManager
                                         {
                                             Display display = (Display) newEntity;
 
+                                            newEntity.setRotation(Utils.blockFaceToYaw(blockData.blockFace), 0);
+
                                             Transformation transform = display.getTransformation();
                                             transform.getScale().set(0.125f, 0.125f, 0.125f);
                                             transform.getTranslation().set(-0.45f, 0f, 0f);
@@ -155,6 +160,8 @@ public class DisplayTextManager
                                         newEntity ->
                                         {
                                             TextDisplay display = (TextDisplay) newEntity;
+
+                                            newEntity.setRotation(Utils.blockFaceToYaw(blockData.blockFace), 0);
 
                                             Transformation transform = display.getTransformation();
                                             transform.getScale().set(0.4f, 0.4f, 0.4f);

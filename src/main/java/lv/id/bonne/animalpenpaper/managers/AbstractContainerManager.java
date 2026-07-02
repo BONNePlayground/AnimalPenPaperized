@@ -17,6 +17,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Transformation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import java.util.Collection;
 import java.util.List;
 
@@ -764,6 +765,16 @@ public abstract class AbstractContainerManager
             .getOrDefault(key, BlockDataType.INSTANCE, new BlockData());
 
         Helper.updateCountTextEntity(block, blockData, newData.entityCount(), key);
+    }
+
+
+    @Nullable
+    public BlockData getStructureData(@NonNull Entity entity)
+    {
+        Block block = entity.getLocation().add(0, -0.5, 0).getBlock();
+        NamespacedKey key = this.penKey(block);
+        return block.getWorld().getPersistentDataContainer().
+            getOrDefault(key, BlockDataType.INSTANCE, new BlockData());
     }
 
 
