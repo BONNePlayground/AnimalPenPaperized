@@ -24,8 +24,7 @@ import java.util.WeakHashMap;
 
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
-import lv.id.bonne.animalpenpaper.managers.AnimalPenManager;
-import lv.id.bonne.animalpenpaper.managers.AquariumManager;
+import lv.id.bonne.animalpenpaper.managers.AbstractContainerManager;
 import lv.id.bonne.animalpenpaper.util.Utils;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.CompoundTag;
@@ -39,16 +38,18 @@ import net.minecraft.nbt.TagParser;
  */
 public class AnimalPenVariantMenu implements Listener, InventoryHolder
 {
-    public AnimalPenVariantMenu(Entity entity)
+    public AnimalPenVariantMenu(Entity entity, AbstractContainerManager manager)
     {
         this.entity = entity;
+        this.manager = manager;
 
         AnimalData animalData = this.getAnimalData();
 
         // from 0 till 45
-        this.itemsPerPage = Math.min(45,
-            Math.max(AnimalPenPlugin.configuration().getMaxStoredVariants(),
-                animalData != null ? animalData.getVariants().size() : 0));
+        this.itemsPerPage = Math.clamp(
+            animalData != null ? animalData.getVariants().size() : 0,
+            AnimalPenPlugin.configuration().getMaxStoredVariants(),
+            45);
 
         this.menuSize = (int) (Math.ceil(this.itemsPerPage / 9.0) * 9) + 9;
 
@@ -470,15 +471,7 @@ public class AnimalPenVariantMenu implements Listener, InventoryHolder
 
     private AnimalData getAnimalData()
     {
-        if (AnimalPenManager.isAnimalPen(this.entity))
-        {
-            return AnimalPenManager.getAnimalData(this.entity);
-        }
-        else if (AquariumManager.isAquarium(this.entity))
-        {
-            return AquariumManager.getAnimalData(this.entity);
-        }
-        return null;
+        return this.manager.getAnimalData(this.entity);
     }
 
 
@@ -602,14 +595,7 @@ public class AnimalPenVariantMenu implements Listener, InventoryHolder
         EntitySnapshot selectedVariant = variants.get(this.selectedVariantIndex);
 
         // Apply the variant (you'll need to implement this method in your managers)
-        if (AnimalPenManager.isAnimalPen(this.entity))
-        {
-            AnimalPenManager.applyVariant(this.entity, selectedVariant);
-        }
-        else if (AquariumManager.isAquarium(this.entity))
-        {
-            AquariumManager.applyVariant(this.entity, selectedVariant);
-        }
+        this.manager.applyVariant(this.entity, selectedVariant);
 
         player.sendMessage(AnimalPenPlugin.translations().
             getTranslatable("menu.animal_pen.variants.apply_success"));
@@ -645,14 +631,7 @@ public class AnimalPenVariantMenu implements Listener, InventoryHolder
         variants.remove(this.selectedVariantIndex);
 
         // Update the animal data (you may need to save this depending on your implementation)
-        if (AnimalPenManager.isAnimalPen(this.entity))
-        {
-            AnimalPenManager.setAnimalPenData(this.entity, animalData);
-        }
-        else if (AquariumManager.isAquarium(this.entity))
-        {
-            AquariumManager.setAquariumData(this.entity, animalData);
-        }
+        this.manager.setStructureData(this.entity, animalData);
 
         // Reset selection
         this.selectedVariantIndex = -1;
@@ -721,14 +700,15 @@ public class AnimalPenVariantMenu implements Listener, InventoryHolder
     }
 
 
-    public static void openMenu(Entity entity, Player player)
+    public static void openMenu(Entity entity, Player player, AbstractContainerManager manager)
     {
-        if (!AnimalPenManager.isAnimalPen(entity) && !AquariumManager.isAquarium(entity))
+        if (!manager.isStructureEntity(entity))
         {
             return;
         }
 
-        AnimalPenVariantMenu animalPenVariantMenu = MENU_MAP.computeIfAbsent(entity, AnimalPenVariantMenu::new);
+        AnimalPenVariantMenu animalPenVariantMenu = MENU_MAP.computeIfAbsent(entity,
+            newEntity -> new AnimalPenVariantMenu(newEntity, manager));
         player.openInventory(animalPenVariantMenu.getInventory());
     }
 
@@ -747,6 +727,8 @@ public class AnimalPenVariantMenu implements Listener, InventoryHolder
     private final Inventory inventory;
 
     private final Entity entity;
+
+    private final AbstractContainerManager manager;
 
     private final int itemsPerPage;
 

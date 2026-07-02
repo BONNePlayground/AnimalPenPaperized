@@ -31,7 +31,7 @@ public class AnimalWithdrawEvent extends AbstractAnimalPenItemEvent
         Location location,
         @Nullable AnimalData itemData,
         @NotNull AnimalData blockData,
-        boolean isAnimalCage)
+        String isAnimalCage)
     {
         super(player, location, itemData, isAnimalCage);
         this.blockData = blockData;

@@ -23,13 +23,12 @@ public class AnimalBlockPlaceEvent extends Event implements Cancellable
     /**
      * @param player The player who places animal pen/aquarium
      * @param location The location of animal pen/aquarium
-     * @param isAnimalPen The indication if block is animal pen (true) or aquarium (false)
      */
-    public AnimalBlockPlaceEvent(Player player, Location location, boolean isAnimalPen)
+    public AnimalBlockPlaceEvent(Player player, Location location, String blockKey)
     {
         this.player = player;
         this.location = location;
-        this.isAnimalPen = isAnimalPen;
+        this.blockKey = blockKey;
     }
 
 
@@ -68,15 +67,15 @@ public class AnimalBlockPlaceEvent extends Event implements Cancellable
     }
 
 
-    public Location location()
+    public String blockKey()
     {
-        return this.location;
+        return this.blockKey;
     }
 
 
-    public boolean isAnimalPen()
+    public Location location()
     {
-        return this.isAnimalPen;
+        return this.location;
     }
 
 
@@ -84,7 +83,7 @@ public class AnimalBlockPlaceEvent extends Event implements Cancellable
 
     private final Location location;
 
-    private final boolean isAnimalPen;
+    private final String blockKey;
 
     private boolean cancel = false;
 

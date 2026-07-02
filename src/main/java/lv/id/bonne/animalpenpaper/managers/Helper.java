@@ -50,7 +50,7 @@ public class Helper
         }
     }
 
-    static void updateCountTextEntity(Block block, BlockData blockData, long entityCount, NamespacedKey penKey)
+    public static void updateCountTextEntity(Block block, BlockData blockData, long entityCount, NamespacedKey penKey)
     {
         Entity entity;
 

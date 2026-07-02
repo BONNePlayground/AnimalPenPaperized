@@ -27,14 +27,16 @@ public class AnimalBlockBreakEvent extends Event implements Cancellable
      * @param player The player who places animal pen/aquarium
      * @param location The location of animal pen/aquarium
      * @param animalData The data stored in animal pen/aquarium
-     * @param isAnimalPen The indication if block is animal pen (true) or aquarium (false)
      */
-    public AnimalBlockBreakEvent(Player player, Location location, @Nullable AnimalData animalData, boolean isAnimalPen)
+    public AnimalBlockBreakEvent(Player player,
+        Location location,
+        @Nullable AnimalData animalData,
+        String blockKey)
     {
         this.player = player;
         this.location = location;
         this.animalData = animalData;
-        this.isAnimalPen = isAnimalPen;
+        this.blockKey = blockKey;
     }
 
 
@@ -79,9 +81,9 @@ public class AnimalBlockBreakEvent extends Event implements Cancellable
     }
 
 
-    public boolean isAnimalPen()
+    public String blockKey()
     {
-        return this.isAnimalPen;
+        return this.blockKey;
     }
 
 
@@ -96,7 +98,7 @@ public class AnimalBlockBreakEvent extends Event implements Cancellable
 
     private final Location location;
 
-    private final boolean isAnimalPen;
+    private final String blockKey;
 
     @Nullable
     private final AnimalData animalData;

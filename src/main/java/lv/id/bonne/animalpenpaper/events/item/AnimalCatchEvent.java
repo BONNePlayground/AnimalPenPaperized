@@ -27,7 +27,7 @@ public class AnimalCatchEvent extends AbstractAnimalPenItemEvent
     public AnimalCatchEvent(Player player,
         Entity entity,
         AnimalData animalData,
-        boolean isAnimalCage)
+        String isAnimalCage)
     {
         super(player, entity.getLocation(), animalData, isAnimalCage);
         this.entity = entity;

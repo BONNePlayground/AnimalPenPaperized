@@ -10,14 +10,8 @@ package lv.id.bonne.animalpenpaper.managers;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.*;
 import org.bukkit.entity.*;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
-import org.bukkit.event.world.EntitiesLoadEvent;
-import org.bukkit.event.world.EntitiesUnloadEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Transformation;
@@ -27,103 +21,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.data.AnimalData;
-import lv.id.bonne.animalpenpaper.data.BlockData;
-import lv.id.bonne.animalpenpaper.data.BlockDataType;
 import net.kyori.adventure.text.Component;
 
 
-public class DisplayTextManager implements Listener
+public class DisplayTextManager
 {
-    @EventHandler
-    public void onEntityLoading(EntitiesLoadEvent event)
+    public void startTrackingEntity(Entity entity, boolean replace, AbstractContainerManager manager)
     {
-        for (Entity entity : event.getEntities())
-        {
-            if (AnimalPenManager.isAnimalPen(entity))
-            {
-                AnimalPenManager.validateAnimalPen(entity);
-                this.startTrackingEntity(entity, true, true);
-            }
-            else if (AquariumManager.isAquarium(entity))
-            {
-                AquariumManager.validateAquarium(entity);
-                this.startTrackingEntity(entity, true, false);
-            }
-            else if (entity instanceof ItemDisplay display)
-            {
-                if (display.getPersistentDataContainer().has(Helper.DECORATION_ENTITY_KEY,
-                    PersistentDataType.STRING))
-                {
-                    String key = display.getPersistentDataContainer().get(Helper.DECORATION_ENTITY_KEY,
-                        PersistentDataType.STRING);
-                    NamespacedKey penKey = new NamespacedKey(AnimalPenPlugin.getInstance(), key);
-
-                    // I need this code to generate 0 for empty pens/aquariums
-                    BlockData blockData = display.getWorld().getPersistentDataContainer().
-                        get(penKey, BlockDataType.INSTANCE);
-
-                    if (blockData != null && blockData.entity == null)
-                    {
-                        Helper.updateCountTextEntity(display.getLocation().getBlock(),
-                            blockData,
-                            0,
-                            penKey);
-                    }
-                }
-            }
-        }
-    }
-
-
-    @EventHandler
-    public void onPlayerCrouching(PlayerToggleSneakEvent event)
-    {
-        if (!AnimalPenPlugin.configuration().isShowCooldownsOnlyOnShift())
-        {
-            return;
-        }
-
-        if (!event.isSneaking())
-        {
-            cache.values().stream().flatMap(List::stream).
-                forEach(display -> event.getPlayer().hideEntity(AnimalPenPlugin.getInstance(), display));
-        }
-        else
-        {
-            cache.values().stream().flatMap(List::stream).
-                filter(display -> display.getLocation().distanceSquared(event.getPlayer().getLocation()) <= 100).
-                forEach(display -> event.getPlayer().showEntity(AnimalPenPlugin.getInstance(), display));
-        }
-    }
-
-
-    @EventHandler
-    public void onEntityUnloading(EntitiesUnloadEvent event)
-    {
-        for (Entity entity : event.getEntities())
-        {
-            if (AnimalPenManager.isAnimalPen(entity))
-            {
-                this.stopTrackingEntity(entity, true);
-            }
-            else if (AquariumManager.isAquarium(entity))
-            {
-                this.stopTrackingEntity(entity, false);
-            }
-            else if (entity instanceof Display display &&
-                display.getPersistentDataContainer().has(Helper.COUNTER_ENTITY_KEY,
-                    PersistentDataType.STRING))
-            {
-                // Remove entity on unloading it. Prevents chunk loading issues.
-                display.remove();
-            }
-        }
-    }
-
-
-    public void startTrackingEntity(Entity entity, boolean replace, boolean isPen)
-    {
-        EntityReference reference = new EntityReference(entity.getUniqueId(), entity.getWorld().getUID(), isPen);
+        EntityReference reference = new EntityReference(entity.getUniqueId(), entity.getWorld().getUID(), manager);
 
         if (!cache.containsKey(reference))
         {
@@ -131,26 +36,26 @@ public class DisplayTextManager implements Listener
         }
         else if (replace)
         {
-            this.stopTrackingEntity(entity, isPen);
+            this.stopTrackingEntity(entity, manager);
             cache.put(reference, new ArrayList<>());
         }
     }
 
 
-    public void stopTrackingEntity(UUID entityUUID, World world, boolean isPen)
+    public void stopTrackingEntity(UUID entityUUID, World world, AbstractContainerManager manager)
     {
         if (entityUUID == null)
         {
             return;
         }
 
-        stopTrackingEntity(new EntityReference(entityUUID, world.getUID(), isPen));
+        stopTrackingEntity(new EntityReference(entityUUID, world.getUID(), manager));
     }
 
 
-    public void stopTrackingEntity(Entity entity, boolean isPen)
+    public void stopTrackingEntity(Entity entity, AbstractContainerManager manager)
     {
-        stopTrackingEntity(entity.getUniqueId(), entity.getWorld(), isPen);
+        stopTrackingEntity(entity.getUniqueId(), entity.getWorld(), manager);
     }
 
 
@@ -182,8 +87,7 @@ public class DisplayTextManager implements Listener
 
                     if (entity != null)
                     {
-                        AnimalData animalData = entityReference.isPen() ?
-                            AnimalPenManager.getAnimalData(entity) : AquariumManager.getAnimalData(entity);
+                        AnimalData animalData = entityReference.manager().getAnimalData(entity);
 
                         if (animalData != null)
                         {
@@ -203,14 +107,7 @@ public class DisplayTextManager implements Listener
                             });
 
                             // Update data
-                            if (entityReference.isPen())
-                            {
-                                AnimalPenManager.setAnimalPenData(entity, animalData);
-                            }
-                            else
-                            {
-                                AquariumManager.setAquariumData(entity, animalData);
-                            }
+                            entityReference.manager().setStructureData(entity, animalData);
 
                             // Draw text
                             List<Pair<Material, Component>> generatedTextMessages =
@@ -327,7 +224,22 @@ public class DisplayTextManager implements Listener
     }
 
 
-    public record EntityReference(UUID entityId, UUID worldId, boolean isPen)
+    public void hideEntities(Player player)
+    {
+        cache.values().stream().flatMap(List::stream).
+            forEach(display -> player.hideEntity(AnimalPenPlugin.getInstance(), display));
+    }
+
+
+    public void showEntities(Player player)
+    {
+        cache.values().stream().flatMap(List::stream).
+            filter(display -> display.getLocation().distanceSquared(player.getLocation()) <= 100).
+            forEach(display -> player.showEntity(AnimalPenPlugin.getInstance(), display));
+    }
+
+
+    public record EntityReference(UUID entityId, UUID worldId, AbstractContainerManager manager)
     {
     }
 

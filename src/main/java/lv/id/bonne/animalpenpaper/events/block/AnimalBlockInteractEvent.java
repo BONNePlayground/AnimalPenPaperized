@@ -25,7 +25,6 @@ public class AnimalBlockInteractEvent extends AbstractAnimalPenBlockEvent
      * @param player The player who performed event.
      * @param location The location of animal pen/aquarium
      * @param animalData The animal data
-     * @param isAnimalPen The indication if block is animal pen (true) or aquarium (false)
      * @param itemStack The item stack used for interaction
      * @param interactionHand The hand used for interaction
      */
@@ -34,9 +33,9 @@ public class AnimalBlockInteractEvent extends AbstractAnimalPenBlockEvent
         EquipmentSlot interactionHand,
         Location location,
         @Nullable AnimalData animalData,
-        boolean isAnimalPen)
+        String blockKey)
     {
-        super(player, location, animalData, isAnimalPen);
+        super(player, location, animalData, blockKey);
         this.itemStack = itemStack;
         this.interactionHand = interactionHand;
     }

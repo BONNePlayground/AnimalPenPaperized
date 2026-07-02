@@ -26,16 +26,20 @@ public class AnimalBlockBreedEvent extends Event
      * @param entityType The entity type
      * @param animalsInPen The amount of animals before
      * @param animalsAdded The amount of animals added
-     * @param isAnimalPen The indication if block is animal pen (true) or aquarium (false)
      */
-    public AnimalBlockBreedEvent(Player player, Location location, EntityType entityType, long animalsInPen, long animalsAdded, boolean isAnimalPen)
+    public AnimalBlockBreedEvent(Player player,
+        Location location,
+        EntityType entityType,
+        long animalsInPen,
+        long animalsAdded,
+        String blockKey)
     {
         this.player = player;
         this.location = location;
         this.entityType = entityType;
         this.animalsInPen = animalsInPen;
         this.animalsAdded = animalsAdded;
-        this.isAnimalPen = isAnimalPen;
+        this.blockKey = blockKey;
     }
 
 
@@ -66,9 +70,9 @@ public class AnimalBlockBreedEvent extends Event
     }
 
 
-    public boolean isAnimalPen()
+    public String blockKey()
     {
-        return this.isAnimalPen;
+        return this.blockKey;
     }
 
 
@@ -96,7 +100,7 @@ public class AnimalBlockBreedEvent extends Event
 
     private final EntityType entityType;
 
-    private final boolean isAnimalPen;
+    private final String blockKey;
 
     private final long animalsInPen;
 

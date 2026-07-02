@@ -25,17 +25,17 @@ public abstract class AbstractAnimalPenItemEvent extends Event implements Cancel
      * @param player The player who performed event
      * @param location The location of event
      * @param animalData The data stored inside item
-     * @param isAnimalCage The animal cage (true) or water mob container (false)
+     * @param itemKey The animal cage (true) or water mob container (false)
      */
     protected AbstractAnimalPenItemEvent(Player player,
         Location location,
         @Nullable AnimalData animalData,
-        boolean isAnimalCage)
+        String itemKey)
     {
         this.player = player;
         this.location = location;
         this.animalData = animalData;
-        this.isAnimalCage = isAnimalCage;
+        this.itemKey = itemKey;
     }
 
 
@@ -94,9 +94,9 @@ public abstract class AbstractAnimalPenItemEvent extends Event implements Cancel
     }
 
 
-    public boolean isAnimalCage()
+    public String itemKey()
     {
-        return this.isAnimalCage;
+        return this.itemKey;
     }
 
 
@@ -117,7 +117,7 @@ public abstract class AbstractAnimalPenItemEvent extends Event implements Cancel
     @Nullable
     private final AnimalData animalData;
 
-    private final boolean isAnimalCage;
+    private final String itemKey;
 
     private boolean cancel = false;
 

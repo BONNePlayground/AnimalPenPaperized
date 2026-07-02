@@ -27,7 +27,7 @@ public class AnimalReleaseEvent extends AbstractAnimalPenItemEvent
     public AnimalReleaseEvent(Player player,
         Location location,
         AnimalData animalData,
-        boolean isAnimalCage)
+        String isAnimalCage)
     {
         super(player, location, animalData, isAnimalCage);
     }

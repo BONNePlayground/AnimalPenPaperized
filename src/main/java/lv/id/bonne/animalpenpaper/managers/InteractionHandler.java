@@ -170,7 +170,7 @@ public class InteractionHandler
         ItemStack itemStack,
         AnimalData data,
         Consumer<AnimalData> dataApply,
-        boolean isAnimalPen)
+        String blockKey)
     {
         if (AnimalPenPlugin.animalFoodConfiguration().isFoodItem(entity, itemStack))
         {
@@ -179,7 +179,7 @@ public class InteractionHandler
                 itemStack,
                 data,
                 dataApply,
-                isAnimalPen);
+                blockKey);
         }
         else if (itemStack.getType() == Material.BRUSH)
         {
@@ -230,7 +230,7 @@ public class InteractionHandler
         ItemStack itemStack,
         AnimalData data,
         Consumer<AnimalData> dataApply,
-        boolean isAnimalPen)
+        String blockKey)
     {
         if (data == null)
         {
@@ -305,7 +305,7 @@ public class InteractionHandler
             entity.getType(),
             data.entityCount(),
             amount,
-            isAnimalPen);
+            blockKey);
 
         data.addEntityCount(amount);
 

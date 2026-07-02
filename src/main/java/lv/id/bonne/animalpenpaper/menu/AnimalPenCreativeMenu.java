@@ -35,21 +35,21 @@ public class AnimalPenCreativeMenu implements Listener, InventoryHolder
         this.inventory = Bukkit.createInventory(this, 36,
             AnimalPenPlugin.translations().getTranslatable("menu.animal_pen.creative.title"));
 
-        List<ItemStack> customItems = List.of(AnimalPenManager.createEmptyAnimalCage(),
-            AnimalPenManager.createAnimalPen("animal_pen_acacia"),
-            AnimalPenManager.createAnimalPen("animal_pen_bamboo"),
-            AnimalPenManager.createAnimalPen("animal_pen_birch"),
-            AnimalPenManager.createAnimalPen("animal_pen_cherry"),
-            AnimalPenManager.createAnimalPen("animal_pen_crimson"),
-            AnimalPenManager.createAnimalPen("animal_pen_dark_oak"),
-            AnimalPenManager.createAnimalPen("animal_pen_jungle"),
-            AnimalPenManager.createAnimalPen("animal_pen_mangrove"),
-            AnimalPenManager.createAnimalPen("animal_pen_oak"),
-            AnimalPenManager.createAnimalPen("animal_pen_pale_oak"),
-            AnimalPenManager.createAnimalPen("animal_pen_spruce"),
-            AnimalPenManager.createAnimalPen("animal_pen_warped"),
-            AquariumManager.createEmptyWaterContainer(),
-            AquariumManager.createAquarium());
+        List<ItemStack> customItems = List.of(AnimalPenManager.INSTANCE.createEmptyContainer(),
+            AnimalPenManager.INSTANCE.createStructureItem("animal_pen_acacia"),
+            AnimalPenManager.INSTANCE.createStructureItem("animal_pen_bamboo"),
+            AnimalPenManager.INSTANCE.createStructureItem("animal_pen_birch"),
+            AnimalPenManager.INSTANCE.createStructureItem("animal_pen_cherry"),
+            AnimalPenManager.INSTANCE.createStructureItem("animal_pen_crimson"),
+            AnimalPenManager.INSTANCE.createStructureItem("animal_pen_dark_oak"),
+            AnimalPenManager.INSTANCE.createStructureItem("animal_pen_jungle"),
+            AnimalPenManager.INSTANCE.createStructureItem("animal_pen_mangrove"),
+            AnimalPenManager.INSTANCE.createStructureItem("animal_pen_oak"),
+            AnimalPenManager.INSTANCE.createStructureItem("animal_pen_pale_oak"),
+            AnimalPenManager.INSTANCE.createStructureItem("animal_pen_spruce"),
+            AnimalPenManager.INSTANCE.createStructureItem("animal_pen_warped"),
+            AquariumManager.INSTANCE.createEmptyContainer(),
+            AquariumManager.INSTANCE.createDefaultStructureItem());
 
         for (int i = 0; i < customItems.size(); i++)
         {

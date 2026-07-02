@@ -25,17 +25,16 @@ public abstract class AbstractAnimalPenBlockEvent extends Event implements Cance
      * @param player The player who performed event.
      * @param location The location of animal pen/aquarium
      * @param animalData The animal data
-     * @param isAnimalPen The indication if block is animal pen (true) or aquarium (false)
      */
     protected AbstractAnimalPenBlockEvent(Player player,
         Location location,
         @Nullable AnimalData animalData,
-        boolean isAnimalPen)
+        String blockKey)
     {
         this.player = player;
         this.location = location;
         this.animalData = animalData;
-        this.isAnimalPen = isAnimalPen;
+        this.blockKey = blockKey;
     }
 
 
@@ -94,9 +93,9 @@ public abstract class AbstractAnimalPenBlockEvent extends Event implements Cance
     }
 
 
-    public boolean isAnimalPen()
+    public String blockKey()
     {
-        return this.isAnimalPen;
+        return this.blockKey;
     }
 
 
@@ -118,7 +117,7 @@ public abstract class AbstractAnimalPenBlockEvent extends Event implements Cance
 
     private final Player player;
 
-    private final boolean isAnimalPen;
+    private final String blockKey;
 
     private boolean cancel = false;
 

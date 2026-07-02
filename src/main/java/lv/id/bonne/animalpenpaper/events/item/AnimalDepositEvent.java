@@ -30,7 +30,7 @@ public class AnimalDepositEvent extends AbstractAnimalPenItemEvent
         Location location,
         @Nullable AnimalData itemData,
         @Nullable AnimalData blockData,
-        boolean isAnimalCage)
+        String isAnimalCage)
     {
         super(player, location, itemData, isAnimalCage);
         this.blockData = blockData;
