@@ -921,18 +921,24 @@ public class InteractionHandler
             return;
         }
 
-        Utils.triggerItemUse(entity, player, itemStack, 1);
+        Sheep sheep = (Sheep) entity;
 
-        // Store dye color for snapshot
-        data.setAppliedMaterial(itemStack.getType());
+        if (sheep.getColor() == Utils.getDyeColor(itemStack.getType()))
+        {
+            // Same color dye.
+            return;
+        }
+
+        sheep.setColor(Utils.getDyeColor(itemStack.getType()));
 
         if (player.getGameMode() != GameMode.CREATIVE)
         {
             itemStack.subtract();
         }
 
-        Sheep sheep = (Sheep) entity;
-        sheep.setColor(Utils.getDyeColor(itemStack.getType()));
+        Utils.triggerItemUse(entity, player, itemStack, 1);
+        // Store dye color for snapshot
+        data.setAppliedMaterial(itemStack.getType());
 
         player.swingMainHand();
 
