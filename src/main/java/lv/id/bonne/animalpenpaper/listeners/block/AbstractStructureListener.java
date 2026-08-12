@@ -13,6 +13,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -266,7 +267,7 @@ public abstract class AbstractStructureListener implements Listener
             return;
         }
 
-        this.processEntity(event.getPlayer(), event.getHand(), entity);
+        this.processEntity(event.getPlayer(), event.getHand(), true, entity, event);
     }
 
 
@@ -351,9 +352,6 @@ public abstract class AbstractStructureListener implements Listener
             return;
         }
 
-        // I CONTROL IT!!! NO CUSTOM INTERACTIONS HAHAHAHA
-        event.setCancelled(true);
-
         if (event.getHand() != EquipmentSlot.HAND)
         {
             // Prevent interactions with offhand to avoid double triggering.,
@@ -364,14 +362,16 @@ public abstract class AbstractStructureListener implements Listener
 
         if (entity instanceof LivingEntity livingEntity)
         {
-            this.processEntity(event.getPlayer(), event.getHand(), livingEntity);
+            this.processEntity(event.getPlayer(), event.getHand(), event.getAction().isRightClick(), livingEntity, event);
         }
     }
 
 
     private void processEntity(@NotNull Player player,
         @NotNull EquipmentSlot hand,
-        @NotNull LivingEntity entity)
+        boolean rightClick,
+        @NotNull LivingEntity entity,
+        @NotNull Cancellable event)
     {
         ItemStack itemStack = player.getInventory().getItem(hand);
         AbstractContainerManager manager = this.getManager();
@@ -398,7 +398,7 @@ public abstract class AbstractStructureListener implements Listener
             return;
         }
 
-        if (itemStack.isEmpty() && hand == EquipmentSlot.HAND)
+        if (rightClick && itemStack.isEmpty() && hand == EquipmentSlot.HAND)
         {
             AnimalPenVariantMenu.openMenu(entity, player, this.getManager());
             // Not an item.
@@ -410,7 +410,8 @@ public abstract class AbstractStructureListener implements Listener
             itemStack,
             manager.getAnimalData(entity),
             data -> manager.setStructureData(entity, data),
-            manager.getBlockPrefix());
+            manager.getBlockPrefix(),
+            () -> event.setCancelled(true));
     }
 
 

@@ -170,7 +170,8 @@ public class InteractionHandler
         ItemStack itemStack,
         AnimalData data,
         Consumer<AnimalData> dataApply,
-        String blockKey)
+        String blockKey,
+        Runnable trigger)
     {
         if (AnimalPenPlugin.animalFoodConfiguration().isFoodItem(entity, itemStack))
         {
@@ -217,6 +218,12 @@ public class InteractionHandler
         {
             InteractionHandler.handleSmallFlowers(entity, player, itemStack, data, dataApply);
         }
+        else
+        {
+            return;
+        }
+
+        trigger.run();
     }
 
 
