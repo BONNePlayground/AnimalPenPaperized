@@ -9,6 +9,7 @@ package lv.id.bonne.animalpenpaper.managers;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.inventory.ItemStack;
@@ -244,6 +245,41 @@ public class DisplayTextManager
         cache.values().stream().flatMap(List::stream).
             filter(display -> display.getLocation().distanceSquared(player.getLocation()) <= 100).
             forEach(display -> player.showEntity(AnimalPenPlugin.getInstance(), display));
+    }
+
+
+    public void validateEntities(Server server)
+    {
+        List<EntityReference> references = new ArrayList<>(cache.keySet());
+
+        references.forEach(ref -> {
+            World world = server.getWorld(ref.worldId());
+
+            if (world == null)
+            {
+                // World not loaded
+                this.stopTrackingEntity(ref);
+                return;
+            }
+
+            Entity entity = world.getEntity(ref.entityId());
+
+            if (entity == null)
+            {
+                // Entity not loaded
+                this.stopTrackingEntity(ref);
+                return;
+            }
+
+            Block block = entity.getLocation().add(0, -0.5, 0).getBlock();
+
+            if (!ref.manager().isStructureEntity(entity) || !ref.manager().isStructureBlock(block))
+            {
+                this.stopTrackingEntity(ref);
+                entity.remove();
+                ref.manager().clearBlockData(block, false);
+            }
+        });
     }
 
 

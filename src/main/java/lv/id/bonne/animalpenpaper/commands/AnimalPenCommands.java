@@ -11,6 +11,7 @@ import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.registrar.ReloadableRegistrarEvent;
 import lv.id.bonne.animalpenpaper.AnimalPenPlugin;
 import lv.id.bonne.animalpenpaper.config.ConfigurationManager;
+import lv.id.bonne.animalpenpaper.managers.DisplayTextManager;
 import lv.id.bonne.animalpenpaper.menu.AnimalPenCreativeMenu;
 
 
@@ -69,7 +70,16 @@ public class AnimalPenCommands
             });
 
 
-        baseLiteral.then(reset).then(reload).then(items);
+        LiteralArgumentBuilder<CommandSourceStack> check = Commands.literal("validate").
+            executes(ctx ->
+            {
+                AnimalPenPlugin.getInstance().task.validateEntities(ctx.getSource().getExecutor().getServer());
+                ctx.getSource().getSender().sendMessage("Loaded entities validated.");
+                return 1;
+            });
+
+
+        baseLiteral.then(reset).then(reload).then(items).then(check);
 
         dispatcher.registrar().register(baseLiteral.build());
     }
