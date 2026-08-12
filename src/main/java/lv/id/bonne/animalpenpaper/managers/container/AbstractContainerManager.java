@@ -826,7 +826,10 @@ public abstract class AbstractContainerManager
             block.getWorld().getNearbyEntitiesByType(Display.class, block.getLocation(), 1)
                 .forEach(display ->
                 {
-                    if (display.getPersistentDataContainer().has(key, PersistentDataType.BOOLEAN))
+                    PersistentDataContainer data = display.getPersistentDataContainer();
+
+                    if (data.has(Helper.DECORATION_ENTITY_KEY, PersistentDataType.STRING) &&
+                        data.get(Helper.DECORATION_ENTITY_KEY, PersistentDataType.STRING).equals(key.value()))
                     {
                         display.remove();
                     }

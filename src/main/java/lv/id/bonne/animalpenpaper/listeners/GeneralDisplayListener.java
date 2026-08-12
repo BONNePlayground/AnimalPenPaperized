@@ -44,7 +44,12 @@ public class GeneralDisplayListener implements Listener
                     BlockData blockData = display.getWorld().getPersistentDataContainer().
                         get(penKey, BlockDataType.INSTANCE);
 
-                    if (blockData != null && blockData.entity == null)
+                    if (blockData == null)
+                    {
+                        // No block data, no display entity needed.
+                        display.remove();
+                    }
+                    else if (blockData.entity == null)
                     {
                         Helper.updateCountTextEntity(display.getLocation().getBlock(),
                             blockData,
